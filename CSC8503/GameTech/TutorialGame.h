@@ -46,6 +46,13 @@ namespace NCL {
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 
+			//OPENAL FUNCTIONS
+			void InitialiseDevice();
+			void GenerateSoundBuffers();
+			void AddWAVToBuffer();
+			void GenerateSources();
+			void ExitOpenAL();
+
 
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
