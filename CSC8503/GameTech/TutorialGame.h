@@ -1,7 +1,7 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
-
+#include "../CSC8503Common/LoadingScreen.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -46,7 +46,6 @@ namespace NCL {
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 
-
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
 			GameWorld*			world;
@@ -78,7 +77,8 @@ namespace NCL {
 			}
 
 			bool gamePaused;
-			//bool gameLoading;
+
+			LoadingScreen loadingScreen;
 		};
 	}
 }

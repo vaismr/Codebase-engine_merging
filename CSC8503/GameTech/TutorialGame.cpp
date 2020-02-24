@@ -13,6 +13,10 @@ using namespace CSC8503;
 TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
 	renderer	= new GameTechRenderer(*world);
+
+	loadingScreen.StartLoadingScreen(*world, *renderer);
+	renderer->Render();
+
 	physics		= new PhysicsSystem(*world);
 
 	forceMagnitude	= 10.0f;
@@ -52,6 +56,7 @@ void TutorialGame::InitialiseAssets() {
 
 	InitCamera();
 	InitWorld();
+	loadingScreen.EndLoadingScreen(*world);
 }
 
 TutorialGame::~TutorialGame()	{
@@ -98,7 +103,7 @@ void TutorialGame::UpdateGame(float dt) {
 		UpdateKeys();
 		Debug::Print("Game Paused", Vector2(50, 100));
 
-		// UI stuff goes here - i.e. pause menu
+		//@TODO UI stuff goes here - i.e. pause menu
 		// need on screen msg showing "Game Paused", quit game button, also mute audio
 
 		Debug::FlushRenderables();
@@ -106,8 +111,10 @@ void TutorialGame::UpdateGame(float dt) {
 	}
 }
 
+// DON'T put movement controls in here... this updates when game is paused
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
+		gamePaused = false;
 		InitWorld(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
 	}
