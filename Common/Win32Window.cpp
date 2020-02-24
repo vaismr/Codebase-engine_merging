@@ -2,6 +2,11 @@
 #ifdef _WIN32
 #include "Windowsx.h"
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl3.h>
+IMGUI_IMPL_API LRESULT  ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+
 using namespace NCL;
 using namespace Win32Code;
 
@@ -199,7 +204,11 @@ void Win32Window::CheckMessages(MSG &msg)	{
 	}
 }
 
+
 LRESULT CALLBACK Win32Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)	{
+	ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
+
+
 	Win32Window* thisWindow = (Win32Window*)window;
     switch(message)	 {
         case(WM_DESTROY):	{

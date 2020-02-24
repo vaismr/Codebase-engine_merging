@@ -7,6 +7,10 @@ using namespace NCL;
 using namespace Rendering;
 using namespace CSC8503;
 
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #define SHADOWSIZE 4096
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5, 0.5, 0.5)) * Matrix4::Scale(Vector3(0.5, 0.5, 0.5));
@@ -55,6 +59,8 @@ void GameTechRenderer::RenderFrame() {
 	RenderShadowMap();
 	RenderCamera();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void GameTechRenderer::BuildObjectList() {

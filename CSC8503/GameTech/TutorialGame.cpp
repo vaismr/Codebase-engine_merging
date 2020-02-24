@@ -7,6 +7,10 @@
 
 #include "../CSC8503Common/PositionConstraint.h"
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_impl_win32.h>
+
 using namespace NCL;
 using namespace CSC8503;
 
@@ -89,8 +93,75 @@ void TutorialGame::UpdateGame(float dt) {
 	renderer->Update(dt);
 	physics->Update(dt);
 
+	renderHUD();
+
 	Debug::FlushRenderables();
 	renderer->Render();
+}
+
+void NCL::CSC8503::TutorialGame::renderHUD()
+{
+	ImGui_ImplOpenGL3_NewFrame();
+#if _WIN32
+	ImGui_ImplWin32_NewFrame();
+#elif __ORBIS__
+	// TODO: PS4 New Frame?? GLFW + gl3w?
+	ImGui_Impl????_NewFrame();
+#endif
+
+	ImGui::NewFrame();
+	{
+		ImVec2 window_pos = ImVec2(0, 0);
+		ImVec2 window_pos_pivot = ImVec2(0, 0);
+		ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once, window_pos_pivot);
+		ImGui::SetNextWindowBgAlpha(1);
+	}
+
+	// Start the Dear ImGui frame
+	static float f = 0.0f;
+	static int counter = 0;
+	ImGui::Begin("Hello, world!", nullptr,
+		ImGuiWindowFlags_NoDecoration
+	); // Create a window called "Hello, world!" and append into it.
+
+	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+
+	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+	if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+		counter++;
+	ImGui::SameLine();
+	ImGui::Text("counter = %d", counter);
+
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	ImGui::End();
+
+
+	{
+		ImVec2 window_pos = ImVec2(100, 300);
+		ImVec2 window_pos_pivot = ImVec2(0, 0);
+		ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once, window_pos_pivot);
+		ImGui::SetNextWindowBgAlpha(1);
+	}
+	// Start the Dear ImGui frame
+	ImGui::Begin("wnd2", nullptr,
+		ImGuiWindowFlags_NoDecoration
+	); // Create a window called "Hello, world!" and append into it.
+
+	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+
+	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+	if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+		counter++;
+	ImGui::SameLine();
+	ImGui::Text("counter = %d", counter);
+
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	ImGui::End();
+
+
+	ImGui::Render();
 }
 
 void TutorialGame::UpdateKeys() {
@@ -179,7 +250,6 @@ void  TutorialGame::LockedCameraMovement() {
 		world->GetMainCamera()->SetYaw(angles.y);
 	}
 }
-
 
 void TutorialGame::DebugObjectMovement() {
 //If we've selected an object, we can manipulate it with some key presses
