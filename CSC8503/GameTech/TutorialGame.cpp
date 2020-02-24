@@ -7,6 +7,10 @@
 
 #include "../CSC8503Common/PositionConstraint.h"
 
+#include "al.h"
+#include "alc.h"
+//#include "alut.h"
+
 using namespace NCL;
 using namespace CSC8503;
 
