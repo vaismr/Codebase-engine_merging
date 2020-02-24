@@ -601,7 +601,7 @@ void TutorialGame::GenerateSoundBuffers()
 
 void TutorialGame::AddWAVToBuffer()
 {
-
+	//Load WAV file
 }
 
 void TutorialGame::GenerateSources()

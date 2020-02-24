@@ -96,7 +96,7 @@
     </ClCompile>
     <Link />
     <Link>
-      <AdditionalDependencies>CSC8503Common.lib;Common.lib;OpenAL32.lib;ALut.lib;OpenGLRendering.lib;Networking-ENet.lib;ws2_32.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CSC8503Common.lib;Common.lib;OpenAL32.lib;OpenGLRendering.lib;Networking-ENet.lib;ws2_32.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

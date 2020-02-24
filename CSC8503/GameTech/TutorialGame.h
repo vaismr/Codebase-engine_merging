@@ -91,10 +91,17 @@ namespace NCL {
 			}
 
 			//OPENAL VARIBALES
+			char* bufferData;
 			ALCdevice* device;
+			ALvoid* data;
 			ALCcontext* context;
-			ALuint buffer;
+			ALsizei size, freq;
+			ALenum format;
+			ALuint buffer, source;
+			//ALfloat listenerOri[] = { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f };
+			ALboolean loop = AL_FALSE;
 			ALCenum error;
+			ALint source_state;
 		};
 	}
 }
