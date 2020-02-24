@@ -2,6 +2,12 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 
+#include "al.h"
+#include "alc.h"
+//#include "alut.h"
+
+#include <iostream>
+
 
 namespace NCL {
 	namespace CSC8503 {
@@ -83,6 +89,12 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
+
+			//OPENAL VARIBALES
+			ALCdevice* device;
+			ALCcontext* context;
+			ALuint buffer;
+			ALCenum error;
 		};
 	}
 }
