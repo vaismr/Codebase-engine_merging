@@ -76,6 +76,9 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
+
+			bool gamePaused;
+			//bool gameLoading;
 		};
 	}
 }

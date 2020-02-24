@@ -18,6 +18,7 @@ TutorialGame::TutorialGame()	{
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
 	inSelectionMode = false;
+	gamePaused = false;
 
 	Debug::SetRenderer(renderer);
 
@@ -66,31 +67,43 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
-	}
-	if (lockedObject != nullptr) {
-		LockedCameraMovement();
-	}
+	if(!gamePaused) {
+		if (!inSelectionMode) {
+			world->GetMainCamera()->UpdateCamera(dt);
+		}
+		if (lockedObject != nullptr) {
+			LockedCameraMovement();
+		}
 
-	UpdateKeys();
+		UpdateKeys();
 
-	if (useGravity) {
-		Debug::Print("(G)ravity on", Vector2(10, 40));
+		if (useGravity) {
+			Debug::Print("(G)ravity on", Vector2(10, 40));
+		}
+		else {
+			Debug::Print("(G)ravity off", Vector2(10, 40));
+		}
+
+		SelectObject();
+		MoveSelectedObject();
+
+		world->UpdateWorld(dt);
+		renderer->Update(dt);
+		physics->Update(dt);
+
+		Debug::FlushRenderables();
+		renderer->Render();
 	}
 	else {
-		Debug::Print("(G)ravity off", Vector2(10, 40));
+		UpdateKeys();
+		Debug::Print("Game Paused", Vector2(50, 100));
+
+		// UI stuff goes here - i.e. pause menu
+		// need on screen msg showing "Game Paused", quit game button, also mute audio
+
+		Debug::FlushRenderables();
+		renderer->Render();
 	}
-
-	SelectObject();
-	MoveSelectedObject();
-
-	world->UpdateWorld(dt);
-	renderer->Update(dt);
-	physics->Update(dt);
-
-	Debug::FlushRenderables();
-	renderer->Render();
 }
 
 void TutorialGame::UpdateKeys() {
@@ -124,6 +137,9 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F8)) {
 		world->ShuffleObjects(false);
 	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+		gamePaused = !gamePaused;
 
 	if (lockedObject) {
 		LockedObjectMovement();
