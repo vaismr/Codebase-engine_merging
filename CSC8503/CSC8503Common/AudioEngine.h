@@ -79,7 +79,6 @@ public:
 	float VolumeTodb(float volume);
 
 	FMOD_VECTOR VectorToFmod(const Vector3& position);
-
 };
 
 #endif
