@@ -23,6 +23,10 @@ void TestNetworking() {
 
 vector<Vector3> testNodes;
 
+void TestPathfinding() {
+
+}
+
 void DisplayPathfinding() {
 
 }
@@ -55,13 +59,7 @@ int main() {
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
 
-	// start loading screen and animation here
-	std::cout << "\n\nLoading Starts... \n\n";
-
 	TutorialGame* g = new TutorialGame();
-
-	// end loading screen here
-	std::cout << "\n\nLoading Ends...\n\n";
 
 
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {

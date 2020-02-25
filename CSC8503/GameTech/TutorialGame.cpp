@@ -15,8 +15,8 @@ TutorialGame::TutorialGame()	{
 	renderer	= new GameTechRenderer(*world);
 
 	loadingScreen.StartLoadingScreen(*world, *renderer);
-	renderer->Render();
-
+	loadingScreen.UpdateLoadingScreen(*renderer);
+	
 	physics		= new PhysicsSystem(*world);
 
 	forceMagnitude	= 10.0f;
@@ -56,6 +56,7 @@ void TutorialGame::InitialiseAssets() {
 
 	InitCamera();
 	InitWorld();
+
 	loadingScreen.EndLoadingScreen(*world);
 }
 
@@ -80,6 +81,7 @@ void TutorialGame::UpdateGame(float dt) {
 			LockedCameraMovement();
 		}
 
+		UpdatePauseMenu();
 		UpdateKeys();
 
 		if (useGravity) {
@@ -100,7 +102,7 @@ void TutorialGame::UpdateGame(float dt) {
 		renderer->Render();
 	}
 	else {
-		UpdateKeys();
+		UpdatePauseMenu();
 		Debug::Print("Game Paused", Vector2(50, 100));
 
 		//@TODO UI stuff goes here - i.e. pause menu
@@ -111,7 +113,11 @@ void TutorialGame::UpdateGame(float dt) {
 	}
 }
 
-// DON'T put movement controls in here... this updates when game is paused
+void TutorialGame::UpdatePauseMenu() {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+		TogglePauseMenu();
+}
+
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
 		gamePaused = false;
@@ -144,9 +150,6 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F8)) {
 		world->ShuffleObjects(false);
 	}
-
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
-		gamePaused = !gamePaused;
 
 	if (lockedObject) {
 		LockedObjectMovement();
@@ -325,6 +328,267 @@ void TutorialGame::InitWorld() {
 	physics->Clear();
 
 	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	// uncomment just to demonstrate loading screen for now...
+	/*InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	loadingScreen.UpdateLoadingScreen(*renderer);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	loadingScreen.UpdateLoadingScreen(*renderer);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	loadingScreen.UpdateLoadingScreen(*renderer);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	loadingScreen.UpdateLoadingScreen(*renderer);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	loadingScreen.UpdateLoadingScreen(*renderer);*/
 	AddGooseToWorld(Vector3(30, 2, 0));
 	AddAppleToWorld(Vector3(35, 2, 0));
 
