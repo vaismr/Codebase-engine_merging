@@ -136,26 +136,21 @@ void NCL::CSC8503::TutorialGame::renderHUD()
 
 
 	{
-		ImVec2 window_pos = ImVec2(100, 300);
+		ImVec2 window_pos = ImVec2(950, 550);
 		ImVec2 window_pos_pivot = ImVec2(0, 0);
 		ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once, window_pos_pivot);
 		ImGui::SetNextWindowBgAlpha(1);
 	}
-	// Start the Dear ImGui frame
-	ImGui::Begin("wnd2", nullptr,
-		ImGuiWindowFlags_NoDecoration
-	); // Create a window called "Hello, world!" and append into it.
+	//test bar
+	ImGui::Begin("power", nullptr,
+		ImGuiWindowFlags_NoDecoration); 
+	
+	ImGui::SetWindowSize(ImVec2(300, 100), 0);
 
-	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+	ImGui::Text("Power");
+	ImGui::SliderFloat(" ", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 
-	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-
-	if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-		counter++;
-	ImGui::SameLine();
-	ImGui::Text("counter = %d", counter);
-
-	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	
 	ImGui::End();
 
 
