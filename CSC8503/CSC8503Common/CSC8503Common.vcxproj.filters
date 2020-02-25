@@ -19,9 +19,6 @@
     <Filter Include="Other">
       <UniqueIdentifier>{7d85adc6-7681-4657-8953-c5696f06c66d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sound">
-      <UniqueIdentifier>{5a22f4fd-1610-4848-8e94-dfb50a7b98d4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionDetection.h">
@@ -126,12 +123,6 @@
     <ClInclude Include="Debug.h">
       <Filter>Other</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\Program Files (x86)\OpenAL 1.1 SDK\samples\renderer\Source\ALOutput.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\Program Files (x86)\OpenAL 1.1 SDK\samples\framework\Win32\CWaves.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp">
@@ -208,12 +199,6 @@
     </ClCompile>
     <ClCompile Include="Transform.cpp">
       <Filter>Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\Program Files (x86)\OpenAL 1.1 SDK\samples\renderer\Source\ALOutput.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\Program Files (x86)\OpenAL 1.1 SDK\samples\framework\Win32\CWaves.cpp">
-      <Filter>Sound</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

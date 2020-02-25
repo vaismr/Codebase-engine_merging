@@ -111,6 +111,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -132,8 +133,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\..\Program Files (x86)\OpenAL 1.1 SDK\samples\framework\Win32\CWaves.h" />
-    <ClInclude Include="..\..\..\..\..\..\..\Program Files (x86)\OpenAL 1.1 SDK\samples\renderer\Source\ALOutput.h" />
     <ClInclude Include="AABBVolume.h" />
     <ClInclude Include="BoundingAABB.h" />
     <ClInclude Include="BoundingOOBB.h" />
@@ -170,8 +169,6 @@
     <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\..\Program Files (x86)\OpenAL 1.1 SDK\samples\framework\Win32\CWaves.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\..\Program Files (x86)\OpenAL 1.1 SDK\samples\renderer\Source\ALOutput.cpp" />
     <ClCompile Include="BoundingAABB.cpp" />
     <ClCompile Include="BoundingOOBB.cpp" />
     <ClCompile Include="BoundingSphere.cpp" />
