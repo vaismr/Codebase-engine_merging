@@ -36,7 +36,7 @@ void Implementation::Update()
 	AudioEngine::ErrorCheck(studioSystem->update());
 }
 
-Implementation* imp = nullptr;
+Implementation* imp = nullptr; //TODO: move to h?
 
 void AudioEngine::Init()
 {
@@ -171,27 +171,63 @@ void AudioEngine::LoadEvent(const string& eventName)
 
 void AudioEngine::PlayEvent(const string& eventName)
 {
+	auto foundIt = imp->events.find(eventName);
+	if (foundIt == imp->events.end())
+	{
+		LoadEvent(eventName);
+		foundIt = imp->events.find(eventName);
+		
+		if (foundIt == imp->events.end())
+			return;
+	}
 
+	foundIt->second->start();
 }
 
 void AudioEngine::StopEvent(const string& eventName, bool immediate)
 {
+	auto foundIt = imp->events.find(eventName);
+	if (foundIt == imp->events.end())
+		return;
 
+	FMOD_STUDIO_STOP_MODE mode;
+	mode = immediate ? FMOD_STUDIO_STOP_IMMEDIATE : FMOD_STUDIO_STOP_ALLOWFADEOUT;
+
+	AudioEngine::ErrorCheck(foundIt->second->stop(mode));
 }
 
 bool AudioEngine::IsEventPlaying(const string& eventName)const
 {
+	auto foundIt = imp->events.find(eventName);
+	if (foundIt == imp->events.end())
+		return false;
 
+	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
+	if (foundIt->second->getPlaybackState(state) == FMOD_STUDIO_PLAYBACK_PLAYING)
+		return true;
+
+	return false;
 }
 
-void AudioEngine::GetEventParameter(const string& eventName, const string& parameterName, float* paramater)
+void AudioEngine::GetEventParameter(const string& eventName, const string& parameterName, float* parameter)
 {
+	auto foundIt = imp->events.find(eventName);
+	if (foundIt == imp->events.end())
+		return;
 
+	float* value = NULL;
+
+	AudioEngine::ErrorCheck(foundIt->second->getParameterByName(parameterName.c_str(), NULL, value));
+	parameter = value;
 }
 
 void AudioEngine::SetEventParameter(const string& eventName, const string& parameterName, float value)
 {
+	auto foundIt = imp->events.find(eventName);
+	if (foundIt == imp->events.end())
+		return;
 
+	AudioEngine::ErrorCheck(foundIt->second->setParameterByName(parameterName.c_str(), value));
 }
 
 FMOD_VECTOR AudioEngine::VectorToFmod(const Vector3& position)
