@@ -32,7 +32,7 @@ struct Implementation
 	FMOD::Studio::System* studioSystem;
 	FMOD::System* coreSystem;
 
-	int mnNextChannelId;
+	int nextChannelId;
 
 	typedef map<string, FMOD::Sound*> SoundMap;
 	typedef map<int, FMOD::Channel*> ChannelMap;
@@ -63,7 +63,7 @@ public:
 
 	void LoadSound(const string& soundName, bool threeD = true, bool looping = false, bool stream = false);
 	void UnloadSound(const string& soundName);
-	void PlaySound(const string& soundName, const Vector3& pos = Vector3{ 0,0,0 }, float volumedB = 0.0f);
+	int PlaySound(const string& soundName, const Vector3& pos = Vector3{ 0,0,0 }, float volumedB = 0.0f);
 
 	void Set3DListenerAndOrientation(const Vector3& pos = Vector3{ 0,0,0 }, float volumedB = 0.0f);
 		
