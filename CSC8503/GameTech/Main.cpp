@@ -55,7 +55,6 @@ hide or show the
 
 */
 int main() {
-	const char* glsl_version = "#version 130";
 	Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
 
 	if (!w->HasInitialised()) {

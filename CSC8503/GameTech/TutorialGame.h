@@ -2,6 +2,7 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 
+#include <imgui/imgui.h>
 
 namespace NCL {
 	namespace CSC8503 {
@@ -37,7 +38,7 @@ namespace NCL {
 			void LockedObjectMovement();
 			void LockedCameraMovement();
 
-			void renderHUD();
+			void renderHUD(float dt);
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
@@ -57,6 +58,8 @@ namespace NCL {
 			bool inSelectionMode;
 
 			float		forceMagnitude;
+
+			ImFont* fontMainDlg = nullptr;
 
 			GameObject* selectionObject = nullptr;
 

@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameTechRenderer.cpp" />
+    <ClCompile Include="imgui_progressbar.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="NetworkedGame.cpp" />
     <ClCompile Include="NetworkPlayer.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="..\..\Library\imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\Library\imgui\imstb_truetype.h" />
     <ClInclude Include="GameTechRenderer.h" />
+    <ClInclude Include="imgui_progressbar.h" />
     <ClInclude Include="NetworkedGame.h" />
     <ClInclude Include="NetworkPlayer.h" />
     <ClInclude Include="TutorialGame.h" />

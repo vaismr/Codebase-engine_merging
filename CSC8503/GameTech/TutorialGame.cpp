@@ -1,15 +1,19 @@
-#include "TutorialGame.h"
+ #include "TutorialGame.h"
 #include "../CSC8503Common/GameWorld.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Common/TextureLoader.h"
 
+#include "../../Common/Assets.h"
+
 #include "../CSC8503Common/PositionConstraint.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_impl_win32.h>
+
+#include "imgui_progressbar.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -53,6 +57,16 @@ void TutorialGame::InitialiseAssets() {
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontDefault();
+	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
+	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 16);
+
+	ImVec4* colors = ImGui::GetStyle().Colors;
+	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+
+
+
 	InitCamera();
 	InitWorld();
 }
@@ -93,13 +107,13 @@ void TutorialGame::UpdateGame(float dt) {
 	renderer->Update(dt);
 	physics->Update(dt);
 
-	renderHUD();
+	renderHUD(dt);
 
 	Debug::FlushRenderables();
 	renderer->Render();
 }
 
-void NCL::CSC8503::TutorialGame::renderHUD()
+void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 #if _WIN32
@@ -108,51 +122,66 @@ void NCL::CSC8503::TutorialGame::renderHUD()
 	// TODO: PS4 New Frame?? GLFW + gl3w?
 	ImGui_Impl????_NewFrame();
 #endif
-
 	ImGui::NewFrame();
-	{
-		ImVec2 window_pos = ImVec2(0, 0);
-		ImVec2 window_pos_pivot = ImVec2(0, 0);
-		ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once, window_pos_pivot);
-		ImGui::SetNextWindowBgAlpha(1);
-	}
+
+
 
 	// Start the Dear ImGui frame
 	static float f = 0.0f;
-	static int counter = 0;
-	ImGui::Begin("Hello, world!", nullptr); // Create a window called "Hello, world!" and append into it.
 
-	ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+	f += dt;
 
-	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Once);
 
-	if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-		counter++;
-	ImGui::SameLine();
-	ImGui::Text("counter = %d", counter);
+	ImGuiWindowFlags flags = 
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBackground
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	ImGui::End();
+	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+
+	ImGui::Text("%.2fs and counting...", f);               // Display some text (you can use a format strings too)
+	
+	ImGui::PushFont(fontMainDlg);
+	ImGui::Text("%.2fs and counting...", f);               // Display some text (you can use a format strings too)
+	ImGui::PopFont();
+
+	// colour: ABGR
+	const ImU32 red = 0xFF0000FF;
+	const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+	const ImU32 bg = ImGui::GetColorU32(ImGuiCol_Button);
+
+	ImGui::ProgressBar("##progress_bar1", 0.5f, ImVec2(400, 6), bg, col);
+	ImGui::ProgressBar("##progress_bar2", 0.7f, ImVec2(200, 20), red, col);
 
 
+	//
+
+	static char name[32] = "Unknown";
+	char buf[64]; sprintf_s(buf, IM_ARRAYSIZE(buf), "Name: %s###ButtonChangeName", name);
+	if (ImGui::Button(buf))
 	{
-		ImVec2 window_pos = ImVec2(950, 550);
-		ImVec2 window_pos_pivot = ImVec2(0, 0);
-		ImGui::SetNextWindowPos(window_pos, ImGuiCond_Once, window_pos_pivot);
-		ImGui::SetNextWindowBgAlpha(1);
+		ImGui::OpenPopup("PopupNameEditor");
 	}
-	//test bar
-	ImGui::Begin("power", nullptr,
-		ImGuiWindowFlags_NoDecoration); 
-	
-	ImGui::SetWindowSize(ImVec2(300, 100), 0);
 
-	ImGui::Text("Power");
-	ImGui::SliderFloat(" ", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 
-	
+	// Popup
+
+	if (ImGui::BeginPopup("PopupNameEditor")) {
+		ImGui::Text("Your name:");
+		ImGui::InputText("##edit", name, IM_ARRAYSIZE(name));
+		if (ImGui::Button("Close"))
+			ImGui::CloseCurrentPopup();
+		ImGui::EndPopup();
+	}
+
+
 	ImGui::End();
-
 
 	ImGui::Render();
 }
