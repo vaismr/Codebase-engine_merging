@@ -127,12 +127,17 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 
 
 	// Start the Dear ImGui frame
-	static float f = 0.0f;
+	static float f = 100.0f;
+	f -= dt;
 
-	f += dt;
+	float power = 0.5f;
 
-	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Once);
+	const ImU32 red = 0xFF0000FF;
+	const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+	const ImU32 bg = ImGui::GetColorU32(ImGuiCol_Button);
+
+	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Always);
 
 	ImGuiWindowFlags flags = 
 		ImGuiWindowFlags_NoTitleBar
@@ -143,24 +148,36 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 		| ImGuiWindowFlags_NoBackground
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
+	//Time window
 	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
-
-	ImGui::Text("%.2fs and counting...", f);               // Display some text (you can use a format strings too)
+	ImGui::SetWindowFontScale(2.5f);
 	
 	ImGui::PushFont(fontMainDlg);
-	ImGui::Text("%.2fs and counting...", f);               // Display some text (you can use a format strings too)
+	ImGui::Text(" Time : %.2fs", f);               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
 
-	// colour: ABGR
-	const ImU32 red = 0xFF0000FF;
-	const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-	const ImU32 bg = ImGui::GetColorU32(ImGuiCol_Button);
 
-	ImGui::ProgressBar("##progress_bar1", 0.5f, ImVec2(400, 6), bg, col);
-	ImGui::ProgressBar("##progress_bar2", 0.7f, ImVec2(200, 20), red, col);
+	ImGui::End();
 
+	//power window
+	ImGui::SetNextWindowPos(ImVec2(800, 450), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
 
-	//
+	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	
+	ImGui::PushFont(fontMainDlg);
+	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
+	ImGui::PopFont();
+	ImGui::ProgressBar("##progress_bar1", power, ImVec2(500, 25), red, col);
+
+	ImGui::SetWindowFontScale(2.5f);
+	ImGui::End();
+
+	//Name window
+	ImGui::SetNextWindowPos(ImVec2(50, 550), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
+	ImGui::Begin("Name", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::SetWindowFontScale(2.5f);
 
 	static char name[32] = "Unknown";
 	char buf[64]; sprintf_s(buf, IM_ARRAYSIZE(buf), "Name: %s###ButtonChangeName", name);
@@ -168,7 +185,6 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 	{
 		ImGui::OpenPopup("PopupNameEditor");
 	}
-
 
 	// Popup
 
@@ -180,10 +196,9 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 		ImGui::EndPopup();
 	}
 
-
 	ImGui::End();
-
 	ImGui::Render();
+
 }
 
 void TutorialGame::UpdateKeys() {
