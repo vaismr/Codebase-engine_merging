@@ -4,6 +4,7 @@
 
 #include <iostream>
 
+#include "../GameTech/Sound/AudioEngine.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -78,6 +79,8 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
+
+			AudioEngine audioEngine;
 		};
 	}
 }

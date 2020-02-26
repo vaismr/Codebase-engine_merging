@@ -36,6 +36,9 @@
     <ClCompile Include="..\CSC8503Common\AudioEngine.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
+    <ClCompile Include="Sound\AudioEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameTechRenderer.h">
@@ -52,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="..\CSC8503Common\AudioEngine.h">
       <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound\AudioEngine.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
