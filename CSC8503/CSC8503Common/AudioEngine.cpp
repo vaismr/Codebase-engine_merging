@@ -8,6 +8,8 @@ Implementation::Implementation()
 
 	coreSystem = NULL;
 	AudioEngine::ErrorCheck(studioSystem->getCoreSystem(&coreSystem));
+
+	nextChannelId = -1; // will move to channel 0 with first call of playsound
 }
 
 Implementation::~Implementation()
@@ -116,6 +118,29 @@ int AudioEngine::PlaySound(const string& soundName, const Vector3& position, flo
 	return channelID;
 }
 
+void AudioEngine::Set3DListenerAndOrientation(const Vector3& pos, float volumedB)
+{
+	FMOD_3D_ATTRIBUTES attributes = { VectorToFmod(pos) };
+	AudioEngine::ErrorCheck(imp->studioSystem->setListenerAttributes(0, &attributes));
+}
+
+void AudioEngine::StopChannel(int channelID)
+{
+	auto foundIt = imp->channels.find(channelID);
+	if (foundIt == imp->channels.end())
+		return;
+
+	AudioEngine::ErrorCheck(foundIt->second->stop());
+}
+
+void AudioEngine::StopAllChannels()
+{
+	for (auto const& x : imp->channels)
+	{
+		AudioEngine::ErrorCheck(x.second->stop());
+	}
+}
+
 void AudioEngine::SetChannel3DPosition(int channelID, const Vector3& position)
 {
 	auto foundIt = imp->channels.find(channelID);
@@ -135,7 +160,7 @@ void AudioEngine::SetChannelVolume(int channelID, float volumedB)
 	AudioEngine::ErrorCheck(foundIt->second->setVolume(dbToVolume(volumedB)));
 }
 
-void LoadBank(const std::string& bankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags)
+void AudioEngine::LoadBank(const std::string& bankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags)
 {
 	auto foundIt = imp->banks.find(bankName);
 	if (foundIt == imp->banks.end())
@@ -194,6 +219,20 @@ void AudioEngine::StopEvent(const string& eventName, bool immediate)
 	mode = immediate ? FMOD_STUDIO_STOP_IMMEDIATE : FMOD_STUDIO_STOP_ALLOWFADEOUT;
 
 	AudioEngine::ErrorCheck(foundIt->second->stop(mode));
+}
+
+bool AudioEngine::IsPlaying(int channelID) const
+{
+	auto foundIt = imp->channels.find(channelID);
+	if (foundIt == imp->channels.end())
+		return false;
+
+	bool* playing;
+	foundIt->second->isPlaying(playing);
+	if (playing)
+		return true;
+
+	return false;
 }
 
 bool AudioEngine::IsEventPlaying(const string& eventName)const

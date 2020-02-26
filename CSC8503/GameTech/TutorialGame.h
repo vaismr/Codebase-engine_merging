@@ -2,10 +2,6 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 
-#include "al.h"
-#include "alc.h"
-//#include "alut.h"
-
 #include <iostream>
 
 
@@ -52,13 +48,6 @@ namespace NCL {
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 
-			//OPENAL FUNCTIONS
-			void InitialiseDevice();
-			void GenerateSoundBuffers();
-			void AddWAVToBuffer();
-			void GenerateSources();
-			void ExitOpenAL();
-
 
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
@@ -89,19 +78,6 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
-
-			//OPENAL VARIBALES
-			char* bufferData;
-			ALCdevice* device;
-			ALvoid* data;
-			ALCcontext* context;
-			ALsizei size, freq;
-			ALenum format;
-			ALuint buffer, source;
-			//ALfloat listenerOri[] = { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f };
-			ALboolean loop = AL_FALSE;
-			ALCenum error;
-			ALint source_state;
 		};
 	}
 }

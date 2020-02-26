@@ -570,47 +570,5 @@ void TutorialGame::SimpleGJKTest() {
 
 	fallingCube->SetBoundingVolume((CollisionVolume*)new OBBVolume(dimensions));
 	newFloor->SetBoundingVolume((CollisionVolume*)new OBBVolume(floorDimensions));
-
-}
-
-void TutorialGame::InitialiseDevice()
-{
-	// Initialization
-	device = alcOpenDevice(NULL); // select the "preferred device"
-
-	if (device) {
-		context = alcCreateContext(device, NULL);
-		alcMakeContextCurrent(context);
-	}
-	// Check for EAX 2.0 support
-	//g_bEAX = alIsExtensionPresent("EAX2.0");
-}
-
-void TutorialGame::GenerateSoundBuffers()
-{
-	alGetError(); // clear error code
-
-	alGenBuffers(1, &buffer);
-
-	if ((error = alGetError()) != AL_NO_ERROR) //if creating buffer generated an error
-	{
-		std::cout << stderr << " alGenBuffers\n";
-		return;
-	}
-}
-
-void TutorialGame::AddWAVToBuffer()
-{
-	//Load WAV file
-}
-
-void TutorialGame::GenerateSources()
-{
-
-}
-
-void TutorialGame::ExitOpenAL()
-{
-
 }
 
