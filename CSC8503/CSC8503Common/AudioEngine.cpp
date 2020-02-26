@@ -79,7 +79,7 @@ void AudioEngine::UnloadSound(const string& soundName)
 	imp->sounds.erase(foundIt);
 }
 
-int AudioEngine::PlaySound(const string& soundName, const Vector3& position, float volumedB)
+int AudioEngine::PlaySound(const string& soundName, const Vec3& position, float volumedB)
 {
 	int channelID = imp->nextChannelId++;
 	auto foundIt = imp->sounds.find(soundName);
@@ -118,7 +118,7 @@ int AudioEngine::PlaySound(const string& soundName, const Vector3& position, flo
 	return channelID;
 }
 
-void AudioEngine::Set3DListenerAndOrientation(const Vector3& pos, float volumedB)
+void AudioEngine::Set3DListenerAndOrientation(const Vec3& pos, float volumedB)
 {
 	FMOD_3D_ATTRIBUTES attributes = { VectorToFmod(pos) };
 	AudioEngine::ErrorCheck(imp->studioSystem->setListenerAttributes(0, &attributes));
@@ -141,7 +141,7 @@ void AudioEngine::StopAllChannels()
 	}
 }
 
-void AudioEngine::SetChannel3DPosition(int channelID, const Vector3& position)
+void AudioEngine::SetChannel3DPosition(int channelID, const Vec3& position)
 {
 	auto foundIt = imp->channels.find(channelID);
 	if (foundIt == imp->channels.end())
@@ -269,7 +269,7 @@ void AudioEngine::SetEventParameter(const string& eventName, const string& param
 	AudioEngine::ErrorCheck(foundIt->second->setParameterByName(parameterName.c_str(), value));
 }
 
-FMOD_VECTOR AudioEngine::VectorToFmod(const Vector3& position)
+FMOD_VECTOR AudioEngine::VectorToFmod(const Vec3& position)
 {
 	FMOD_VECTOR FMVec;
 

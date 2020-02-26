@@ -15,7 +15,7 @@
 
 using namespace std;
 
-struct Vector3
+struct Vec3
 {
 	float x;
 	float y;
@@ -63,13 +63,13 @@ public:
 
 	void LoadSound(const string& soundName, bool threeD = true, bool looping = false, bool stream = false);
 	void UnloadSound(const string& soundName);
-	int PlaySound(const string& soundName, const Vector3& pos = Vector3{ 0,0,0 }, float volumedB = 0.0f);
+	int PlaySound(const string& soundName, const Vec3& pos = Vec3{ 0,0,0 }, float volumedB = 0.0f);
 
-	void Set3DListenerAndOrientation(const Vector3& pos = Vector3{ 0,0,0 }, float volumedB = 0.0f);
+	void Set3DListenerAndOrientation(const Vec3& pos = Vec3{ 0,0,0 }, float volumedB = 0.0f);
 		
 	void StopChannel(int channelID);
 	void StopAllChannels();
-	void SetChannel3DPosition(int channelID, const Vector3& position);
+	void SetChannel3DPosition(int channelID, const Vec3& position);
 	void SetChannelVolume(int channelID, float volumedB);
 
 	bool IsPlaying(int channelID) const;
@@ -78,7 +78,7 @@ public:
 	float dbToVolume(float db);
 	float VolumeTodb(float volume);
 
-	FMOD_VECTOR VectorToFmod(const Vector3& position);
+	FMOD_VECTOR VectorToFmod(const Vec3& position);
 };
 
 #endif

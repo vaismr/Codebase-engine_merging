@@ -26,7 +26,7 @@ TutorialGame::TutorialGame()	{
 	InitialiseAssets();
 
 	audioEngine.Init();
-	audioEngine.LoadSound("");
+	audioEngine.LoadSound("../../Assets/Sounds/jaguar.wav");
 }
 
 /*
@@ -323,7 +323,7 @@ void TutorialGame::InitWorld() {
 A single function to add a large immoveable cube to the bottom of our world
 
 */
-GameObject* TutorialGame::AddFloorToWorld(const NCL::Vector3& position) {
+GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	GameObject* floor = new GameObject();
 
 	Vector3 floorSize = Vector3(100, 2, 100);
@@ -350,7 +350,7 @@ rigid body representation. This and the cube function will let you build a lot o
 physics worlds. You'll probably need another function for the creation of OBB cubes too.
 
 */
-GameObject* TutorialGame::AddSphereToWorld(const NCL::Vector3& position, float radius, float inverseMass) {
+GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
 	GameObject* sphere = new GameObject();
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
@@ -370,7 +370,7 @@ GameObject* TutorialGame::AddSphereToWorld(const NCL::Vector3& position, float r
 	return sphere;
 }
 
-GameObject* TutorialGame::AddCubeToWorld(const NCL::Vector3& position, NCL::Vector3 dimensions, float inverseMass) {
+GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
 	GameObject* cube = new GameObject();
 
 	AABBVolume* volume = new AABBVolume(dimensions);
@@ -391,7 +391,7 @@ GameObject* TutorialGame::AddCubeToWorld(const NCL::Vector3& position, NCL::Vect
 	return cube;
 }
 
-GameObject* TutorialGame::AddGooseToWorld(const NCL::Vector3& position)
+GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
 {
 	float size			= 1.0f;
 	float inverseMass	= 1.0f;
@@ -416,7 +416,7 @@ GameObject* TutorialGame::AddGooseToWorld(const NCL::Vector3& position)
 	return goose;
 }
 
-GameObject* TutorialGame::AddParkKeeperToWorld(const NCL::Vector3& position)
+GameObject* TutorialGame::AddParkKeeperToWorld(const Vector3& position)
 {
 	float meshSize = 4.0f;
 	float inverseMass = 0.5f;
@@ -440,7 +440,7 @@ GameObject* TutorialGame::AddParkKeeperToWorld(const NCL::Vector3& position)
 	return keeper;
 }
 
-GameObject* TutorialGame::AddCharacterToWorld(const NCL::Vector3& position) {
+GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 	float meshSize = 4.0f;
 	float inverseMass = 0.5f;
 
@@ -476,7 +476,7 @@ GameObject* TutorialGame::AddCharacterToWorld(const NCL::Vector3& position) {
 	return character;
 }
 
-GameObject* TutorialGame::AddAppleToWorld(const NCL::Vector3& position) {
+GameObject* TutorialGame::AddAppleToWorld(const Vector3& position) {
 	GameObject* apple = new GameObject();
 
 	SphereVolume* volume = new SphereVolume(0.7f);
@@ -524,7 +524,7 @@ void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing
 	AddFloorToWorld(Vector3(0, -2, 0));
 }
 
-void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const NCL::Vector3& cubeDims) {
+void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims) {
 	for (int x = 1; x < numCols+1; ++x) {
 		for (int z = 1; z < numRows+1; ++z) {
 			Vector3 position = Vector3(x * colSpacing, 10.0f, z * rowSpacing);
