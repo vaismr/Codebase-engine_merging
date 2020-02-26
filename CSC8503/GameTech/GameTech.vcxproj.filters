@@ -33,9 +33,6 @@
     <ClCompile Include="NetworkPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\CSC8503Common\AudioEngine.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
     <ClCompile Include="Sound\AudioEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -52,9 +49,6 @@
     </ClInclude>
     <ClInclude Include="NetworkPlayer.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CSC8503Common\AudioEngine.h">
-      <Filter>Sound</Filter>
     </ClInclude>
     <ClInclude Include="Sound\AudioEngine.h">
       <Filter>Header Files</Filter>

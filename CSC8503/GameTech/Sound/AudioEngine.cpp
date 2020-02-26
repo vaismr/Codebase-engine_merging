@@ -9,6 +9,8 @@ Implementation::Implementation()
 	coreSystem = NULL;
 	AudioEngine::ErrorCheck(studioSystem->getCoreSystem(&coreSystem));
 
+	AudioEngine::ErrorCheck(studioSystem->setNumListeners(1));
+
 	nextChannelId = 0;
 }
 
@@ -79,7 +81,7 @@ void AudioEngine::UnloadSound(const string& soundName)
 	imp->sounds.erase(foundIt);
 }
 
-int AudioEngine::PlaySound(const string& soundName, const Vec3& position, float volumedB)
+int AudioEngine::PlaySounds(const string& soundName, const Vec3& position, float volumedB)
 {
 	int channelID = imp->nextChannelId++;
 	auto foundIt = imp->sounds.find(soundName);
@@ -120,7 +122,7 @@ int AudioEngine::PlaySound(const string& soundName, const Vec3& position, float 
 
 void AudioEngine::Set3DListenerAndOrientation(const Vec3& pos, float volumedB)
 {
-	FMOD_3D_ATTRIBUTES attributes = { VectorToFmod(pos) };
+	FMOD_3D_ATTRIBUTES attributes = {VectorToFmod(pos), VectorToFmod(Vec3{0,0,0}), VectorToFmod(Vec3{1,0,0}), VectorToFmod(Vec3{0,1,0})};
 	AudioEngine::ErrorCheck(imp->studioSystem->setListenerAttributes(0, &attributes));
 }
 
@@ -227,12 +229,9 @@ bool AudioEngine::IsPlaying(int channelID) const
 	if (foundIt == imp->channels.end())
 		return false;
 
-	bool* playing;
+	bool* playing = false;
 	foundIt->second->isPlaying(playing);
-	if (playing)
-		return true;
-
-	return false;
+	return playing;
 }
 
 bool AudioEngine::IsEventPlaying(const string& eventName)const
@@ -278,6 +277,16 @@ FMOD_VECTOR AudioEngine::VectorToFmod(const Vec3& position)
 	FMVec.z = position.z;
 
 	return FMVec;
+}
+
+void AudioEngine::PrintListenerPos(int ID)
+{
+	FMOD_VECTOR* pos = new FMOD_VECTOR;
+	imp->coreSystem->get3DListenerAttributes(ID, pos, NULL, NULL, NULL);
+
+	cout << pos->x << " " << pos->y << " " << pos->z << " \n";
+
+	delete pos;
 }
 
 float AudioEngine::dbToVolume(float db)

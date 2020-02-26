@@ -81,6 +81,7 @@ namespace NCL {
 			}
 
 			AudioEngine audioEngine;
+			Vector3 lastCamPos; //store position of the camera in the last frame
 		};
 	}
 }

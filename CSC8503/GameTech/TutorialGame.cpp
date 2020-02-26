@@ -6,6 +6,7 @@
 #include "../../Common/TextureLoader.h"
 
 #include "../CSC8503Common/PositionConstraint.h"
+#include <iostream>
 
 
 
@@ -27,6 +28,8 @@ TutorialGame::TutorialGame()	{
 
 	audioEngine.Init();
 	audioEngine.LoadSound("../../Assets/Sounds/jaguar.wav");
+	audioEngine.LoadSound("../../Assets/Sounds/wave.mp3");
+	audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });
 }
 
 /*
@@ -68,9 +71,13 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+
+	audioEngine.Shutdown();
 }
 
 void TutorialGame::UpdateGame(float dt) {
+	lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
+	
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
@@ -93,6 +100,33 @@ void TutorialGame::UpdateGame(float dt) {
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
 	physics->Update(dt);
+
+	//update audio
+
+	Vec3 cameraPos = Vec3{ world->GetMainCamera()->GetPosition().x, world->GetMainCamera()->GetPosition().y , world->GetMainCamera()->GetPosition().z };
+	
+	//calculate distance between camera in this frame and last frame, using dt to get velocity - used for doppler effect
+	Vec3 cameraVelocity = Vec3{(world->GetMainCamera()->GetPosition().x - lastCamPos.x) / dt, (world->GetMainCamera()->GetPosition().y - lastCamPos.y) / dt, (world->GetMainCamera()->GetPosition().z - lastCamPos.z) / dt };
+
+	float cosPitch = cos(world->GetMainCamera()->GetPitch());
+	float cosYaw = cos(world->GetMainCamera()->GetYaw());
+	float sinPitch = sin(world->GetMainCamera()->GetPitch());
+	float sinYaw = sin(world->GetMainCamera()->GetYaw());
+	
+	float comp0 = cosPitch * cosYaw;
+	float comp1 = cosPitch * sinYaw;
+	float comp2 = sinPitch;
+
+	float forwardMagnitude = sqrt((comp0 * comp0) + (comp1 * comp1) + (comp2 * comp2));
+
+	Vec3 cameraForward = Vec3{comp0 / forwardMagnitude, comp1 / forwardMagnitude, comp2 / forwardMagnitude}; //forwards orientation, unit vector and perpendicular to up
+
+	//up = (forward x 0,1,0) x forward
+	Vec3 cameraUp = Vec3{(cameraForward.y * 0) - (cameraForward.z * 1), (cameraForward.z * 0) - (cameraForward.x * 0), (cameraForward.x * 1) - (cameraForward.y * 0) };
+	cameraUp = Vec3{ (cameraUp.y * cameraForward.z) - (cameraUp.z * cameraForward.y), (cameraUp.z * cameraForward.x) - (cameraUp.x * cameraForward.z), (cameraUp.x * cameraForward.y) - (cameraUp.y * cameraForward.x) };
+	
+	audioEngine.Set3DListenerAndOrientation(cameraPos);
+	audioEngine.Update();
 
 	Debug::FlushRenderables();
 	renderer->Render();
@@ -128,6 +162,18 @@ void TutorialGame::UpdateKeys() {
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F8)) {
 		world->ShuffleObjects(false);
+	}
+	
+	//sounds testing
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) 
+	{
+		audioEngine.PlaySounds("../../Assets/Sounds/jaguar.wav", Vec3{0,10,0}, 10.0f);
+		audioEngine.PrintListenerPos();
+	}
+	
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) 
+	{
+		audioEngine.PlaySounds("../../Assets/Sounds/wave.mp3", Vec3{-60,40,60}, 20.0f);
 	}
 
 	if (lockedObject) {

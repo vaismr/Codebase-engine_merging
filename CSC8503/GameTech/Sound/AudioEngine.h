@@ -63,7 +63,7 @@ public:
 
 	void LoadSound(const string& soundName, bool threeD = true, bool looping = false, bool stream = false);
 	void UnloadSound(const string& soundName);
-	int PlaySound(const string& soundName, const Vec3& pos = Vec3{ 0,0,0 }, float volumedB = 0.0f);
+	int PlaySounds(const string& soundName, const Vec3& pos = Vec3{ 0,0,0 }, float volumedB = 0.0f);
 
 	void Set3DListenerAndOrientation(const Vec3& pos = Vec3{ 0,0,0 }, float volumedB = 0.0f);
 		
@@ -79,6 +79,8 @@ public:
 	float VolumeTodb(float volume);
 
 	FMOD_VECTOR VectorToFmod(const Vec3& position);
+
+	void PrintListenerPos(int ID = 0);
 };
 
 #endif
