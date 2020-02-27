@@ -14,8 +14,6 @@ using namespace CSC8503;
 TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	renderer = new GameTechRenderer(*world);
-	//loadingScreen.StartLoadingScreen(*world, renderer);
-	//loadingScreen.UpdateLoadingScreen();
 	physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
@@ -60,7 +58,6 @@ void TutorialGame::InitialiseAssets() {
 
 	InitCamera();
 	InitWorld();
-	//loadingScreen.EndLoadingScreen(*world);
 }
 
 TutorialGame::~TutorialGame() {
