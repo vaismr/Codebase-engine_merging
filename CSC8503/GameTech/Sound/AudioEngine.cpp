@@ -143,6 +143,16 @@ void AudioEngine::StopAllChannels()
 	}
 }
 
+void AudioEngine::TogglePauseAllChannels()
+{
+	paused = !paused;
+	for (auto const& x : imp->channels)
+	{
+		AudioEngine::ErrorCheck(x.second->setPaused(paused));
+		//AudioEngine::ErrorCheck(x.second->setPaused(false));
+	}
+}
+
 void AudioEngine::SetChannel3DPosition(int channelID, const Vec3& position)
 {
 	auto foundIt = imp->channels.find(channelID);

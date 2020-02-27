@@ -121,6 +121,9 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 		physics->Update(dt);
 		renderHUD(dt);
 
+		UpdateListener(dt);
+		audioEngine.Update();
+
 		Debug::FlushRenderables();
 		renderer->Render();
 	}
@@ -132,10 +135,44 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 	}
 }
 
+void TutorialGame::UpdateListener(float dt)
+{
+	//update audio
+
+	Vec3 cameraPos = Vec3{ world->GetMainCamera()->GetPosition().x, world->GetMainCamera()->GetPosition().y , world->GetMainCamera()->GetPosition().z };
+
+	//calculate distance between camera in this frame and last frame, using dt to get velocity - used for doppler effect
+	Vec3 cameraVelocity = Vec3{ (world->GetMainCamera()->GetPosition().x - lastCamPos.x) / dt, (world->GetMainCamera()->GetPosition().y - lastCamPos.y) / dt, (world->GetMainCamera()->GetPosition().z - lastCamPos.z) / dt };
+
+	float cosPitch = cos(world->GetMainCamera()->GetPitch());
+	float cosYaw = cos(world->GetMainCamera()->GetYaw());
+	float sinPitch = sin(world->GetMainCamera()->GetPitch());
+	float sinYaw = sin(world->GetMainCamera()->GetYaw());
+
+	float comp0 = cosPitch * cosYaw;
+	float comp1 = cosPitch * sinYaw;
+	float comp2 = sinPitch;
+
+	float forwardMagnitude = sqrt((comp0 * comp0) + (comp1 * comp1) + (comp2 * comp2));
+
+	Vec3 cameraForward = Vec3{ comp0 / forwardMagnitude, comp1 / forwardMagnitude, comp2 / forwardMagnitude }; //forwards orientation, unit vector and perpendicular to up
+
+	//up = (forward x 0,1,0) x forward
+	Vec3 cameraUp = Vec3{ (cameraForward.y * 0) - (cameraForward.z * 1), (cameraForward.z * 0) - (cameraForward.x * 0), (cameraForward.x * 1) - (cameraForward.y * 0) };
+	cameraUp = Vec3{ (cameraUp.y * cameraForward.z) - (cameraUp.z * cameraForward.y), (cameraUp.z * cameraForward.x) - (cameraUp.x * cameraForward.z), (cameraUp.x * cameraForward.y) - (cameraUp.y * cameraForward.x) };
+
+	audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, cameraUp);
+}
+
+
+
 //@TODO UI stuff - need on screen msg showing "Game Paused", quit game button, also mute audio
 void TutorialGame::UpdatePauseMenu() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+	{
 		TogglePauseMenu();
+		audioEngine.TogglePauseAllChannels();
+	}		
 }
 
 void NCL::CSC8503::TutorialGame::renderHUD(float dt)
@@ -222,36 +259,6 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 
 	ImGui::End();
 	ImGui::Render();
-
-	//update audio
-
-	Vec3 cameraPos = Vec3{ world->GetMainCamera()->GetPosition().x, world->GetMainCamera()->GetPosition().y , world->GetMainCamera()->GetPosition().z };
-	
-	//calculate distance between camera in this frame and last frame, using dt to get velocity - used for doppler effect
-	Vec3 cameraVelocity = Vec3{(world->GetMainCamera()->GetPosition().x - lastCamPos.x) / dt, (world->GetMainCamera()->GetPosition().y - lastCamPos.y) / dt, (world->GetMainCamera()->GetPosition().z - lastCamPos.z) / dt };
-
-	float cosPitch = cos(world->GetMainCamera()->GetPitch());
-	float cosYaw = cos(world->GetMainCamera()->GetYaw());
-	float sinPitch = sin(world->GetMainCamera()->GetPitch());
-	float sinYaw = sin(world->GetMainCamera()->GetYaw());
-	
-	float comp0 = cosPitch * cosYaw;
-	float comp1 = cosPitch * sinYaw;
-	float comp2 = sinPitch;
-
-	float forwardMagnitude = sqrt((comp0 * comp0) + (comp1 * comp1) + (comp2 * comp2));
-
-	Vec3 cameraForward = Vec3{comp0 / forwardMagnitude, comp1 / forwardMagnitude, comp2 / forwardMagnitude}; //forwards orientation, unit vector and perpendicular to up
-
-	//up = (forward x 0,1,0) x forward
-	Vec3 cameraUp = Vec3{(cameraForward.y * 0) - (cameraForward.z * 1), (cameraForward.z * 0) - (cameraForward.x * 0), (cameraForward.x * 1) - (cameraForward.y * 0) };
-	cameraUp = Vec3{ (cameraUp.y * cameraForward.z) - (cameraUp.z * cameraForward.y), (cameraUp.z * cameraForward.x) - (cameraUp.x * cameraForward.z), (cameraUp.x * cameraForward.y) - (cameraUp.y * cameraForward.x) };
-	
-	audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, cameraUp);
-	audioEngine.Update();
-
-	Debug::FlushRenderables();
-	renderer->Render();
 }
 
 void TutorialGame::UpdateKeys() {
@@ -265,7 +272,11 @@ void TutorialGame::UpdateKeys() {
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+	{
 		TogglePauseMenu();
+		audioEngine.TogglePauseAllChannels();
+	}
+		
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
 		useGravity = !useGravity; //Toggle gravity!

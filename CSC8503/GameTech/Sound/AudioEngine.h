@@ -69,6 +69,7 @@ public:
 		
 	void StopChannel(int channelID);
 	void StopAllChannels();
+	void TogglePauseAllChannels();
 	void SetChannel3DPosition(int channelID, const Vec3& position);
 	void SetChannelVolume(int channelID, float volumedB);
 
@@ -81,6 +82,9 @@ public:
 	FMOD_VECTOR VectorToFmod(const Vec3& position);
 
 	void PrintListenerPos(int ID = 0);
+
+private:
+	bool paused = false;
 };
 
 #endif
