@@ -115,6 +115,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 {
+
 	ImGui_ImplOpenGL3_NewFrame();
 #if _WIN32
 	ImGui_ImplWin32_NewFrame();
@@ -123,8 +124,6 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 	ImGui_Impl????_NewFrame();
 #endif
 	ImGui::NewFrame();
-
-
 
 	// Start the Dear ImGui frame
 	static float f = 100.0f;
