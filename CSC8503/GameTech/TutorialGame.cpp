@@ -6,6 +6,7 @@
 #include "../../Common/TextureLoader.h"
 
 #include "../CSC8503Common/PositionConstraint.h"
+#include <thread>
 
 using namespace NCL;
 using namespace CSC8503;
@@ -13,10 +14,8 @@ using namespace CSC8503;
 TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	renderer = new GameTechRenderer(*world);
-
-	loadingScreen.StartLoadingScreen(*world, renderer);
-	loadingScreen.UpdateLoadingScreen();
-
+	//loadingScreen.StartLoadingScreen(*world, renderer);
+	//loadingScreen.UpdateLoadingScreen();
 	physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
@@ -26,7 +25,23 @@ TutorialGame::TutorialGame() {
 
 	Debug::SetRenderer(renderer);
 
+	loadingScreen.StartLoadingScreen(*world, renderer);
+	isLoading = true;
+
+	//std::thread loadingThread(&TutorialGame::Loading, isLoading);
+	std::thread loadingThread([this] {this->Loading(isLoading); });
+	
+	while (isLoading) {
+		loadingScreen.UpdateLoadingScreen();
+	}
+
+	loadingThread.join();
+	loadingScreen.EndLoadingScreen(*world);
+}
+
+void TutorialGame::Loading(bool& isLoading) {
 	InitialiseAssets();
+	isLoading = false;
 }
 
 /*
@@ -56,8 +71,7 @@ void TutorialGame::InitialiseAssets() {
 
 	InitCamera();
 	InitWorld();
-
-	loadingScreen.EndLoadingScreen(*world);
+	//loadingScreen.EndLoadingScreen(*world);
 }
 
 TutorialGame::~TutorialGame() {
