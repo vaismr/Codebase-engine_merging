@@ -120,9 +120,9 @@ int AudioEngine::PlaySounds(const string& soundName, const Vec3& position, float
 	return channelID;
 }
 
-void AudioEngine::Set3DListenerAndOrientation(const Vec3& pos, float volumedB)
+void AudioEngine::Set3DListenerAndOrientation(const Vec3& pos, const Vec3& velocity, const Vec3& forward, const Vec3& up, float volumedB)
 {
-	FMOD_3D_ATTRIBUTES attributes = {VectorToFmod(pos), VectorToFmod(Vec3{0,0,0}), VectorToFmod(Vec3{1,0,0}), VectorToFmod(Vec3{0,1,0})};
+	FMOD_3D_ATTRIBUTES attributes = {VectorToFmod(pos), VectorToFmod(velocity), VectorToFmod(forward), VectorToFmod(up)};
 	AudioEngine::ErrorCheck(imp->studioSystem->setListenerAttributes(0, &attributes));
 }
 

@@ -125,7 +125,7 @@ void TutorialGame::UpdateGame(float dt) {
 	Vec3 cameraUp = Vec3{(cameraForward.y * 0) - (cameraForward.z * 1), (cameraForward.z * 0) - (cameraForward.x * 0), (cameraForward.x * 1) - (cameraForward.y * 0) };
 	cameraUp = Vec3{ (cameraUp.y * cameraForward.z) - (cameraUp.z * cameraForward.y), (cameraUp.z * cameraForward.x) - (cameraUp.x * cameraForward.z), (cameraUp.x * cameraForward.y) - (cameraUp.y * cameraForward.x) };
 	
-	audioEngine.Set3DListenerAndOrientation(cameraPos);
+	audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, cameraUp);
 	audioEngine.Update();
 
 	Debug::FlushRenderables();
