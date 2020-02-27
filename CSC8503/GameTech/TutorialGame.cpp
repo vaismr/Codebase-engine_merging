@@ -84,33 +84,52 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
-	}
-	if (lockedObject != nullptr) {
-		LockedCameraMovement();
-	}
+	if (!isPaused) {
+		if (!inSelectionMode) {
+			world->GetMainCamera()->UpdateCamera(dt);
+		}
+		if (lockedObject != nullptr) {
+			LockedCameraMovement();
+		}
 
-	UpdateKeys();
+		UpdateKeys();
 
-	if (useGravity) {
-		Debug::Print("(G)ravity on", Vector2(10, 40));
+		if (useGravity) {
+			Debug::Print("(G)ravity on", Vector2(10, 40));
+		}
+		else {
+			Debug::Print("(G)ravity off", Vector2(10, 40));
+		}
+
+		SelectObject();
+		MoveSelectedObject();
+
+		world->UpdateWorld(dt);
+		renderer->Update(dt);
+		physics->Update(dt);
+
+		renderHUD();
+
+<<<<<<< HEAD
+	renderHUD(dt);
+=======
+		Debug::FlushRenderables();
+		renderer->Render();
 	}
 	else {
-		Debug::Print("(G)ravity off", Vector2(10, 40));
+		UpdatePauseMenu();
+		Debug::Print("Game Paused", Vector2(50, 100));
+>>>>>>> MainPc
+
+		Debug::FlushRenderables();
+		renderer->Render();
 	}
+}
 
-	SelectObject();
-	MoveSelectedObject();
-
-	world->UpdateWorld(dt);
-	renderer->Update(dt);
-	physics->Update(dt);
-
-	renderHUD(dt);
-
-	Debug::FlushRenderables();
-	renderer->Render();
+//@TODO UI stuff - need on screen msg showing "Game Paused", quit game button, also mute audio
+void TutorialGame::UpdatePauseMenu() {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+		TogglePauseMenu();
 }
 
 void NCL::CSC8503::TutorialGame::renderHUD(float dt)
@@ -209,6 +228,9 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+		TogglePauseMenu();
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
 		useGravity = !useGravity; //Toggle gravity!
