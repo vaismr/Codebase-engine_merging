@@ -106,12 +106,12 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 
 		UpdateKeys();
 
-		if (useGravity) {
+		/*if (useGravity) {
 			Debug::Print("(G)ravity on", Vector2(10, 40));
 		}
 		else {
 			Debug::Print("(G)ravity off", Vector2(10, 40));
-		}
+		}*/
 
 		SelectObject();
 		MoveSelectedObject();
@@ -296,7 +296,7 @@ void TutorialGame::UpdateKeys() {
 		audioEngine.PrintListenerPos();
 	}
 	
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) 
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::L)) 
 	{
 		audioEngine.PlaySounds("../../Assets/Sounds/wave.mp3", Vec3{-60,40,60}, 20.0f);
 	}
@@ -447,7 +447,7 @@ bool TutorialGame::SelectObject() {
 		}
 	}
 	else {
-		renderer->DrawString("Press Q to change to select mode!", Vector2(10, 0));
+		//renderer->DrawString("Press Q to change to select mode!", Vector2(10, 0));
 	}
 	return false;
 }
