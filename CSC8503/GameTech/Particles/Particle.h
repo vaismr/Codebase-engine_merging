@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include "../../CSC8503Common/PhysicsSystem.h"
 
 

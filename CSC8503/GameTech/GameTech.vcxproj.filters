@@ -42,6 +42,9 @@
     <ClCompile Include="imgui_progressbar.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Particles\ParticleEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameTechRenderer.h">
@@ -87,6 +90,9 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="Particles\Particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles\ParticleEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
