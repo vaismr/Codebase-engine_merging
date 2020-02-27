@@ -19,6 +19,10 @@ https://research.ncl.ac.uk/game/
 
 #include "../../Common/MeshGeometry.h"
 
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #ifdef _WIN32
 #include "../../Common/Win32Window.h"
 
@@ -29,6 +33,8 @@ https://research.ncl.ac.uk/game/
 #include "KHR/WGLext.h"
 
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
+
+#include <imgui/imgui_impl_win32.h>
 #endif
 
 using namespace NCL;
@@ -92,7 +98,6 @@ void OGLRenderer::BeginFrame()		{
 }
 
 void OGLRenderer::RenderFrame()		{
-
 }
 
 void OGLRenderer::EndFrame()		{
@@ -373,6 +378,18 @@ void OGLRenderer::InitWithWin32(Window& w) {
 		wglDeleteContext(tempContext);
 		return;
 	}
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	ImGui::StyleColorsDark();
+
+	const char* glsl_version = "#version 130";
+	ImGui_ImplOpenGL3_Init(glsl_version);
+	ImGui_ImplWin32_Init(realWindow->GetHandle());
 
 	wglDeleteContext(tempContext);	//We don't need the temporary context any more!
 

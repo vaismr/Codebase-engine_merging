@@ -1,14 +1,22 @@
-#include "TutorialGame.h"
+ #include "TutorialGame.h"
 #include "../CSC8503Common/GameWorld.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Common/TextureLoader.h"
 
+#include "../../Common/Assets.h"
+
 #include "../CSC8503Common/PositionConstraint.h"
 #include <iostream>
 
 
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_impl_win32.h>
+
+#include "imgui_progressbar.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -57,6 +65,16 @@ void TutorialGame::InitialiseAssets() {
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontDefault();
+	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
+	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 16);
+
+	ImVec4* colors = ImGui::GetStyle().Colors;
+	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+
+
+
 	InitCamera();
 	InitWorld();
 }
@@ -76,30 +94,134 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
-	
-	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
-	}
-	if (lockedObject != nullptr) {
-		LockedCameraMovement();
-	}
+lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
 
-	UpdateKeys();
+	if (!isPaused) {
+		if (!inSelectionMode) {
+			world->GetMainCamera()->UpdateCamera(dt);
+		}
+		if (lockedObject != nullptr) {
+			LockedCameraMovement();
+		}
 
-	if (useGravity) {
-		Debug::Print("(G)ravity on", Vector2(10, 40));
+		UpdateKeys();
+
+		if (useGravity) {
+			Debug::Print("(G)ravity on", Vector2(10, 40));
+		}
+		else {
+			Debug::Print("(G)ravity off", Vector2(10, 40));
+		}
+
+		SelectObject();
+		MoveSelectedObject();
+
+		world->UpdateWorld(dt);
+		renderer->Update(dt);
+		physics->Update(dt);
+		renderHUD(dt);
+
+		Debug::FlushRenderables();
+		renderer->Render();
 	}
 	else {
-		Debug::Print("(G)ravity off", Vector2(10, 40));
+		UpdatePauseMenu();
+		Debug::Print("Game Paused", Vector2(50, 100));
+		Debug::FlushRenderables();
+		renderer->Render();
+	}
+}
+
+//@TODO UI stuff - need on screen msg showing "Game Paused", quit game button, also mute audio
+void TutorialGame::UpdatePauseMenu() {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+		TogglePauseMenu();
+}
+
+void NCL::CSC8503::TutorialGame::renderHUD(float dt)
+{
+
+	ImGui_ImplOpenGL3_NewFrame();
+#if _WIN32
+	ImGui_ImplWin32_NewFrame();
+#elif __ORBIS__
+	// TODO: PS4 New Frame?? GLFW + gl3w?
+	ImGui_Impl????_NewFrame();
+#endif
+	ImGui::NewFrame();
+
+	// Start the Dear ImGui frame
+	static float f = 100.0f;
+	f -= dt;
+
+	float power = 0.5f;
+
+	const ImU32 red = 0xFF0000FF;
+	const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+	const ImU32 bg = ImGui::GetColorU32(ImGuiCol_Button);
+
+	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Always);
+
+	ImGuiWindowFlags flags = 
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBackground
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+	//Time window
+	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::SetWindowFontScale(2.5f);
+	
+	ImGui::PushFont(fontMainDlg);
+	ImGui::Text(" Time : %.2fs", f);               // Display some text (you can use a format strings too)
+	ImGui::PopFont();
+
+
+	ImGui::End();
+
+	//power window
+	ImGui::SetNextWindowPos(ImVec2(800, 450), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
+
+	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	
+	ImGui::PushFont(fontMainDlg);
+	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
+	ImGui::PopFont();
+	ImGui::ProgressBar("##progress_bar1", power, ImVec2(500, 25), red, col);
+
+	ImGui::SetWindowFontScale(2.5f);
+	ImGui::End();
+
+	//Name window
+	ImGui::SetNextWindowPos(ImVec2(50, 550), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
+	ImGui::Begin("Name", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::SetWindowFontScale(2.5f);
+
+	static char name[32] = "Unknown";
+	char buf[64]; sprintf_s(buf, IM_ARRAYSIZE(buf), "Name: %s###ButtonChangeName", name);
+	if (ImGui::Button(buf))
+	{
+		ImGui::OpenPopup("PopupNameEditor");
 	}
 
-	SelectObject();
-	MoveSelectedObject();
+	// Popup
 
-	world->UpdateWorld(dt);
-	renderer->Update(dt);
-	physics->Update(dt);
+	if (ImGui::BeginPopup("PopupNameEditor")) {
+		ImGui::Text("Your name:");
+		ImGui::InputText("##edit", name, IM_ARRAYSIZE(name));
+		if (ImGui::Button("Close"))
+			ImGui::CloseCurrentPopup();
+		ImGui::EndPopup();
+	}
+
+	ImGui::End();
+	ImGui::Render();
 
 	//update audio
 
@@ -141,6 +263,9 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
+		TogglePauseMenu();
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
 		useGravity = !useGravity; //Toggle gravity!
@@ -230,7 +355,6 @@ void  TutorialGame::LockedCameraMovement() {
 		world->GetMainCamera()->SetYaw(angles.y);
 	}
 }
-
 
 void TutorialGame::DebugObjectMovement() {
 //If we've selected an object, we can manipulate it with some key presses
