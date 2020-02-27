@@ -1,4 +1,4 @@
- #include "TutorialGame.h"
+#include "TutorialGame.h"
 #include "../CSC8503Common/GameWorld.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
@@ -15,6 +15,8 @@
 
 #include "imgui_progressbar.h"
 
+#include "LevelTutorial.h"
+
 using namespace NCL;
 using namespace CSC8503;
 
@@ -30,6 +32,13 @@ TutorialGame::TutorialGame()	{
 	Debug::SetRenderer(renderer);
 
 	InitialiseAssets();
+
+	levels.push_back(new LevelTutorial()); // level 0
+	levels.push_back(new LevelTutorial());
+	levels.push_back(new LevelTutorial());
+	levels.push_back(new LevelTutorial());
+	levels.push_back(new LevelTutorial());
+	levels.push_back(new LevelTutorial()); // level 5
 }
 
 /*
@@ -64,11 +73,6 @@ void TutorialGame::InitialiseAssets() {
 
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-
-
-
-	InitCamera();
-	InitWorld();
 }
 
 TutorialGame::~TutorialGame()	{
@@ -84,7 +88,29 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
-	if (!isPaused) {
+	ImGui_ImplOpenGL3_NewFrame();
+#if _WIN32
+	ImGui_ImplWin32_NewFrame();
+#elif __ORBIS__
+	// TODO: PS4 New Frame?? GLFW + gl3w?
+	ImGui_Impl????_NewFrame();
+#endif
+	ImGui::NewFrame();
+
+
+	switch (state) {
+	case GameState::MAIN_MENU:
+		RenderMainGameMenu(dt);
+		break;
+
+	case GameState::LOADING:
+		level = levels[level_number];
+		InitWorld();
+		state = GameState::IN_GAME;
+		Window::GetWindow()->ShowOSPointer(false);
+		break;
+
+	case GameState::IN_GAME:
 		if (!inSelectionMode) {
 			world->GetMainCamera()->UpdateCamera(dt);
 		}
@@ -107,17 +133,23 @@ void TutorialGame::UpdateGame(float dt) {
 		world->UpdateWorld(dt);
 		renderer->Update(dt);
 		physics->Update(dt);
-		renderHUD(dt);
 
-		Debug::FlushRenderables();
-		renderer->Render();
-	}
-	else {
+		RenderInGameHud(dt);
+		break;
+
+	case GameState::PAUSED:
 		UpdatePauseMenu();
 		Debug::Print("Game Paused", Vector2(50, 100));
-		Debug::FlushRenderables();
-		renderer->Render();
+
+		RenderInGameHud(0);
+		RenderPauseMenu(dt);
+		break;
 	}
+
+	ImGui::Render();
+
+	Debug::FlushRenderables();
+	renderer->Render();
 }
 
 //@TODO UI stuff - need on screen msg showing "Game Paused", quit game button, also mute audio
@@ -126,18 +158,51 @@ void TutorialGame::UpdatePauseMenu() {
 		TogglePauseMenu();
 }
 
-void NCL::CSC8503::TutorialGame::renderHUD(float dt)
-{
+void TutorialGame::RenderMainGameMenu(float dt) {
+	auto dl = ImGui::GetBackgroundDrawList();
+	dl->AddImage(basicTex, ImVec2(0, 0), ImVec2(1080, 720));
 
-	ImGui_ImplOpenGL3_NewFrame();
-#if _WIN32
-	ImGui_ImplWin32_NewFrame();
-#elif __ORBIS__
-	// TODO: PS4 New Frame?? GLFW + gl3w?
-	ImGui_Impl????_NewFrame();
-#endif
-	ImGui::NewFrame();
+	ImGui::Begin("Main Menu");
 
+	ImGui::SliderInt("level", &level_number, 1, levels.size());
+
+	if (ImGui::Button("ENTER GAME")) {
+		// LOAD_LEVEL
+		state = GameState::LOADING;
+		level_number = level_number - 1;
+	}
+	ImGui::End();
+}
+
+void TutorialGame::RenderPauseMenu(float dt) {
+	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Always);
+
+	ImGuiWindowFlags flags =
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBackground
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+	ImGui::Begin("Pause Menu", nullptr, flags);
+
+	static bool toggle = false;
+	std::string str = "Do";
+	str += toggle ? "1" : "2";
+	str += "##a";
+
+	if (ImGui::Button(str.c_str())) {
+		toggle = !toggle;
+	}
+
+
+	ImGui::End();
+}
+
+void TutorialGame::RenderInGameHud(float dt) {
 	// Start the Dear ImGui frame
 	static float f = 100.0f;
 	f -= dt;
@@ -151,7 +216,7 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Always);
 
-	ImGuiWindowFlags flags = 
+	ImGuiWindowFlags flags =
 		ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoScrollbar
 		| ImGuiWindowFlags_NoMove
@@ -161,9 +226,9 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 	//Time window
-	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::Begin("Time Window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
 	ImGui::SetWindowFontScale(2.5f);
-	
+
 	ImGui::PushFont(fontMainDlg);
 	ImGui::Text(" Time : %.2fs", f);               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
@@ -176,7 +241,7 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
 
 	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
-	
+
 	ImGui::PushFont(fontMainDlg);
 	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
@@ -209,8 +274,6 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 	}
 
 	ImGui::End();
-	ImGui::Render();
-
 }
 
 void TutorialGame::UpdateKeys() {
@@ -420,17 +483,14 @@ void TutorialGame::InitCamera() {
 }
 
 void TutorialGame::InitWorld() {
+	InitCamera();
+
 	world->ClearAndErase();
 	physics->Clear();
 
-	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	AddGooseToWorld(Vector3(30, 2, 0));
-	AddAppleToWorld(Vector3(35, 2, 0));
-
-	AddParkKeeperToWorld(Vector3(40, 2, 0));
-	AddCharacterToWorld(Vector3(45, 2, 0));
-
-	AddFloorToWorld(Vector3(0, -2, 0));
+	if (level) {
+		level->init(this);
+	}
 }
 
 //From here on it's functions to add in objects to the world!

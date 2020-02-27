@@ -16,6 +16,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{ade7defe-8eba-4592-bc3f-7b6b83839e31}</UniqueIdentifier>
     </Filter>
+    <Filter Include="levels">
+      <UniqueIdentifier>{7f822865-4fbe-4f5f-aa80-f5295bc44705}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -35,6 +38,12 @@
     </ClCompile>
     <ClCompile Include="imgui_progressbar.cpp">
       <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelBase.h">
+      <Filter>levels</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelTutorial.h">
+      <Filter>levels</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

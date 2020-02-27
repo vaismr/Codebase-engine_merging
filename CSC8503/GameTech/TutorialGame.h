@@ -4,14 +4,40 @@
 #include <imgui/imgui.h>
 #include "../CSC8503Common/LoadingScreen.h"
 
+class LevelBase;
+
 namespace NCL {
 	namespace CSC8503 {
+
+		enum class GameState {
+			MAIN_MENU,
+			LOADING,
+			IN_GAME,
+			PAUSED,
+		};
+
 		class TutorialGame {
+			friend LevelBase;
+
 		public:
 			TutorialGame();
 			~TutorialGame();
 
 			virtual void UpdateGame(float dt);
+
+			GameObject* AddFloorToWorld(const Vector3& position);
+			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			//IT'S HAPPENING
+			GameObject* AddGooseToWorld(const Vector3& position);
+			GameObject* AddParkKeeperToWorld(const Vector3& position);
+			GameObject* AddCharacterToWorld(const Vector3& position);
+			GameObject* AddAppleToWorld(const Vector3& position);
+
+
+			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
+			void InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing);
+			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
 
 		protected:
 			void InitialiseAssets();
@@ -22,8 +48,13 @@ namespace NCL {
 			void InitWorld();
 
 			void TogglePauseMenu() {
-				isPaused = !isPaused;
-				Window::GetWindow()->ShowOSPointer(isPaused);
+				if (state == GameState::PAUSED) {
+					state = GameState::IN_GAME;
+				}
+				else if (state == GameState::IN_GAME) {
+					state = GameState::PAUSED;
+				}
+				Window::GetWindow()->ShowOSPointer(state == GameState::PAUSED);
 			}
 			void UpdatePauseMenu();
 
@@ -32,9 +63,6 @@ namespace NCL {
 			in the module. Feel free to mess around with them to see different objects being created in different
 			test scenarios (constraints, collision types, and so on).
 			*/
-			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
-			void InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing);
-			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
 			void BridgeConstraintTest();
 			void SimpleGJKTest();
 
@@ -44,16 +72,9 @@ namespace NCL {
 			void LockedObjectMovement();
 			void LockedCameraMovement();
 
-			void renderHUD(float dt);
-
-			GameObject* AddFloorToWorld(const Vector3& position);
-			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
-			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
-			//IT'S HAPPENING
-			GameObject* AddGooseToWorld(const Vector3& position);
-			GameObject* AddParkKeeperToWorld(const Vector3& position);
-			GameObject* AddCharacterToWorld(const Vector3& position);
-			GameObject* AddAppleToWorld(const Vector3& position);
+			void RenderInGameHud(float dt);
+			void RenderMainGameMenu(float dt);
+			void RenderPauseMenu(float dt);
 
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
@@ -87,7 +108,10 @@ namespace NCL {
 				lockedObject = o;
 			}
 
-			bool isPaused;
+			GameState state = GameState::MAIN_MENU;
+			int level_number = 1;
+			LevelBase* level = nullptr;
+			std::vector<LevelBase*> levels;
 
 			LoadingScreen loadingScreen;
 		};

@@ -65,7 +65,7 @@ int main() {
 	//TestNetworking();
 	//TestPathfinding();
 	
-	w->ShowOSPointer(false);
+	w->ShowOSPointer(true);
 	w->LockMouseToWindow(true);
 
 	TutorialGame* g = new TutorialGame();
