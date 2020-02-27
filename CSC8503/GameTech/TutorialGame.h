@@ -1,12 +1,8 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
-<<<<<<< HEAD
-
 #include <imgui/imgui.h>
-=======
 #include "../CSC8503Common/LoadingScreen.h"
->>>>>>> MainPc
 
 namespace NCL {
 	namespace CSC8503 {

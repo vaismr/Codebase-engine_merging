@@ -107,20 +107,14 @@ void TutorialGame::UpdateGame(float dt) {
 		world->UpdateWorld(dt);
 		renderer->Update(dt);
 		physics->Update(dt);
+		renderHUD(dt);
 
-		renderHUD();
-
-<<<<<<< HEAD
-	renderHUD(dt);
-=======
 		Debug::FlushRenderables();
 		renderer->Render();
 	}
 	else {
 		UpdatePauseMenu();
 		Debug::Print("Game Paused", Vector2(50, 100));
->>>>>>> MainPc
-
 		Debug::FlushRenderables();
 		renderer->Render();
 	}
