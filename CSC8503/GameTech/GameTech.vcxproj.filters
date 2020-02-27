@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{bdceb61d-0615-4b58-b704-3ab06034aa23}</UniqueIdentifier>
+     </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{ade7defe-8eba-4592-bc3f-7b6b83839e31}</UniqueIdentifier>
     </Filter>
@@ -33,6 +36,9 @@
     <ClCompile Include="NetworkPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sound\AudioEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="imgui_progressbar.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -48,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NetworkPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound\AudioEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Library\imgui\imconfig.h">

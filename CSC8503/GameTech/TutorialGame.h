@@ -1,6 +1,9 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
+
+#include <iostream>
+#include "../GameTech/Sound/AudioEngine.h"
 #include <imgui/imgui.h>
 #include "../CSC8503Common/LoadingScreen.h"
 
@@ -86,6 +89,9 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
+
+			AudioEngine audioEngine;
+			Vector3 lastCamPos; //store position of the camera in the last frame
 
 			bool isPaused;
 
