@@ -24,24 +24,13 @@ TutorialGame::TutorialGame() {
 	isPaused = false;
 
 	Debug::SetRenderer(renderer);
-
-	loadingScreen.StartLoadingScreen(*world, renderer);
-	isLoading = true;
-
-	//std::thread loadingThread(&TutorialGame::Loading, isLoading);
-	std::thread loadingThread([this] {this->Loading(isLoading); });
 	
-	while (isLoading) {
-		loadingScreen.UpdateLoadingScreen();
-	}
+	loadingScreen = new LoadingScreen();
 
-	loadingThread.join();
-	loadingScreen.EndLoadingScreen(*world);
-}
-
-void TutorialGame::Loading(bool& isLoading) {
 	InitialiseAssets();
-	isLoading = false;
+
+	delete loadingScreen;
+	loadingScreen = nullptr;
 }
 
 /*

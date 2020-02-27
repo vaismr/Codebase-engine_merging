@@ -12,11 +12,8 @@ namespace NCL {
 
 			virtual void UpdateGame(float dt);
 
-			void Loading(bool& isLoading);
-			void InitialiseAssets();
-
 		protected:
-			
+			void InitialiseAssets();
 
 			void InitCamera();
 			void UpdateKeys();
@@ -87,7 +84,7 @@ namespace NCL {
 
 			bool isPaused;
 
-			LoadingScreen loadingScreen;
+			LoadingScreen* loadingScreen;
 			bool isLoading;
 
 			
