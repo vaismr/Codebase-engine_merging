@@ -163,6 +163,7 @@
     <ClInclude Include="imgui_progressbar.h" />
     <ClInclude Include="NetworkedGame.h" />
     <ClInclude Include="NetworkPlayer.h" />
+    <ClInclude Include="Particles\Particle.h" />
     <ClInclude Include="Sound\AudioEngine.h" />
     <ClInclude Include="TutorialGame.h" />
   </ItemGroup>

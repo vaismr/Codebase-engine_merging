@@ -15,7 +15,7 @@
     </Filter>
     <Filter Include="Sound">
       <UniqueIdentifier>{bdceb61d-0615-4b58-b704-3ab06034aa23}</UniqueIdentifier>
-     </Filter>
+    </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{ade7defe-8eba-4592-bc3f-7b6b83839e31}</UniqueIdentifier>
     </Filter>
@@ -85,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="imgui_progressbar.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles\Particle.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
