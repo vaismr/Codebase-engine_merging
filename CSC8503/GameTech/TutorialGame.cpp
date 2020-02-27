@@ -16,6 +16,7 @@
 #include "imgui_progressbar.h"
 
 #include "LevelTutorial.h"
+#include "Level1.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -36,9 +37,9 @@ TutorialGame::TutorialGame()	{
 	levels.push_back(new LevelTutorial()); // level 0
 	levels.push_back(new LevelTutorial());
 	levels.push_back(new LevelTutorial());
-	levels.push_back(new LevelTutorial());
-	levels.push_back(new LevelTutorial());
-	levels.push_back(new LevelTutorial()); // level 5
+	levels.push_back(new Level1());
+	levels.push_back(new Level1());
+	levels.push_back(new Level1()); // level 5
 }
 
 /*

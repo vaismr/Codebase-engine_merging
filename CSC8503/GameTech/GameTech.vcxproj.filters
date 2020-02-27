@@ -86,5 +86,8 @@
     <ClInclude Include="imgui_progressbar.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="Level1.h">
+      <Filter>levels</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
