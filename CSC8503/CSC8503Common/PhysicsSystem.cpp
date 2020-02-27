@@ -194,6 +194,7 @@ void PhysicsSystem::NarrowPhase() {
 
 }
 
+
 /*
 Integration of acceleration and velocity is split up, so that we can
 move objects multiple times during the course of a PhysicsUpdate,
@@ -203,17 +204,95 @@ This function will update both linear and angular acceleration,
 based on any forces that have been accumulated in the objects during
 the course of the previous game frame.
 */
+//@TODO remove this implementation? Just for testing until physics middleware implemented
 void PhysicsSystem::IntegrateAccel(float dt) {
+	std::vector<GameObject*>::const_iterator first;
+	std::vector<GameObject*>::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
 
+	for (auto i = first; i != last; ++i) {
+		PhysicsObject* object = (*i)->GetPhysicsObject();
+
+		// GameObject doesn't have physics object
+		if (object == nullptr)
+			continue;
+
+		float inverseMass = object->GetInverseMass();
+
+		Vector3 linearVel = object->GetLinearVelocity();
+		Vector3 force = object->GetForce();
+		Vector3 accel = force * inverseMass;
+
+		// don't apply gravity for objects that can't be moved
+		if (applyGravity && inverseMass > 0)
+			accel += gravity;
+
+		// integrate acceleration
+		linearVel += accel * dt;
+		object->SetLinearVelocity(linearVel);
+
+		// angular calculations
+		Vector3 torque = object->GetTorque();
+		Vector3 angVel = object->GetAngularVelocity();
+
+		object->UpdateInertiaTensor();
+
+		Vector3 angAccel = object->GetInertiaTensor() * torque;
+
+		// integrate angular acceleration
+		angVel += angAccel * dt;
+		object->SetAngularVelocity(angVel);
+	}
 }
+
 /*
 This function integrates linear and angular velocity into
 position and orientation. It may be called multiple times
 throughout a physics update, to slowly move the objects through
 the world, looking for collisions.
 */
+//@TODO remove this implementation? Just for testing until physics middleware implemented
 void PhysicsSystem::IntegrateVelocity(float dt) {
+	std::vector<GameObject*>::const_iterator first;
+	std::vector<GameObject*>::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
+	float dampingFactor = 1.0f - 0.95f;
+	float frameDamping = powf(dampingFactor, dt);
 
+	for (auto i = first; i != last; ++i) {
+		PhysicsObject* object = (*i)->GetPhysicsObject();
+		if (object == nullptr)
+			continue;
+
+		Transform& transform = (*i)->GetTransform();
+
+		// position stuff
+		Vector3 position = transform.GetLocalPosition();
+		Vector3 linearVel = object->GetLinearVelocity();
+		position += linearVel * dt;		// integrate velocity
+		transform.SetLocalPosition(position);
+		// added later
+		transform.SetWorldPosition(position);
+
+		// linear damping - simulate drag/air resistance by reducing linearVelocity each frame
+		linearVel = linearVel * frameDamping;
+		object->SetLinearVelocity(linearVel);
+
+
+		// orientation calculations
+		Quaternion orientation = transform.GetLocalOrientation();
+		Vector3 angVel = object->GetAngularVelocity();
+
+		// integrate angular velocity. * 0.5 is just a quaternion quirk
+		orientation = orientation + (Quaternion(angVel * dt * 0.5f, 0.0f) * orientation);
+		orientation.Normalise();
+
+		transform.SetLocalOrientation(orientation);
+
+		// damping for angular velocity to prevent forever spinning
+		angVel = angVel * frameDamping;
+		object->SetAngularVelocity(angVel);
+	}
 }
 
 /*
