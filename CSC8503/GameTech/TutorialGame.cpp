@@ -54,8 +54,8 @@ void TutorialGame::InitialiseAssets() {
 		(*into)->UploadToGPU();
 	};
 
-	loadFunc("cube1.msh"		 , &cubeMesh);
-	//loadFunc("cube.msh"		 , &cubeMesh);
+	loadFunc("Particle.msh"		 , &particleMesh);
+	loadFunc("cube.msh"		 , &cubeMesh);
 	loadFunc("sphere.msh"	 , &sphereMesh);
 	loadFunc("goose.msh"	 , &gooseMesh);
 	loadFunc("CharacterA.msh", &keeperMesh);
@@ -92,6 +92,8 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+
+	delete particleMesh;
 
 	audioEngine.Shutdown();
 }
