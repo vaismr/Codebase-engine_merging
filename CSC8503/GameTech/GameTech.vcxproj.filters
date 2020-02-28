@@ -42,7 +42,7 @@
     <ClCompile Include="LevelBase.h">
       <Filter>levels</Filter>
     </ClCompile>
-    <ClCompile Include="LevelTutorial.h">
+    <ClCompile Include="LevelTest.h">
       <Filter>levels</Filter>
     </ClCompile>
   </ItemGroup>

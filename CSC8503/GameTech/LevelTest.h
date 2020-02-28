@@ -1,6 +1,6 @@
 #include "LevelBase.h"
 
-class LevelTutorial: public LevelBase {
+class LevelTest: public LevelBase {
 public:
 	virtual void init(TutorialGame* game) {
 		game->InitMixedGridWorld(10, 10, 3.5f, 3.5f);

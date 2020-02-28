@@ -147,7 +147,7 @@
     <ClCompile Include="NetworkPlayer.cpp" />
     <ClCompile Include="TutorialGame.cpp" />
     <ClCompile Include="LevelBase.h" />
-    <ClCompile Include="LevelTutorial.h" />
+    <ClCompile Include="LevelTest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Library\imgui\imconfig.h" />

@@ -15,7 +15,7 @@
 
 #include "imgui_progressbar.h"
 
-#include "LevelTutorial.h"
+#include "LevelTest.h"
 #include "Level1.h"
 
 using namespace NCL;
@@ -34,9 +34,9 @@ TutorialGame::TutorialGame()	{
 
 	InitialiseAssets();
 
-	levels.push_back(new LevelTutorial()); // level 0
-	levels.push_back(new LevelTutorial());
-	levels.push_back(new LevelTutorial());
+	levels.push_back(new LevelTest()); // level 0
+	levels.push_back(new LevelTest());
+	levels.push_back(new LevelTest());
 	levels.push_back(new Level1());
 	levels.push_back(new Level1());
 	levels.push_back(new Level1()); // level 5
@@ -105,6 +105,7 @@ void TutorialGame::UpdateGame(float dt) {
 		break;
 
 	case GameState::LOADING:
+
 		level = levels[level_number];
 		InitWorld();
 		state = GameState::IN_GAME;
@@ -144,6 +145,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 		RenderInGameHud(0);
 		RenderPauseMenu(dt);
+
 		break;
 	}
 
@@ -157,6 +159,7 @@ void TutorialGame::UpdateGame(float dt) {
 void TutorialGame::UpdatePauseMenu() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
 		TogglePauseMenu();
+
 }
 
 void TutorialGame::RenderMainGameMenu(float dt) {
@@ -172,33 +175,25 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 		state = GameState::LOADING;
 		level_number = level_number - 1;
 	}
+
+	if (ImGui::Button("quit game")) {
+		closed = true;
+	}
+
 	ImGui::End();
 }
 
 void TutorialGame::RenderPauseMenu(float dt) {
 	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Always);
 
-	ImGuiWindowFlags flags =
-		ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoScrollbar
-		| ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoNav
-		| ImGuiWindowFlags_NoBackground
-		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-	ImGui::Begin("Pause Menu", nullptr, flags);
+	ImGui::Begin("Pause menu");
 
-	static bool toggle = false;
-	std::string str = "Do";
-	str += toggle ? "1" : "2";
-	str += "##a";
 
-	if (ImGui::Button(str.c_str())) {
-		toggle = !toggle;
+	if (ImGui::Button("quit game")) {
+		closed = true;
 	}
-
 
 	ImGui::End();
 }
@@ -484,6 +479,7 @@ void TutorialGame::InitCamera() {
 }
 
 void TutorialGame::InitWorld() {
+	bool closed = false;
 	InitCamera();
 
 	world->ClearAndErase();
