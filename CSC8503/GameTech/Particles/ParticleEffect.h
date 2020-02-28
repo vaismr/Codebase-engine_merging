@@ -1,19 +1,18 @@
 #pragma once
 
-
+#include "../../Common/Camera.h"
 #include "Particle.h"
 #include "../GameTechRenderer.h"
 #include "../../CSC8503Common/PhysicsSystem.h"
-
+#include "../../Common/TextureLoader.h"
+#include "ParticleEmitter.h"
+#include "../../Common/Maths.h"
 
 
 namespace NCL
 {
 	namespace CSC8503
 	{
-		class Camera;
-		class ParticleEmitter;
-
 		class ParticleEffect
 		{
 		public:
@@ -43,18 +42,18 @@ namespace NCL
 			virtual void Update(float dt);
 			virtual void Render();
 
-			bool LoadTexture(const string& filename);
+			void LoadTexture(const string& filename);
 
 		protected:
 			void EmitParticle(Particle& particle);
 		private:
 			Camera* camera;
-			ParticleEmitter* emitter;
+			ParticleEmitter* pEmitter;
 
 			ParticleBuffer particles;
 			VertexBuffer vertices;
 			Matrix4 localToWorld;
-			GLuint texID;
+			OGLTexture* tex;
 			Vector3 force; //force to be applied to every particle in this effect, could be upwards for smoke etc.
 		};
 	}

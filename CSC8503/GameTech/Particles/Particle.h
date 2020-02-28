@@ -13,7 +13,7 @@ namespace NCL
 			{
 
 			}
-		private:
+
 			Vector3 position;
 			Vector3 velocity;
 			Vector4 colour;

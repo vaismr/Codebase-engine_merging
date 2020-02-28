@@ -5,6 +5,7 @@
 class ParticleEmitter
 {
 public: 
+	ParticleEmitter() {};
 	virtual ~ParticleEmitter() {};
-	virtual void EmitParticle(Particle& particle) = 0;
+	virtual void EmitParticle(Particle& particle) {};
 };
