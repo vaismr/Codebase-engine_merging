@@ -95,7 +95,6 @@ TutorialGame::~TutorialGame()	{
 
 void TutorialGame::UpdateGame(float dt) {
 	lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
-GLuint
 
 	if (!isPaused) {
 		if (!inSelectionMode) {
