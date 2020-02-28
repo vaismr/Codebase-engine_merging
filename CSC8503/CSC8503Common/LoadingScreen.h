@@ -1,45 +1,82 @@
 #pragma once
 #include "../GameTech/GameTechRenderer.h"
+#include <thread>
+#include <mutex>
+
+/*
+*	Example Usage (the destructor MUST be called when finished, otherwise infinite loop): 
+*
+*	LoadingScreen ls = new LoadingScreen();
+*
+*	// anything that needs to load goes here
+*
+*	delete ls;
+*	ls = nullptr;
+*/
 
 namespace NCL {
 	namespace CSC8503 {
 		class LoadingScreen {
 		public:
-			void StartLoadingScreen(GameWorld& gameWorld, GameTechRenderer* renderer) {
-				this->renderer = renderer;
-				gameWorld.GetMainCamera()->SetCameraType(CameraType::Orthographic);
-				glClearColor(0, 0, 0, 0);
+			// MUST call destructor after loading assets
+			LoadingScreen() : mMutex() {
+				loadingThread = std::thread([this] {this->Loading(); });
+				isLoading = true;
 			}
 
-			// is possible using threads rather than calling this every so often... but much harder
+			~LoadingScreen() {
+				isLoading = false;
+				loadingThread.join();
+
+				delete world;
+				world = nullptr;
+			}
+
+			void Loading() {
+				std::lock_guard<std::mutex> guard(mMutex);
+				// since it's a new thread, we need a new renderer
+				world = new GameWorld(); 
+				renderer = new GameTechRenderer(*world);
+				world->GetMainCamera()->SetCameraType(CameraType::Orthographic);
+				glClearColor(0, 0, 0, 0);
+
+				while (isLoading) {
+					UpdateLoadingScreen();
+					Sleep(600);
+				}
+
+				delete renderer;
+				renderer = nullptr;
+			}
+
 			void UpdateLoadingScreen() {
 				glClearColor(0, 0, 0, 0);
 
-				switch (loadCount) {
-				case 0:
-					renderer->DrawString("LOADING.", Vector2(50, 50)); break;
-				case 1:
-					renderer->DrawString("LOADING..", Vector2(50, 50)); break;
-				case 2:
-					renderer->DrawString("LOADING...", Vector2(50, 50)); break;
-				case 3:
-					renderer->DrawString("LOADING....", Vector2(50, 50)); break;
-				default:
-					renderer->DrawString("LOADING.....", Vector2(50, 50));
-					loadCount = -1;
+				if (loadCount < 4) {
+					loadingText += ".";
+					renderer->DrawString(loadingText, textPos);
+					loadCount++;
 				}
-
+				else {
+					loadingText = "Loading.";
+					renderer->DrawString(loadingText, textPos);
+					loadCount = 0;
+				}
+				
 				renderer->Render();
-				loadCount++;
 			}
 
-			void EndLoadingScreen(GameWorld& gameWorld) {
-				gameWorld.GetMainCamera()->SetCameraType(CameraType::Perspective);
-				renderer = nullptr;
-			}
 		private:
 			int loadCount = 0;
+			bool isLoading;
 
+			Vector2 textPos = Vector2(50, 50);
+			string loadingText = "Loading";
+
+			std::thread loadingThread;
+			std::mutex mMutex;
+
+			GameWorld* world;
 			GameTechRenderer* renderer;
 		};
 	}

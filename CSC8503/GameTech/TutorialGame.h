@@ -113,7 +113,7 @@ namespace NCL {
 			LevelBase* level = nullptr;
 			std::vector<LevelBase*> levels;
 
-			LoadingScreen loadingScreen;
+			LoadingScreen* loadingScreen;
 		};
 	}
 }
