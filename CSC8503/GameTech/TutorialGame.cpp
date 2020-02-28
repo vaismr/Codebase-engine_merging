@@ -32,6 +32,8 @@ TutorialGame::TutorialGame()	{
 
 	Debug::SetRenderer(renderer);
 
+	loadingScreen = new LoadingScreen();
+
 	InitialiseAssets();
 
 	levels.push_back(new LevelTutorial()); // level 0
@@ -40,6 +42,9 @@ TutorialGame::TutorialGame()	{
 	levels.push_back(new Level1());
 	levels.push_back(new Level1());
 	levels.push_back(new Level1()); // level 5
+
+	delete loadingScreen;
+	loadingScreen = nullptr;
 }
 
 /*
@@ -98,17 +103,20 @@ void TutorialGame::UpdateGame(float dt) {
 #endif
 	ImGui::NewFrame();
 
-
 	switch (state) {
 	case GameState::MAIN_MENU:
 		RenderMainGameMenu(dt);
 		break;
 
 	case GameState::LOADING:
+		loadingScreen = new LoadingScreen();
 		level = levels[level_number];
 		InitWorld();
 		state = GameState::IN_GAME;
 		Window::GetWindow()->ShowOSPointer(false);
+		Sleep(2000);
+		delete loadingScreen;
+		loadingScreen = nullptr;
 		break;
 
 	case GameState::IN_GAME:
@@ -140,7 +148,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 	case GameState::PAUSED:
 		UpdatePauseMenu();
-		Debug::Print("Game Paused", Vector2(50, 100));
+		//Debug::Print("Game Paused", Vector2(50, 100));
 
 		RenderInGameHud(0);
 		RenderPauseMenu(dt);

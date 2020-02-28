@@ -19,6 +19,7 @@ namespace NCL {
 
 		protected:
 			void RenderFrame()	override;
+			void RenderLoadingFrame() override;
 
 			OGLShader*		defaultShader;
 
