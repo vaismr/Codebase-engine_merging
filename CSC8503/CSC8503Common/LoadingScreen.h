@@ -4,7 +4,7 @@
 #include <mutex>
 
 /*
-*	Example Usage: 
+*	Example Usage (the destructor MUST be called when finished, otherwise infinite loop): 
 *
 *	LoadingScreen ls = new LoadingScreen();
 *
@@ -18,6 +18,7 @@ namespace NCL {
 	namespace CSC8503 {
 		class LoadingScreen {
 		public:
+			// MUST call destructor after loading assets
 			LoadingScreen() : mMutex() {
 				loadingThread = std::thread([this] {this->Loading(); });
 				isLoading = true;
