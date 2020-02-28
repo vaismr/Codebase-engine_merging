@@ -1,6 +1,7 @@
 #pragma once
 #include "../GameTech/GameTechRenderer.h"
 #include <thread>
+#include <mutex>
 
 /*
 *	Example Usage: 
@@ -17,7 +18,7 @@ namespace NCL {
 	namespace CSC8503 {
 		class LoadingScreen {
 		public:
-			LoadingScreen() {
+			LoadingScreen() : mMutex() {
 				loadingThread = std::thread([this] {this->Loading(); });
 				isLoading = true;
 			}
@@ -31,6 +32,7 @@ namespace NCL {
 			}
 
 			void Loading() {
+				std::lock_guard<std::mutex> guard(mMutex);
 				// since it's a new thread, we need a new renderer
 				world = new GameWorld(); 
 				renderer = new GameTechRenderer(*world);
@@ -42,7 +44,6 @@ namespace NCL {
 					Sleep(600);
 				}
 
-				world->GetMainCamera()->SetCameraType(CameraType::Perspective);
 				delete renderer;
 				renderer = nullptr;
 			}
@@ -72,6 +73,7 @@ namespace NCL {
 			string loadingText = "Loading";
 
 			std::thread loadingThread;
+			std::mutex mMutex;
 
 			GameWorld* world;
 			GameTechRenderer* renderer;
