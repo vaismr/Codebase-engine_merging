@@ -96,7 +96,7 @@ namespace NCL {
 
 			bool isPaused;
 
-			LoadingScreen loadingScreen;
+			LoadingScreen* loadingScreen;
 		};
 	}
 }
