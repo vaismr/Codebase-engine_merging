@@ -69,7 +69,7 @@ namespace NCL {
 			bool isLoading;
 
 			Vector2 textPos = Vector2(50, 50);
-			string loadingText = "Loading.";
+			string loadingText = "Loading";
 
 			std::thread loadingThread;
 
