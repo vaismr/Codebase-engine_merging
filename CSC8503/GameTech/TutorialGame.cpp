@@ -8,18 +8,23 @@
 #include "../../Common/Assets.h"
 
 #include "../CSC8503Common/PositionConstraint.h"
+#include <thread>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_impl_win32.h>
 
 #include "imgui_progressbar.h"
-
 #include "LevelTest.h"
 #include "Level1.h"
 
+#include "../CSC8503Common/LoadingScreen.h"
+
+
 using namespace NCL;
 using namespace CSC8503;
+
+
 
 TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
@@ -31,7 +36,7 @@ TutorialGame::TutorialGame()	{
 	inSelectionMode = false;
 
 	Debug::SetRenderer(renderer);
-
+	
 	InitialiseAssets();
 
 	levels.push_back(new LevelTest()); // level 0
@@ -40,6 +45,7 @@ TutorialGame::TutorialGame()	{
 	levels.push_back(new Level1());
 	levels.push_back(new Level1());
 	levels.push_back(new Level1()); // level 5
+
 }
 
 /*
@@ -67,6 +73,7 @@ void TutorialGame::InitialiseAssets() {
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
+
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
 	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
@@ -74,6 +81,10 @@ void TutorialGame::InitialiseAssets() {
 
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+
+	InitCamera();
+	InitWorld();
+
 }
 
 TutorialGame::~TutorialGame()	{
@@ -105,11 +116,17 @@ void TutorialGame::UpdateGame(float dt) {
 		break;
 
 	case GameState::LOADING:
-
+		
+	/*	loadingScreen = new LoadingScreen();*/
+		
 		level = levels[level_number];
 		InitWorld();
 		state = GameState::IN_GAME;
 		Window::GetWindow()->ShowOSPointer(false);
+		
+		//delete loadingScreen;
+		//loadingScreen = nullptr;
+
 		break;
 
 	case GameState::IN_GAME:
@@ -202,7 +219,6 @@ void TutorialGame::RenderInGameHud(float dt) {
 	// Start the Dear ImGui frame
 	static float f = 100.0f;
 	f -= dt;
-
 	float power = 0.5f;
 
 	const ImU32 red = 0xFF0000FF;
