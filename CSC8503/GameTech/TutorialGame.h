@@ -14,6 +14,7 @@ namespace NCL {
 			LOADING,
 			IN_GAME,
 			PAUSED,
+			END_GAME,
 		};
 
 		class TutorialGame {
@@ -65,6 +66,17 @@ namespace NCL {
 			}
 			void UpdatePauseMenu();
 
+			void ToggleEndgameMenu() {
+				if (state == GameState::END_GAME) {
+					state = GameState::IN_GAME;
+				}
+				else if (state == GameState::IN_GAME) {
+					state = GameState::END_GAME;
+				}
+				Window::GetWindow()->ShowOSPointer(state == GameState::END_GAME);
+			}
+			void UpdateEndgameMenu();
+
 			/*
 			These are some of the world/object creation functions I created when testing the functionality
 			in the module. Feel free to mess around with them to see different objects being created in different
@@ -82,6 +94,7 @@ namespace NCL {
 			void RenderInGameHud(float dt);
 			void RenderMainGameMenu(float dt);
 			void RenderPauseMenu(float dt);
+			void TutorialGame::RenderEndgameMenu(float dt);
 
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;

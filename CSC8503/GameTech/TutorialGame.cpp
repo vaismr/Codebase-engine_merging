@@ -47,10 +47,10 @@ TutorialGame::TutorialGame()	{
 	InitialiseAssets();
 
 	levels.push_back(new LevelTest()); // level 0
-	levels.push_back(new LevelTest());
-	levels.push_back(new LevelTest());
-
 	levels.push_back(new Level1());
+	levels.push_back(new Level1());
+
+	;
 	levels.push_back(new Level1());
 	levels.push_back(new Level1()); // level 5
 
@@ -133,7 +133,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 		level = levels[level_number];
 		InitWorld();
-		Sleep(200);
+		//Sleep(200);
 		state = GameState::IN_GAME;
 		Window::GetWindow()->ShowOSPointer(false);
 
@@ -176,6 +176,14 @@ void TutorialGame::UpdateGame(float dt) {
 		RenderPauseMenu(dt);
 
 		break;
+	
+	case GameState::END_GAME:
+
+		UpdateEndgameMenu();
+
+		RenderEndgameMenu(dt);
+
+		break;
 	}
 
 	ImGui::Render();
@@ -191,21 +199,36 @@ void TutorialGame::UpdatePauseMenu() {
 
 }
 
+void TutorialGame::UpdateEndgameMenu() {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
+		ToggleEndgameMenu();
+
+}
+
 void TutorialGame::RenderMainGameMenu(float dt) {
+	
 	auto dl = ImGui::GetBackgroundDrawList();
-	dl->AddImage(basicTex, ImVec2(0, 0), ImVec2(1080, 720));
+	dl->AddImage(basicTex, ImVec2(0, 0), ImVec2(1920, 1080));
 
 	ImGui::Begin("Main Menu");
 
-	ImGui::SliderInt("level", &level_number, 1, levels.size());
+	if (ImGui::Button("START GAME")) {
+		state = GameState::LOADING;
+		level_number = 0;
+	}
 
-	if (ImGui::Button("ENTER GAME")) {
+	if (ImGui::Button("CHOICE LEVEL")) {
 		// LOAD_LEVEL
 		state = GameState::LOADING;
 		level_number = level_number - 1;
 	}
+	ImGui::SliderInt("level", &level_number, 1, levels.size());
 
-	if (ImGui::Button("quit game")) {
+	if (ImGui::Button("OPTIONS")) {
+		
+	}
+
+	if (ImGui::Button("QUIT GAME")) {
 		closed = true;
 	}
 
@@ -224,6 +247,33 @@ void TutorialGame::RenderPauseMenu(float dt) {
 		closed = true;
 	}
 
+	ImGui::End();
+}
+
+void TutorialGame::RenderEndgameMenu(float dt) {
+	
+	ImGuiWindowFlags flags =
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+	
+	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Always);
+
+
+	ImGui::Begin("Endgame", nullptr, flags);
+
+	ImGui::PushFont(fontMainDlg);
+	ImGui::Text(" GAME OVER ");               // Display some text (you can use a format strings too)
+	ImGui::PopFont();
+
+	if (ImGui::Button("quit game")) {
+		closed = true;
+	}
+	ImGui::SetWindowFontScale(2.5f);
 	ImGui::End();
 }
 
@@ -312,6 +362,9 @@ void TutorialGame::UpdateKeys() {
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
 		TogglePauseMenu();
+	
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
+		ToggleEndgameMenu();
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
 		useGravity = !useGravity; //Toggle gravity!
