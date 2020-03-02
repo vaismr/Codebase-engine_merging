@@ -136,6 +136,8 @@ void GameTechRenderer::RenderCamera() {
 
 	int cameraLocation = 0;
 
+	float pTime = 0.0f;
+
 	//TODO - PUT IN FUNCTION
 	glActiveTexture(GL_TEXTURE0 + 1);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
@@ -159,6 +161,8 @@ void GameTechRenderer::RenderCamera() {
 			lightColourLocation = glGetUniformLocation(shader->GetProgramID(), "lightColour");
 			lightRadiusLocation = glGetUniformLocation(shader->GetProgramID(), "lightRadius");
 
+			
+
 			cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
 			glUniform3fv(cameraLocation, 1, (float*)&gameWorld.GetMainCamera()->GetPosition());
 
@@ -174,6 +178,9 @@ void GameTechRenderer::RenderCamera() {
 
 			activeShader = shader;
 		}
+
+		pTime = glGetUniformLocation(shader->GetProgramID(), "time");
+		glUniform1f(pTime, particleTime);
 
 		Matrix4 modelMatrix = (*i).GetTransform()->GetWorldMatrix();
 		glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);			

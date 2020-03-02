@@ -37,7 +37,7 @@ TutorialGame::TutorialGame()	{
 	audioEngine.Init();
 	audioEngine.LoadSound("../../Assets/Sounds/jaguar.wav");
 	audioEngine.LoadSound("../../Assets/Sounds/wave.mp3");
-	audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });
+	//audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });
 }
 
 /*
@@ -54,6 +54,7 @@ void TutorialGame::InitialiseAssets() {
 		(*into)->UploadToGPU();
 	};
 
+	loadFunc("Particle.msh"		 , &particleMesh);
 	loadFunc("cube.msh"		 , &cubeMesh);
 	loadFunc("sphere.msh"	 , &sphereMesh);
 	loadFunc("goose.msh"	 , &gooseMesh);
@@ -62,8 +63,11 @@ void TutorialGame::InitialiseAssets() {
 	loadFunc("CharacterF.msh", &charB);
 	loadFunc("Apple.msh"	 , &appleMesh);
 
+	particleMesh->SetPrimitiveType(GeometryPrimitive::Points);
+
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
+	particleShader = new OGLShader("particleVert.glsl", "particleFrag.glsl", "particleGeom.glsl");
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
@@ -90,11 +94,14 @@ TutorialGame::~TutorialGame()	{
 	delete renderer;
 	delete world;
 
+	delete particleMesh;
+	delete particleShader;
+
 	audioEngine.Shutdown();
 }
 
 void TutorialGame::UpdateGame(float dt) {
-lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
+	lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
 
 	if (!isPaused) {
 		if (!inSelectionMode) {
@@ -121,18 +128,21 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 		physics->Update(dt);
 		renderHUD(dt);
 
-		UpdateListener(dt);
-		audioEngine.Update();
-
 		Debug::FlushRenderables();
 		renderer->Render();
+		UpdateListener(dt);
+		audioEngine.Update();
+		
 	}
 	else {
 		UpdatePauseMenu();
 		Debug::Print("Game Paused", Vector2(50, 100));
+
 		Debug::FlushRenderables();
 		renderer->Render();
 	}
+
+	
 }
 
 void TutorialGame::UpdateListener(float dt)
@@ -143,6 +153,8 @@ void TutorialGame::UpdateListener(float dt)
 
 	//calculate distance between camera in this frame and last frame, using dt to get velocity - used for doppler effect
 	Vec3 cameraVelocity = Vec3{ (world->GetMainCamera()->GetPosition().x - lastCamPos.x) / dt, (world->GetMainCamera()->GetPosition().y - lastCamPos.y) / dt, (world->GetMainCamera()->GetPosition().z - lastCamPos.z) / dt };
+
+	
 
 	float cosPitch = cos(world->GetMainCamera()->GetPitch());
 	float cosYaw = cos(world->GetMainCamera()->GetYaw());
@@ -158,10 +170,22 @@ void TutorialGame::UpdateListener(float dt)
 	Vec3 cameraForward = Vec3{ comp0 / forwardMagnitude, comp1 / forwardMagnitude, comp2 / forwardMagnitude }; //forwards orientation, unit vector and perpendicular to up
 
 	//up = (forward x 0,1,0) x forward
-	Vec3 cameraUp = Vec3{ (cameraForward.y * 0) - (cameraForward.z * 1), (cameraForward.z * 0) - (cameraForward.x * 0), (cameraForward.x * 1) - (cameraForward.y * 0) };
-	cameraUp = Vec3{ (cameraUp.y * cameraForward.z) - (cameraUp.z * cameraForward.y), (cameraUp.z * cameraForward.x) - (cameraUp.x * cameraForward.z), (cameraUp.x * cameraForward.y) - (cameraUp.y * cameraForward.x) };
+	Vec3 cameraUpTemp = Vec3{ (cameraForward.y * 0) - (cameraForward.z * 1), (cameraForward.z * 0) - (cameraForward.x * 0), (cameraForward.x * 1) - (cameraForward.y * 0) };
+	Vec3 cameraUp = Vec3{ (cameraUpTemp.y * cameraForward.z) - (cameraUpTemp.z * cameraForward.y), (cameraUpTemp.z * cameraForward.x) - (cameraUpTemp.x * cameraForward.z), (cameraUpTemp.x * cameraForward.y) - (cameraUpTemp.y * cameraForward.x) };
 
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
+	{
+		cout << cameraUp.x << " " << cameraUp.y << " " << cameraUp.z << endl;
+	}
+
+	//camerup giving negative values, not allowed so not setting listener, maybe normalise? maybe magnitude value?
 	audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, cameraUp);
+	//audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, Vec3{0,1,0});
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
+	{
+		cout << lastCamPos.x << endl;
+	}
 }
 
 
@@ -303,7 +327,7 @@ void TutorialGame::UpdateKeys() {
 	//sounds testing
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) 
 	{
-		audioEngine.PlaySounds("../../Assets/Sounds/jaguar.wav", Vec3{0,10,0}, 10.0f);
+		//audioEngine.PlaySounds("../../Assets/Sounds/jaguar.wav", Vec3{0,10,0}, 10.0f);
 		audioEngine.PrintListenerPos();
 	}
 	
@@ -494,7 +518,9 @@ void TutorialGame::InitWorld() {
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
 	AddCharacterToWorld(Vector3(45, 2, 0));
 
-	AddFloorToWorld(Vector3(0, -2, 0));
+	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
+
+	//AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 //From here on it's functions to add in objects to the world!
@@ -674,6 +700,30 @@ GameObject* TutorialGame::AddAppleToWorld(const Vector3& position) {
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+GameObject* TutorialGame::AddParticleToWorld(const Vector3& position, OGLTexture* texture, const float alpha)
+{
+	GameObject* particle = new GameObject();
+
+	SphereVolume* volume = new SphereVolume(0.7f);
+	particle->SetBoundingVolume((CollisionVolume*)volume);
+
+	particle->GetTransform().SetWorldScale(Vector3(10, 10, 10));
+	particle->GetTransform().SetWorldPosition(position);
+
+	RenderObject* rObj = new RenderObject(&particle->GetTransform(), particleMesh, texture, particleShader);
+	rObj->SetColour(Vector4(0.5, 1, 1, 0.5));
+
+	particle->SetRenderObject(rObj);
+	particle->SetPhysicsObject(new PhysicsObject(&particle->GetTransform(), particle->GetBoundingVolume()));
+
+	particle->GetPhysicsObject()->SetInverseMass(1.0f);
+	particle->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(particle);
+
+	return particle;
 }
 
 void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius) {
