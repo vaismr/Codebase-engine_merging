@@ -121,6 +121,7 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 		SelectObject();
 		MoveSelectedObject();
 
+		// @TODO make func e.g. UpdateVariables()
 		enemyPlayerDist = (player->GetTransform().GetWorldPosition() - enemy->GetTransform().GetWorldPosition()).Length();
 
 		world->UpdateWorld(dt);
@@ -512,6 +513,7 @@ void TutorialGame::InitWorld() {
 	TestEnemyAI();
 }
 
+// @TODO change from test func
 void TutorialGame::TestEnemyAI() {
 
 	EnemyFunc idleFunc = [](void* enemy, void* player) {
@@ -519,6 +521,7 @@ void TutorialGame::TestEnemyAI() {
 		enemyObject->SetStateDescription("idle");
 	};
 
+	// @TODO raycast for this?
 	EnemyFunc spottedPlayer = [](void* enemy, void* player) {
 		GameObject* enemyObject = (GameObject*)enemy;
 		GameObject* playerObject = (GameObject*)player;

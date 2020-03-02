@@ -30,20 +30,20 @@ namespace NCL {
 
 		class EnemyState : public State {
 		public:
-			EnemyState(EnemyFunc enemyFunc, void* enemy, void* player = nullptr) {
+			EnemyState(EnemyFunc enemyFunc, void* enemy, void* data = nullptr) {
 				func = enemyFunc;
 				this->enemy = enemy;
-				this->player = player;
+				this->data = data;
 			}
 
 			virtual void Update() {
 				if (enemy != nullptr)
-					func(enemy, player);
+					func(enemy, data);
 			}
 		protected:
 			EnemyFunc func;
 			void* enemy;
-			void* player;
+			void* data;
 		};
 	}
 }
