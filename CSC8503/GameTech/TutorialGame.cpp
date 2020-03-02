@@ -517,15 +517,9 @@ void TutorialGame::TestEnemyAI() {
 	EnemyFunc idleFunc = [](void* enemy, void* player) {
 		GameObject* enemyObject = (GameObject*)enemy;
 		enemyObject->SetStateDescription("idle");
-		GameObject* playerObject = (GameObject*)player;
-		Vector3 dir = playerObject->GetTransform().GetWorldPosition() - enemyObject->GetTransform().GetWorldPosition();
-		dir.Normalise();
-		float dirAngle = atan2(dir.x, dir.z);
-		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
-		enemyObject->GetTransform().SetLocalOrientation(orientation);
 	};
 
-	/*EnemyFunc spottedPlayer = [](void* enemy, void* player) {
+	EnemyFunc spottedPlayer = [](void* enemy, void* player) {
 		GameObject* enemyObject = (GameObject*)enemy;
 		GameObject* playerObject = (GameObject*)player;
 		enemyObject->SetStateDescription("spotted player");
@@ -534,7 +528,7 @@ void TutorialGame::TestEnemyAI() {
 		float dirAngle = atan2(dir.x, dir.z);
 		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
-	};*/
+	};
 
 	EnemyFunc chaseFunc = [](void* enemy, void* player) {
 		GameObject* enemyObject = (GameObject*)enemy;
@@ -544,25 +538,34 @@ void TutorialGame::TestEnemyAI() {
 		float dirAngle = atan2(dir.x, dir.z);
 		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
-		enemyObject->GetPhysicsObject()->AddForce(dir * 6.0f);
+		enemyObject->GetPhysicsObject()->AddForce(dir * 8.0f);
 	};
 
 	EnemyState* idleState = new EnemyState(idleFunc, enemy, player);
-	//EnemyState* spottedState = new EnemyState(spottedPlayer, enemy, player);
+	EnemyState* spottedState = new EnemyState(spottedPlayer, enemy, player);
 	EnemyState* chaseState = new EnemyState(chaseFunc, enemy, player);
 
 	stateMachine->AddState(idleState);
-	//stateMachine->AddState(spottedState);
+	stateMachine->AddState(spottedState);
 	stateMachine->AddState(chaseState);
 
-	GenericTransition<float&, float>* toChase = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::LessThanTransition, enemyPlayerDist, 30.0f, idleState, chaseState);
+	GenericTransition<float&, float>* idleToSpotted = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::LessThanTransition, enemyPlayerDist, 30.0f, idleState, spottedState);
 
-	GenericTransition<float&, float>* toIdle = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::GreaterThanTransition, enemyPlayerDist, 50.0f, chaseState, idleState);
+	GenericTransition<float&, float>* spottedToIdle = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::GreaterThanTransition, enemyPlayerDist, 40.0f, spottedState, idleState);
 
-	stateMachine->AddTransition(toIdle);
-	stateMachine->AddTransition(toChase);
+
+	GenericTransition<float&, float>* spottedToChase = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::LessThanTransition, enemyPlayerDist, 15.0f, spottedState, chaseState);
+
+	GenericTransition<float&, float>* chaseToSpotted = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::GreaterThanTransition, enemyPlayerDist, 25.0f, chaseState, spottedState);
+
+	stateMachine->AddTransition(idleToSpotted);
+	stateMachine->AddTransition(spottedToIdle);
+	stateMachine->AddTransition(spottedToChase);
+	stateMachine->AddTransition(chaseToSpotted);
 }
 
 //From here on it's functions to add in objects to the world!
