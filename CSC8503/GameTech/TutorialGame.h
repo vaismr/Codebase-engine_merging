@@ -98,9 +98,10 @@ namespace NCL {
 
 			bool isPaused;
 
-			LoadingScreen loadingScreen;
-
 			OGLMesh* particleMesh = nullptr;
+      
+			LoadingScreen* loadingScreen;
+
 		};
 	}
 }

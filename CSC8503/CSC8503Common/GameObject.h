@@ -31,6 +31,14 @@ namespace NCL {
 				return isActive;
 			}
 
+			void SetStatic(bool isStat) {
+				isStatic = isStat;
+			}
+
+			bool IsStatic() const {
+				return isStatic;
+			}
+
 			const Transform& GetConstTransform() const {
 				return transform;
 			}
@@ -84,6 +92,7 @@ namespace NCL {
 			NetworkObject*		networkObject;
 
 			bool	isActive;
+			bool	isStatic;
 			string	name;
 
 			Vector3 broadphaseAABB;

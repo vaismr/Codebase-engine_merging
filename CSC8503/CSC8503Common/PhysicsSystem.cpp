@@ -159,7 +159,33 @@ a particular pair will only be added once, so objects colliding for
 multiple frames won't flood the set with duplicates.
 */
 void PhysicsSystem::BasicCollisionDetection() {
+	std::vector<GameObject*>::const_iterator first;
+	std::vector<GameObject*>::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
 
+	for (auto i = first; i != last; ++i) {
+		if ((*i)->GetPhysicsObject() == nullptr) {
+			continue;
+		}
+		for (auto j = i + 1; j != last; ++j) {
+			if ((*j)->GetPhysicsObject() == nullptr) {
+				continue;
+			}
+			if ((*i)->IsStatic() && (*j)->IsStatic()) {
+				continue;
+			}
+			CollisionDetection::CollisionInfo info;
+			if (CollisionDetection::ObjectIntersection(*i, *j, info)) {
+				//std::cout << "Collision between" << (*i)->GetName()
+					//<< "and" << (*j)->GetName() << std::endl;
+
+				ImpulseResolveCollision(*info.a, *info.b, info.point);
+
+				info.framesLeft = numCollisionFrames;
+				allCollisions.insert(info);
+			}
+		}
+	}
 }
 
 /*
@@ -169,7 +195,70 @@ so that objects separate back out.
 
 */
 void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const {
+	PhysicsObject* physA = a.GetPhysicsObject();
+	PhysicsObject* physB = b.GetPhysicsObject();
 
+	Transform& transformA = a.GetTransform();
+	Transform& transformB = b.GetTransform();
+
+	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
+
+	if (totalMass == 0.0f) {
+		return;
+	}
+
+	// Separate them out using projection
+	transformA.SetWorldPosition(transformA.GetWorldPosition() -
+		(p.normal * p.penetration * (physA->GetInverseMass() / totalMass)));
+
+	transformB.SetWorldPosition(transformB.GetWorldPosition() +
+		(p.normal * p.penetration * (physB->GetInverseMass() / totalMass)));
+
+
+
+	Vector3 relativeA = p.localA;
+	Vector3 relativeB = p.localB;
+
+	Vector3 angVelocityA =
+		Vector3::Cross(physA->GetAngularVelocity(), relativeA);
+	Vector3 angVelocityB =
+		Vector3::Cross(physB->GetAngularVelocity(), relativeB);
+
+	Vector3 fullVelocityA = physA->GetLinearVelocity() + angVelocityA;
+	Vector3 fullVelocityB = physB->GetLinearVelocity() + angVelocityB;
+
+	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
+
+	if (Vector3::Dot(contactVelocity, p.normal) > 0)
+	{
+		return;
+	}
+
+	float impulseForce = Vector3::Dot(contactVelocity, p.normal);
+
+	if (impulseForce > 0) {
+		return;
+	}
+
+	// now to work out the effect of inertia ....
+	Vector3 inertiaA = Vector3::Cross(physA->GetInertiaTensor() *
+		Vector3::Cross(relativeA, p.normal), relativeA);
+	Vector3 inertiaB = Vector3::Cross(physB->GetInertiaTensor() *
+		Vector3::Cross(relativeB, p.normal), relativeB);
+	float angularEffect = Vector3::Dot(inertiaA + inertiaB, p.normal);
+
+	float cRestitution = physA->GetElasticity() * physB->GetElasticity(); // disperse some kinectic energy
+
+	float j = (-(1.0f + cRestitution) * impulseForce) /
+		(totalMass + angularEffect);
+
+	Vector3 fullImpulse = p.normal * j;
+
+	physA->ApplyLinearImpulse(-fullImpulse);
+	physB->ApplyLinearImpulse(fullImpulse);
+
+	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
+	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
 }
 
 /*
@@ -182,7 +271,34 @@ compare the collisions that we absolutely need to.
 */
 
 void PhysicsSystem::BroadPhase() {
+	broadphaseCollisions.clear();
+	QuadTree <GameObject*> tree(Vector2(1024, 1024), 7, 6);
 
+	std::vector <GameObject*>::const_iterator first;
+	std::vector <GameObject*>::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
+	for (auto i = first; i != last; ++i) {
+		Vector3 halfSizes;
+		if (!(*i)->GetBroadphaseAABB(halfSizes)) {
+			continue;
+		}
+		Vector3 pos = (*i)->GetConstTransform().GetWorldPosition();
+		tree.Insert(*i, pos, halfSizes);
+	}
+	tree.OperateOnContents(
+		[&](std::list <QuadTreeEntry<GameObject*>>& data) {
+			CollisionDetection::CollisionInfo info;
+			for (auto i = data.begin(); i != data.end(); ++i) {
+				for (auto j = std::next(i); j != data.end(); ++j) {
+					// is this pair of items already in the collision set -
+					// if the same pair is in another quadtree node together etc
+					info.a = min((*i).object, (*j).object);
+					info.b = max((*i).object, (*j).object);
+					broadphaseCollisions.insert(info);
+				}
+
+			}
+		});
 }
 
 /*
@@ -191,7 +307,19 @@ The broadphase will now only give us likely collisions, so we can now go through
 and work out if they are truly colliding, and if so, add them into the main collision list
 */
 void PhysicsSystem::NarrowPhase() {
-
+	for (std::set < CollisionDetection::CollisionInfo >::iterator
+		i = broadphaseCollisions.begin();
+		i != broadphaseCollisions.end(); ++i) {
+		CollisionDetection::CollisionInfo info = *i;
+		if (info.a->IsStatic() && info.b->IsStatic()) {
+			continue;
+		}
+		if (CollisionDetection::ObjectIntersection(info.a, info.b, info)) {
+			info.framesLeft = numCollisionFrames;
+			ImpulseResolveCollision(*info.a, *info.b, info.point);
+			allCollisions.insert(info); // insert into our main set
+		}
+	}
 }
 
 
@@ -212,26 +340,23 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject* object = (*i)->GetPhysicsObject();
-
-		// GameObject doesn't have physics object
-		if (object == nullptr)
+		if (object == nullptr) {
 			continue;
-
+		}
 		float inverseMass = object->GetInverseMass();
 
 		Vector3 linearVel = object->GetLinearVelocity();
 		Vector3 force = object->GetForce();
 		Vector3 accel = force * inverseMass;
 
-		// don't apply gravity for objects that can't be moved
-		if (applyGravity && inverseMass > 0)
+		if (applyGravity && inverseMass > 0) {
 			accel += gravity;
+		}
 
-		// integrate acceleration
 		linearVel += accel * dt;
+
 		object->SetLinearVelocity(linearVel);
 
-		// angular calculations
 		Vector3 torque = object->GetTorque();
 		Vector3 angVel = object->GetAngularVelocity();
 
@@ -239,8 +364,8 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 
 		Vector3 angAccel = object->GetInertiaTensor() * torque;
 
-		// integrate angular acceleration
 		angVel += angAccel * dt;
+
 		object->SetAngularVelocity(angVel);
 	}
 }
@@ -261,35 +386,30 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject* object = (*i)->GetPhysicsObject();
-		if (object == nullptr)
+		if (object == nullptr) {
 			continue;
-
+		}
 		Transform& transform = (*i)->GetTransform();
 
-		// position stuff
 		Vector3 position = transform.GetLocalPosition();
 		Vector3 linearVel = object->GetLinearVelocity();
-		position += linearVel * dt;		// integrate velocity
+
+		position += linearVel * dt;
 		transform.SetLocalPosition(position);
-		// added later
 		transform.SetWorldPosition(position);
 
-		// linear damping - simulate drag/air resistance by reducing linearVelocity each frame
+
 		linearVel = linearVel * frameDamping;
 		object->SetLinearVelocity(linearVel);
 
-
-		// orientation calculations
 		Quaternion orientation = transform.GetLocalOrientation();
 		Vector3 angVel = object->GetAngularVelocity();
 
-		// integrate angular velocity. * 0.5 is just a quaternion quirk
 		orientation = orientation + (Quaternion(angVel * dt * 0.5f, 0.0f) * orientation);
 		orientation.Normalise();
 
 		transform.SetLocalOrientation(orientation);
 
-		// damping for angular velocity to prevent forever spinning
 		angVel = angVel * frameDamping;
 		object->SetAngularVelocity(angVel);
 	}
