@@ -5,7 +5,7 @@ uniform float particleSize = 0.5f;
 uniform float	time;
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 20) out;
+layout(triangle_strip, max_vertices = 32) out;
 
 in Vertex
 {
@@ -27,12 +27,17 @@ out Vertex
 
 void main()
 {
-	float speed = time * 2.0f;
+	float riseSpeed = time * 5.0f;
+	float shrinkSpeed = time * 2.0f;
 
-	for (int j = 0; j < 5; j++)
+	int numLevels = 8;
+
+	for (int j = 0; j < numLevels; j++)
 	{
 		for (int i = 0; i < gl_in.length(); i++)
 		{
+			float shrinkFactor = 2.0f / j;
+
 			OUT.colour = IN[i].colour;
 			OUT.normal = IN[i].normal;
 			OUT.shadowProj = IN[i].shadowProj;
@@ -40,57 +45,57 @@ void main()
 
 			//top right
 			gl_Position = gl_in[i].gl_Position;
-			gl_Position.x += particleSize / time;
-			gl_Position.y += particleSize / time;
+			gl_Position.x += (particleSize + shrinkFactor) / shrinkSpeed;
+			gl_Position.y += (particleSize + shrinkFactor) / shrinkSpeed;
 			
 			if (j % 2 == 0)
 			{
 				gl_Position.x += j;
 			}
 			 
-			gl_Position.y += speed + (j * 5);
+			gl_Position.y += riseSpeed + (j * numLevels);
 			OUT.texCoord = vec2(1, 0);
 			EmitVertex();
 
 			//top left
 			gl_Position = gl_in[i].gl_Position;
-			gl_Position.x -= particleSize / time;
-			gl_Position.y += particleSize / time;
+			gl_Position.x -= (particleSize + shrinkFactor) / shrinkSpeed;
+			gl_Position.y += (particleSize + shrinkFactor) / shrinkSpeed;
 
 			if (j % 2 == 0)
 			{
 				gl_Position.x += j;
 			}
 
-			gl_Position.y += speed + (j * 5);
+			gl_Position.y += riseSpeed + (j * numLevels);
 			OUT.texCoord = vec2(0, 0);
 			EmitVertex();
 
 			//bottom right
 			gl_Position = gl_in[i].gl_Position;
-			gl_Position.x += particleSize / time;
-			gl_Position.y -= particleSize / time;
+			gl_Position.x += (particleSize + shrinkFactor) / shrinkSpeed;
+			gl_Position.y -= (particleSize + shrinkFactor) / shrinkSpeed;
 			
 			if (j % 2 == 0)
 			{
 				gl_Position.x += j;
 			}
 
-			gl_Position.y += speed + (j * 5);
+			gl_Position.y += riseSpeed + (j * numLevels);
 			OUT.texCoord = vec2(1, 1);
 			EmitVertex();
 
 			//bottom left
 			gl_Position = gl_in[i].gl_Position;
-			gl_Position.x -= particleSize / time;
-			gl_Position.y -= particleSize / time;
+			gl_Position.x -= (particleSize + shrinkFactor) / shrinkSpeed;
+			gl_Position.y -= (particleSize + shrinkFactor) / shrinkSpeed;
 
 			if (j % 2 == 0)
 			{
 				gl_Position.x += j;
 			}
 
-			gl_Position.y += speed + (j * 5);
+			gl_Position.y += riseSpeed + (j * numLevels);
 			OUT.texCoord = vec2(0, 1);
 			EmitVertex();
 

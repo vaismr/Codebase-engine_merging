@@ -34,9 +34,9 @@ namespace NCL {
 			{
 				particleTime += dt;
 
-				if (particleTime > 10.0f)
+				if (particleTime > 3.0f)
 				{
-					particleTime = 0.0f;
+					particleTime = 1.0f;
 				}
 			};
 
