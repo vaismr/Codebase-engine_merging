@@ -7,6 +7,14 @@ using namespace NCL::Maths;
 namespace NCL {
 	class CollisionVolume;
 	
+	enum class ObjectType {
+		Regular = 1,
+		Floor = 2,
+		Enemy = 4,
+		Collectable = 16,
+		Invalid = 256
+	};
+
 	namespace CSC8503 {
 		class Transform;
 
@@ -37,6 +45,30 @@ namespace NCL {
 
 			float GetInverseMass() const {
 				return inverseMass;
+			}
+
+			void SetElasticity(float e) {
+				elasticity = e;
+			}
+
+			float GetElasticity() const {
+				return elasticity;
+			}
+
+			void SetFriction(Vector3 f) {
+				friction = f;
+			}
+
+			Vector3 GetFriction() const {
+				return friction;
+			}
+
+			void SetType(ObjectType newType) {
+				type = newType;
+			}
+
+			ObjectType GetType() {
+				return type;
 			}
 
 			void ApplyAngularImpulse(const Vector3& force);
@@ -74,12 +106,12 @@ namespace NCL {
 
 			float inverseMass;
 			float elasticity;
-			float friction;
+			ObjectType type;
 
 			//linear stuff
 			Vector3 linearVelocity;
 			Vector3 force;
-			
+			Vector3 friction;
 
 			//angular stuff
 			Vector3 angularVelocity;
