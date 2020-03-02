@@ -37,7 +37,7 @@ namespace NCL {
 			}
 
 			virtual void Update() {
-				if (enemy != nullptr && player != nullptr)
+				if (enemy != nullptr)
 					func(enemy, player);
 			}
 		protected:
