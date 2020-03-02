@@ -8,14 +8,15 @@
 #include "../../Common/Assets.h"
 
 #include "../CSC8503Common/PositionConstraint.h"
-#include <thread>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_impl_win32.h>
 
 #include "imgui_progressbar.h"
+
 #include "LevelTest.h"
+
 #include "Level1.h"
 
 #include "../CSC8503Common/LoadingScreen.h"
@@ -36,15 +37,26 @@ TutorialGame::TutorialGame()	{
 	inSelectionMode = false;
 
 	Debug::SetRenderer(renderer);
+
 	
+	InitialiseAssets();
+
+
+	/*loadingScreen = new LoadingScreen();*/
+
 	InitialiseAssets();
 
 	levels.push_back(new LevelTest()); // level 0
 	levels.push_back(new LevelTest());
 	levels.push_back(new LevelTest());
+
 	levels.push_back(new Level1());
 	levels.push_back(new Level1());
 	levels.push_back(new Level1()); // level 5
+
+
+	//delete loadingScreen;
+	//loadingScreen = nullptr;
 
 }
 
@@ -82,6 +94,7 @@ void TutorialGame::InitialiseAssets() {
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
 
+
 	InitCamera();
 	InitWorld();
 
@@ -109,24 +122,23 @@ void TutorialGame::UpdateGame(float dt) {
 #endif
 	ImGui::NewFrame();
 
-
 	switch (state) {
 	case GameState::MAIN_MENU:
 		RenderMainGameMenu(dt);
 		break;
 
 	case GameState::LOADING:
-		
-	/*	loadingScreen = new LoadingScreen();*/
-		
+
+		loadingScreen = new LoadingScreen();
+
 		level = levels[level_number];
 		InitWorld();
+		Sleep(200);
 		state = GameState::IN_GAME;
 		Window::GetWindow()->ShowOSPointer(false);
-		
-		//delete loadingScreen;
-		//loadingScreen = nullptr;
 
+		delete loadingScreen;
+		loadingScreen = nullptr;
 		break;
 
 	case GameState::IN_GAME:
@@ -158,7 +170,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 	case GameState::PAUSED:
 		UpdatePauseMenu();
-		Debug::Print("Game Paused", Vector2(50, 100));
+		//Debug::Print("Game Paused", Vector2(50, 100));
 
 		RenderInGameHud(0);
 		RenderPauseMenu(dt);
