@@ -57,6 +57,7 @@ namespace NCL {
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
+			GameObject* AddParticleToWorld(const Vector3& position, OGLTexture* texture, const float alpha);
 
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
@@ -75,6 +76,7 @@ namespace NCL {
 			OGLMesh* sphereMesh = nullptr;
 			OGLTexture* basicTex = nullptr;
 			OGLShader* basicShader = nullptr;
+			OGLShader* particleShader = nullptr;
 
 			//Coursework Meshes
 			OGLMesh* gooseMesh = nullptr;

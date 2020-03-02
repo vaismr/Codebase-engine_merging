@@ -31,6 +31,11 @@ namespace NCL {
 
 			void SetupDebugMatrix(OGLShader*s) override;
 
+			void UpdateParticleTime(float dt)
+			{
+
+			}
+
 			vector<const RenderObject*> activeObjects;
 
 			//shadow mapping things

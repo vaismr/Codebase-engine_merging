@@ -12,6 +12,7 @@ _-_-_-_-_-_-_-""  ""
 *//////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "Window.h"
+#include <iostream>
 
 namespace NCL {
 	namespace Rendering {
@@ -29,7 +30,15 @@ namespace NCL {
 
 			virtual bool HasInitialised() const {return true;}
 
-			virtual void Update(float dt) {}
+			virtual void Update(float dt) 
+			{
+				particleTime += dt;
+
+				if (particleTime > 10.0f)
+				{
+					particleTime = 0.0f;
+				}
+			};
 
 			void Render() {
 				BeginFrame();
@@ -40,6 +49,8 @@ namespace NCL {
 			virtual bool SetVerticalSync(VerticalSyncState s) {
 				return false;
 			}
+
+			float particleTime;
 
 		protected:
 			virtual void OnWindowResize(int w, int h) = 0;

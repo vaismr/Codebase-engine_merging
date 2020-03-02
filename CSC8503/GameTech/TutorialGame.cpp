@@ -63,10 +63,11 @@ void TutorialGame::InitialiseAssets() {
 	loadFunc("CharacterF.msh", &charB);
 	loadFunc("Apple.msh"	 , &appleMesh);
 
-	cubeMesh->SetPrimitiveType(GeometryPrimitive::Points);
+	particleMesh->SetPrimitiveType(GeometryPrimitive::Points);
 
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
+	particleShader = new OGLShader("particleVert.glsl", "particleFrag.glsl", "particleGeom.glsl");
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
@@ -94,6 +95,7 @@ TutorialGame::~TutorialGame()	{
 	delete world;
 
 	delete particleMesh;
+	delete particleShader;
 
 	audioEngine.Shutdown();
 }
@@ -516,7 +518,9 @@ void TutorialGame::InitWorld() {
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
 	AddCharacterToWorld(Vector3(45, 2, 0));
 
-	AddFloorToWorld(Vector3(0, -2, 0));
+	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
+
+	//AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 //From here on it's functions to add in objects to the world!
@@ -696,6 +700,30 @@ GameObject* TutorialGame::AddAppleToWorld(const Vector3& position) {
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+GameObject* TutorialGame::AddParticleToWorld(const Vector3& position, OGLTexture* texture, const float alpha)
+{
+	GameObject* particle = new GameObject();
+
+	SphereVolume* volume = new SphereVolume(0.7f);
+	particle->SetBoundingVolume((CollisionVolume*)volume);
+
+	particle->GetTransform().SetWorldScale(Vector3(10, 10, 10));
+	particle->GetTransform().SetWorldPosition(position);
+
+	RenderObject* rObj = new RenderObject(&particle->GetTransform(), particleMesh, texture, particleShader);
+	rObj->SetColour(Vector4(0.5, 1, 1, 0.5));
+
+	particle->SetRenderObject(rObj);
+	particle->SetPhysicsObject(new PhysicsObject(&particle->GetTransform(), particle->GetBoundingVolume()));
+
+	particle->GetPhysicsObject()->SetInverseMass(1.0f);
+	particle->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(particle);
+
+	return particle;
 }
 
 void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius) {
