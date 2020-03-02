@@ -70,8 +70,14 @@ int main() {
 
 	TutorialGame* g = new TutorialGame();
 
+	bool isMouseLocked = false;
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
+
+		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::U)) {
+			isMouseLocked = !isMouseLocked;
+			w->LockMouseToWindow(isMouseLocked);
+		}
 
 		if (dt > 1.0f) {
 			std::cout << "Skipping large time delta" << std::endl;

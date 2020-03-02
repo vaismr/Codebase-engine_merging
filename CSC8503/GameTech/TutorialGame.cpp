@@ -114,7 +114,6 @@ void TutorialGame::UpdateGame(float dt) {
 		InitWorld();
 		state = GameState::IN_GAME;
 		Window::GetWindow()->ShowOSPointer(false);
-		Sleep(2000);
 		delete loadingScreen;
 		loadingScreen = nullptr;
 		break;
