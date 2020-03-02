@@ -43,6 +43,7 @@ namespace NCL {
 			}
 
 			void Insert(T& object, const Vector3& objectPos, const Vector3& objectSize, int depthLeft, int maxSize) {
+				//Error...
 				/*if (!CollisionDetection::AABBTest(objectPos,
 					Vector3(position.x, 0, position.y), objectSize,
 					Vector3(size.x, 1000.0f, size.y))) {

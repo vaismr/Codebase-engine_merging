@@ -19,6 +19,9 @@
     <Filter Include="Other">
       <UniqueIdentifier>{7d85adc6-7681-4657-8953-c5696f06c66d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UnitTests">
+      <UniqueIdentifier>{ea0c273a-4c1c-4750-b43e-7d6e4a24301e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionDetection.h">
@@ -202,6 +205,9 @@
     </ClCompile>
     <ClCompile Include="Transform.cpp">
       <Filter>Other</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>UnitTests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
