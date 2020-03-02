@@ -25,6 +25,7 @@ TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
 	renderer	= new GameTechRenderer(*world);
 	physics		= new PhysicsSystem(*world);
+	stateMachine = new StateMachine();
 
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
@@ -85,6 +86,10 @@ TutorialGame::~TutorialGame()	{
 	delete gooseMesh;
 	delete basicTex;
 	delete basicShader;
+	delete stateMachine;
+
+	delete player;
+	delete enemy;
 
 	delete physics;
 	delete renderer;
@@ -116,10 +121,15 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 		SelectObject();
 		MoveSelectedObject();
 
+		enemyPlayerDist = (player->GetTransform().GetWorldPosition() - enemy->GetTransform().GetWorldPosition()).Length();
+
 		world->UpdateWorld(dt);
 		renderer->Update(dt);
 		physics->Update(dt);
+		stateMachine->Update();
 		renderHUD(dt);
+
+		renderer->DrawString("State: " + selectionObject->GetStateDescription(), Vector2(200, 200));
 
 		UpdateListener(dt);
 		audioEngine.Update();
@@ -331,21 +341,21 @@ void TutorialGame::LockedObjectMovement() {
 	//the right axis, to hopefully get a vector that's good enough!
 
 	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
-		selectionObject->GetPhysicsObject()->AddForce(-rightAxis);
+	float speed = 150.0f;
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+		lockedObject->GetPhysicsObject()->AddForce(-rightAxis * speed);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-		selectionObject->GetPhysicsObject()->AddForce(rightAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+		lockedObject->GetPhysicsObject()->AddForce(rightAxis * speed);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-		selectionObject->GetPhysicsObject()->AddForce(fwdAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
+		lockedObject->GetPhysicsObject()->AddForce(fwdAxis * speed);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+		lockedObject->GetPhysicsObject()->AddForce(-fwdAxis * speed);
 	}
 }
 
@@ -488,13 +498,71 @@ void TutorialGame::InitWorld() {
 	physics->Clear();
 
 	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	AddGooseToWorld(Vector3(30, 2, 0));
+	player = AddGooseToWorld(Vector3(30, 2, 0));
 	AddAppleToWorld(Vector3(35, 2, 0));
 
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
-	AddCharacterToWorld(Vector3(45, 2, 0));
+	enemy = AddCharacterToWorld(Vector3(45, 2, 0));
 
 	AddFloorToWorld(Vector3(0, -2, 0));
+
+	selectionObject = player;
+	lockedObject = player;
+
+	TestEnemyAI();
+}
+
+void TutorialGame::TestEnemyAI() {
+
+	EnemyFunc idleFunc = [](void* enemy, void* player) {
+		GameObject* enemyObject = (GameObject*)enemy;
+		enemyObject->SetStateDescription("idle");
+		GameObject* playerObject = (GameObject*)player;
+		Vector3 dir = playerObject->GetTransform().GetWorldPosition() - enemyObject->GetTransform().GetWorldPosition();
+		dir.Normalise();
+		float dirAngle = atan2(dir.x, dir.z);
+		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
+		enemyObject->GetTransform().SetLocalOrientation(orientation);
+	};
+
+	/*EnemyFunc spottedPlayer = [](void* enemy, void* player) {
+		GameObject* enemyObject = (GameObject*)enemy;
+		GameObject* playerObject = (GameObject*)player;
+		enemyObject->SetStateDescription("spotted player");
+		Vector3 dir = playerObject->GetTransform().GetWorldPosition() - enemyObject->GetTransform().GetWorldPosition();
+		dir.Normalise();
+		float dirAngle = atan2(dir.x, dir.z);
+		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
+		enemyObject->GetTransform().SetLocalOrientation(orientation);
+	};*/
+
+	EnemyFunc chaseFunc = [](void* enemy, void* player) {
+		GameObject* enemyObject = (GameObject*)enemy;
+		GameObject* playerObject = (GameObject*)player;
+		enemyObject->SetStateDescription("chasing");
+		Vector3 dir = playerObject->GetTransform().GetWorldPosition() - enemyObject->GetTransform().GetWorldPosition();
+		float dirAngle = atan2(dir.x, dir.z);
+		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
+		enemyObject->GetTransform().SetLocalOrientation(orientation);
+		enemyObject->GetPhysicsObject()->AddForce(dir * 6.0f);
+	};
+
+	EnemyState* idleState = new EnemyState(idleFunc, enemy, player);
+	//EnemyState* spottedState = new EnemyState(spottedPlayer, enemy, player);
+	EnemyState* chaseState = new EnemyState(chaseFunc, enemy, player);
+
+	stateMachine->AddState(idleState);
+	//stateMachine->AddState(spottedState);
+	stateMachine->AddState(chaseState);
+
+	GenericTransition<float&, float>* toChase = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::LessThanTransition, enemyPlayerDist, 30.0f, idleState, chaseState);
+
+	GenericTransition<float&, float>* toIdle = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::GreaterThanTransition, enemyPlayerDist, 50.0f, chaseState, idleState);
+
+	stateMachine->AddTransition(toIdle);
+	stateMachine->AddTransition(toChase);
 }
 
 //From here on it's functions to add in objects to the world!

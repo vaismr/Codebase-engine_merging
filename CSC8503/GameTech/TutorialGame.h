@@ -1,6 +1,9 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
+#include "../CSC8503Common/StateMachine.h"
+#include "../CSC8503Common/StateTransition.h"
+#include "../CSC8503Common/State.h"
 
 #include <iostream>
 #include "../GameTech/Sound/AudioEngine.h"
@@ -70,6 +73,9 @@ namespace NCL {
 			ImFont* fontMainDlg = nullptr;
 
 			GameObject* selectionObject = nullptr;
+			GameObject* player = nullptr;
+			GameObject* enemy = nullptr;
+
 
 			OGLMesh* cubeMesh = nullptr;
 			OGLMesh* sphereMesh = nullptr;
@@ -97,6 +103,11 @@ namespace NCL {
 			bool isPaused;
 
 			LoadingScreen* loadingScreen;
+			StateMachine* stateMachine;
+
+			float enemyPlayerDist = 0;
+
+			void TestEnemyAI();
 		};
 	}
 }

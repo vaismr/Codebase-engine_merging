@@ -10,6 +10,7 @@ namespace NCL {
 		};
 
 		typedef void(*StateFunc)(void*);
+		typedef void(*EnemyFunc)(void*, void*);
 
 		class GenericState : public State		{
 		public:
@@ -25,6 +26,24 @@ namespace NCL {
 		protected:
 			StateFunc func;
 			void* funcData;
+		};
+
+		class EnemyState : public State {
+		public:
+			EnemyState(EnemyFunc enemyFunc, void* enemy, void* player = nullptr) {
+				func = enemyFunc;
+				this->enemy = enemy;
+				this->player = player;
+			}
+
+			virtual void Update() {
+				if (enemy != nullptr && player != nullptr)
+					func(enemy, player);
+			}
+		protected:
+			EnemyFunc func;
+			void* enemy;
+			void* player;
 		};
 	}
 }
