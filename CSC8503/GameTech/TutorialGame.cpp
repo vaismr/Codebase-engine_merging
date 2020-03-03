@@ -47,28 +47,16 @@ TutorialGame::TutorialGame()	{
 	audioEngine.Init();
 	audioEngine.LoadSound("../../Assets/Sounds/jaguar.wav");
 	audioEngine.LoadSound("../../Assets/Sounds/wave.mp3");
-	//audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });
+	/*audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });*/
 
 
-	
-	InitialiseAssets();
-
-
-	///*loadingScreen = new LoadingScreen();*/
-
-	//InitialiseAssets();
-
-	levels.push_back(new LevelTest()); // level 0
+	//levels.push_back(new LevelTest()); // level 0
 	//levels.push_back(new Level1());
 	//levels.push_back(new Level1());
 
 	//;
 	//levels.push_back(new Level1());
 	//levels.push_back(new Level1()); // level 5
-
-
-	////delete loadingScreen;
-	////loadingScreen = nullptr;
 
 
 }
@@ -157,7 +145,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 			loadingScreen = new LoadingScreen();
 
-			level = levels[level_number];
+			//level = levels[level_number];
 			InitWorld();
 			//Sleep(200);
 			state = GameState::IN_GAME;
