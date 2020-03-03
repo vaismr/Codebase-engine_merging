@@ -79,6 +79,7 @@ int main() {
 			w->LockMouseToWindow(isMouseLocked);
 		}
 
+#ifdef _DEBUG
 		if (dt > 1.0f) {
 			std::cout << "Skipping large time delta" << std::endl;
 			continue; //must have hit a breakpoint or something to have a 1 second frame time!
@@ -89,6 +90,7 @@ int main() {
 		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NEXT)) {
 			w->ShowConsole(false);
 		}
+#endif
 
 		DisplayPathfinding();
 

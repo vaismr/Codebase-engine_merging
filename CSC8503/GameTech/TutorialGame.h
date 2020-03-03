@@ -51,6 +51,14 @@ namespace NCL {
 				return closed;
 			}
 
+			void SetWorld(GameWorld* a) {
+				if (world) {
+					delete world;
+				}
+
+				world = a;
+			}
+
 		protected:
 			void InitialiseAssets();
 
@@ -62,11 +70,14 @@ namespace NCL {
 			void TogglePauseMenu() {
 				if (state == GameState::PAUSED) {
 					state = GameState::IN_GAME;
+					Window::GetWindow()->ShowOSPointer(false);
+					Window::GetWindow()->LockMouseToWindow(true);
 				}
 				else if (state == GameState::IN_GAME) {
 					state = GameState::PAUSED;
+					Window::GetWindow()->ShowOSPointer(true);
+					Window::GetWindow()->LockMouseToWindow(false);
 				}
-				Window::GetWindow()->ShowOSPointer(state == GameState::PAUSED);
 			}
 			void UpdatePauseMenu();
 
@@ -112,6 +123,7 @@ namespace NCL {
 			float		forceMagnitude;
 
 			ImFont* fontMainDlg = nullptr;
+			ImFont* fontPauseHeader = nullptr;
 
 			GameObject* selectionObject = nullptr;
 

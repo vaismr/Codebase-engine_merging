@@ -95,6 +95,7 @@ void TutorialGame::InitialiseAssets() {
 	io.Fonts->AddFontDefault();
 	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
 	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 16);
+	fontPauseHeader = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 36);
 
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
@@ -150,6 +151,7 @@ void TutorialGame::UpdateGame(float dt) {
 			//Sleep(200);
 			state = GameState::IN_GAME;
 			Window::GetWindow()->ShowOSPointer(false);
+			Window::GetWindow()->LockMouseToWindow(true);
 
 			delete loadingScreen;
 			loadingScreen = nullptr;
@@ -192,9 +194,8 @@ void TutorialGame::UpdateGame(float dt) {
 			
 			Debug::Print("Game Paused", Vector2(50, 100));
 			UpdatePauseMenu();
-			
-		/*	RenderInGameHud(dt);*/  // can't draw  
-			
+
+			RenderInGameHud(dt);
 			RenderPauseMenu(dt);
 			
 			break;
@@ -281,6 +282,9 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	auto dl = ImGui::GetBackgroundDrawList();
 	dl->AddImage(basicTex, ImVec2(0, 0), ImVec2(1920, 1080));
 
+	// ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Once);
+	// ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Once);
+
 	ImGui::Begin("Main Menu");
 
 	if (ImGui::Button("START GAME")) {
@@ -308,16 +312,20 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 
 void TutorialGame::RenderPauseMenu(float dt) {
 	
-	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Once);
 
 
 	ImGui::Begin("Pause menu");
 
-
+	// RGBA
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0xFF, 0, 0, 0x64));
+	ImGui::PushFont(fontPauseHeader);
 	if (ImGui::Button("quit game")) {
 		closed = true;
 	}
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
 
 	ImGui::End();
 }
@@ -338,7 +346,7 @@ void TutorialGame::RenderEndgameMenu(float dt) {
 
 	ImGui::Begin("Endgame", nullptr, flags);
 
-	ImGui::PushFont(fontMainDlg);
+	ImGui::PushFont(fontPauseHeader);
 	ImGui::Text(" GAME OVER ");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
 
@@ -373,9 +381,9 @@ void TutorialGame::RenderInGameHud(float dt) {
 
 	//Time window
 	ImGui::Begin("Time Window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
-	ImGui::SetWindowFontScale(2.5f);
+	ImGui::SetWindowFontScale(1.0f);
 
-	ImGui::PushFont(fontMainDlg);
+	ImGui::PushFont(fontPauseHeader);
 	ImGui::Text(" Time : %.2fs", f);               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
 
@@ -388,7 +396,7 @@ void TutorialGame::RenderInGameHud(float dt) {
 
 	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
 
-	ImGui::PushFont(fontMainDlg);
+	ImGui::PushFont(fontPauseHeader);
 	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
 	ImGui::ProgressBar("##progress_bar1", power, ImVec2(500, 25), red, col);
@@ -420,7 +428,6 @@ void TutorialGame::RenderInGameHud(float dt) {
 	}
 
 	ImGui::End();
-	ImGui::Render();
 }
 
 void TutorialGame::UpdateKeys() {
