@@ -29,6 +29,11 @@ namespace NCL {
 			void RenderShadowMap();
 			void RenderCamera(); 
 
+			//skybox
+			OGLShader* skyshader;
+			unsigned int loadCubemap(vector<std::string> faces);
+			void RenderSkybox();
+
 			void SetupDebugMatrix(OGLShader*s) override;
 
 			vector<const RenderObject*> activeObjects;

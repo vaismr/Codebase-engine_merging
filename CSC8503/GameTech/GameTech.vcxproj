@@ -206,6 +206,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="arrow.cpp" />
+    <ClCompile Include="ball.cpp" />
     <ClCompile Include="GameTechRenderer.cpp" />
     <ClCompile Include="imgui_progressbar.cpp" />
     <ClCompile Include="Main.cpp">
@@ -225,6 +227,8 @@
     <ClInclude Include="..\..\Library\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\Library\imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\Library\imgui\imstb_truetype.h" />
+    <ClInclude Include="arrow.h" />
+    <ClInclude Include="ball.h" />
     <ClInclude Include="GameTechRenderer.h" />
     <ClInclude Include="imgui_progressbar.h" />
     <ClInclude Include="NetworkedGame.h" />

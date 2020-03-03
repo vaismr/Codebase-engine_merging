@@ -3,10 +3,12 @@
 #include "../../Common/Camera.h"
 #include "../../Common/Vector2.h"
 #include "../../Common/Vector3.h"
+#include "../../Common/stb/stb_image.h"
+#include "../../Common/Assets.h"
 using namespace NCL;
 using namespace Rendering;
 using namespace CSC8503;
-
+#define STB_IMAGE_IMPLEMENTATION
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -19,7 +21,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	glEnable(GL_DEPTH_TEST);
 
 	shadowShader = new OGLShader("GameTechShadowVert.glsl", "GameTechShadowFrag.glsl");
-
+	
 	glGenTextures(1, &shadowTex);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -44,6 +46,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 	lightRadius = 1000.0f;
 	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
+
+	
 }
 
 GameTechRenderer::~GameTechRenderer()	{
@@ -59,9 +63,47 @@ void GameTechRenderer::RenderFrame() {
 	RenderShadowMap();
 	RenderCamera();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
-
+	//RenderSkybox();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 }
+unsigned int loadCubemap(vector<std::string> faces) {
+
+	unsigned int skytextureID;
+	glGenTextures(1, &skytextureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skytextureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		std::string realPath = Assets::TEXTUREDIR + faces[i].c_str();
+		unsigned char* data = stbi_load(realPath.c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	return skytextureID;
+
+}
+void GameTechRenderer::RenderSkybox() {
+	
+	
+
+};
 
 void GameTechRenderer::BuildObjectList() {
 	std::vector<GameObject*>::const_iterator first;

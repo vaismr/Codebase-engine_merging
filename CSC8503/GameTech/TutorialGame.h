@@ -6,6 +6,7 @@
 #include "../GameTech/Sound/AudioEngine.h"
 #include <imgui/imgui.h>
 #include "../CSC8503Common/LoadingScreen.h"
+#include "ball.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -16,6 +17,7 @@ namespace NCL {
 
 			virtual void UpdateGame(float dt);
 
+
 		protected:
 			void InitialiseAssets();
 
@@ -23,6 +25,7 @@ namespace NCL {
 			void UpdateKeys();
 
 			void InitWorld();
+			void Initball();
 
 			void TogglePauseMenu() {
 				isPaused = !isPaused;
@@ -46,8 +49,16 @@ namespace NCL {
 			void DebugObjectMovement();
 			void LockedObjectMovement();
 			void LockedCameraMovement();
-
+			
 			void renderHUD(float dt);
+			//arrow
+			float dir;
+			void UpdateArrow();
+			float Impulsesize=0;
+			Vector3 Impulsedir;
+			Vector3 totalImpulse;
+			Vector3 Arrowlength;
+
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
@@ -57,10 +68,12 @@ namespace NCL {
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
-
+			
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
 			GameWorld* world;
+			Ball* ball;
+
 
 			bool useGravity;
 			bool inSelectionMode;
