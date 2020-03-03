@@ -220,6 +220,8 @@
     <ClCompile Include="Sound\AudioEngine.cpp" />
     <ClCompile Include="Particles\SphereEmitter.cpp" />
     <ClCompile Include="TutorialGame.cpp" />
+    <ClCompile Include="LevelBase.h" />
+    <ClCompile Include="LevelTest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Library\imgui\imconfig.h" />
@@ -240,6 +242,7 @@
     <ClInclude Include="Sound\AudioEngine.h" />
     <ClInclude Include="Particles\SphereEmitter.h" />
     <ClInclude Include="TutorialGame.h" />
+    <ClInclude Include="Level1.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.vcxproj">

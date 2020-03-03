@@ -66,6 +66,8 @@ namespace NCL {
 			void RenderFrame()	override;
 			void EndFrame()		override;
 
+			void RenderLoadingFrame() override;
+
 			void DrawDebugData();
 			void DrawDebugStrings();
 			void DrawDebugLines();

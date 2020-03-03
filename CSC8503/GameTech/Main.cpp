@@ -65,13 +65,19 @@ int main() {
 	//TestNetworking();
 	//TestPathfinding();
 	
-	w->ShowOSPointer(false);
+	w->ShowOSPointer(true);
 	w->LockMouseToWindow(true);
 
 	TutorialGame* g = new TutorialGame();
 
+	bool isMouseLocked = false;
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
+
+		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::U)) {
+			isMouseLocked = !isMouseLocked;
+			w->LockMouseToWindow(isMouseLocked);
+		}
 
 		if (dt > 1.0f) {
 			std::cout << "Skipping large time delta" << std::endl;
@@ -89,6 +95,8 @@ int main() {
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
 		g->UpdateGame(dt);
+		if (g->IsClosed()) break;
 	}
+
 	Window::DestroyGameWindow();
 }

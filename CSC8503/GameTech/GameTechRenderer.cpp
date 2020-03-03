@@ -59,8 +59,12 @@ void GameTechRenderer::RenderFrame() {
 	RenderShadowMap();
 	RenderCamera();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
-
+	
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void GameTechRenderer::RenderLoadingFrame() {
+	RenderCamera();
 }
 
 void GameTechRenderer::BuildObjectList() {

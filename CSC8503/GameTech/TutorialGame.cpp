@@ -1,4 +1,4 @@
- #include "TutorialGame.h"
+#include "TutorialGame.h"
 #include "../CSC8503Common/GameWorld.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
@@ -8,8 +8,8 @@
 #include "../../Common/Assets.h"
 
 #include "../CSC8503Common/PositionConstraint.h"
-#include <iostream>
 
+#include <iostream>
 
 
 #include <imgui/imgui.h>
@@ -18,8 +18,17 @@
 
 #include "imgui_progressbar.h"
 
+#include "LevelTest.h"
+
+#include "Level1.h"
+
+#include "../CSC8503Common/LoadingScreen.h"
+
+
 using namespace NCL;
 using namespace CSC8503;
+
+
 
 TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
@@ -32,12 +41,36 @@ TutorialGame::TutorialGame()	{
 
 	Debug::SetRenderer(renderer);
 
+
 	InitialiseAssets();
 
 	audioEngine.Init();
 	audioEngine.LoadSound("../../Assets/Sounds/jaguar.wav");
 	audioEngine.LoadSound("../../Assets/Sounds/wave.mp3");
 	//audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });
+
+
+	
+	InitialiseAssets();
+
+
+	///*loadingScreen = new LoadingScreen();*/
+
+	//InitialiseAssets();
+
+	levels.push_back(new LevelTest()); // level 0
+	//levels.push_back(new Level1());
+	//levels.push_back(new Level1());
+
+	//;
+	//levels.push_back(new Level1());
+	//levels.push_back(new Level1()); // level 5
+
+
+	////delete loadingScreen;
+	////loadingScreen = nullptr;
+
+
 }
 
 /*
@@ -69,6 +102,7 @@ void TutorialGame::InitialiseAssets() {
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 	particleShader = new OGLShader("particleVert.glsl", "particleFrag.glsl", "particleGeom.glsl");
 
+
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
 	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
@@ -78,9 +112,9 @@ void TutorialGame::InitialiseAssets() {
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
 
 
-
 	InitCamera();
 	InitWorld();
+
 }
 
 TutorialGame::~TutorialGame()	{
@@ -101,49 +135,97 @@ TutorialGame::~TutorialGame()	{
 }
 
 void TutorialGame::UpdateGame(float dt) {
+
 	lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
 
 	if (!isPaused) {
-		if (!inSelectionMode) {
-			world->GetMainCamera()->UpdateCamera(dt);
+		ImGui_ImplOpenGL3_NewFrame();
+#if _WIN32
+		ImGui_ImplWin32_NewFrame();
+#elif __ORBIS__
+		// TODO: PS4 New Frame?? GLFW + gl3w?
+		ImGui_Impl ? ? ? ? _NewFrame();
+#endif
+		ImGui::NewFrame();
+
+		switch (state) {
+		case GameState::MAIN_MENU:
+			RenderMainGameMenu(dt);
+			break;
+
+		case GameState::LOADING:
+
+			loadingScreen = new LoadingScreen();
+
+			level = levels[level_number];
+			InitWorld();
+			//Sleep(200);
+			state = GameState::IN_GAME;
+			Window::GetWindow()->ShowOSPointer(false);
+
+			delete loadingScreen;
+			loadingScreen = nullptr;
+			break;
+
+		case GameState::IN_GAME:
+
+			if (!inSelectionMode) {
+				world->GetMainCamera()->UpdateCamera(dt);
+			}
+			if (lockedObject != nullptr) {
+				LockedCameraMovement();
+			}
+
+			UpdateKeys();
+
+			/*if (useGravity) {
+				Debug::Print("(G)ravity on", Vector2(10, 40));
+			}
+			else {
+				Debug::Print("(G)ravity off", Vector2(10, 40));
+			}*/
+
+			SelectObject();
+			MoveSelectedObject();
+
+			world->UpdateWorld(dt);
+			renderer->Update(dt);
+			physics->Update(dt);
+
+
+			Debug::FlushRenderables();
+			UpdateListener(dt);
+			audioEngine.Update();
+
+			RenderInGameHud(dt);
+			break;
+
+		case GameState::PAUSED:
+			
+			Debug::Print("Game Paused", Vector2(50, 100));
+			UpdatePauseMenu();
+			
+		/*	RenderInGameHud(dt);*/  // can't draw  
+			
+			RenderPauseMenu(dt);
+			
+			break;
+
+		case GameState::END_GAME:
+
+			UpdateEndgameMenu();
+
+			RenderEndgameMenu(dt);
+
+			break;
 		}
-		if (lockedObject != nullptr) {
-			LockedCameraMovement();
-		}
-
-		UpdateKeys();
-
-		/*if (useGravity) {
-			Debug::Print("(G)ravity on", Vector2(10, 40));
-		}
-		else {
-			Debug::Print("(G)ravity off", Vector2(10, 40));
-		}*/
-
-		SelectObject();
-		MoveSelectedObject();
-
-		world->UpdateWorld(dt);
-		renderer->Update(dt);
-		physics->Update(dt);
-		renderHUD(dt);
-
-		Debug::FlushRenderables();
-		renderer->Render();
-		UpdateListener(dt);
-		audioEngine.Update();
-		
 	}
-	else {
-		UpdatePauseMenu();
-		Debug::Print("Game Paused", Vector2(50, 100));
+	ImGui::Render();
 
-		Debug::FlushRenderables();
-		renderer->Render();
-	}
-
-	
+	Debug::FlushRenderables();
+	renderer->Render();
 }
+
 
 void TutorialGame::UpdateListener(float dt)
 {
@@ -185,7 +267,7 @@ void TutorialGame::UpdateListener(float dt)
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
 	{
 		cout << lastCamPos.x << endl;
-	}
+	}		
 }
 
 
@@ -197,24 +279,92 @@ void TutorialGame::UpdatePauseMenu() {
 		TogglePauseMenu();
 		audioEngine.TogglePauseAllChannels();
 	}		
+
 }
 
-void NCL::CSC8503::TutorialGame::renderHUD(float dt)
-{
+void TutorialGame::UpdateEndgameMenu() {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
+		ToggleEndgameMenu();
 
-	ImGui_ImplOpenGL3_NewFrame();
-#if _WIN32
-	ImGui_ImplWin32_NewFrame();
-#elif __ORBIS__
-	// TODO: PS4 New Frame?? GLFW + gl3w?
-	ImGui_Impl????_NewFrame();
-#endif
-	ImGui::NewFrame();
+}
 
+void TutorialGame::RenderMainGameMenu(float dt) {
+	
+	auto dl = ImGui::GetBackgroundDrawList();
+	dl->AddImage(basicTex, ImVec2(0, 0), ImVec2(1920, 1080));
+
+	ImGui::Begin("Main Menu");
+
+	if (ImGui::Button("START GAME")) {
+		state = GameState::LOADING;
+		level_number = 0;
+	}
+
+	if (ImGui::Button("CHOICE LEVEL")) {
+		// LOAD_LEVEL
+		state = GameState::LOADING;
+		level_number = level_number - 1;
+	}
+	ImGui::SliderInt("level", &level_number, 1, levels.size());
+
+	if (ImGui::Button("OPTIONS")) {
+		
+	}
+
+	if (ImGui::Button("QUIT GAME")) {
+		closed = true;
+	}
+
+	ImGui::End();
+}
+
+void TutorialGame::RenderPauseMenu(float dt) {
+	
+	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Always);
+
+
+	ImGui::Begin("Pause menu");
+
+
+	if (ImGui::Button("quit game")) {
+		closed = true;
+	}
+
+	ImGui::End();
+}
+
+void TutorialGame::RenderEndgameMenu(float dt) {
+	
+	ImGuiWindowFlags flags =
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+	
+	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Always);
+
+
+	ImGui::Begin("Endgame", nullptr, flags);
+
+	ImGui::PushFont(fontMainDlg);
+	ImGui::Text(" GAME OVER ");               // Display some text (you can use a format strings too)
+	ImGui::PopFont();
+
+	if (ImGui::Button("quit game")) {
+		closed = true;
+	}
+	ImGui::SetWindowFontScale(2.5f);
+	ImGui::End();
+}
+
+void TutorialGame::RenderInGameHud(float dt) {
 	// Start the Dear ImGui frame
 	static float f = 100.0f;
 	f -= dt;
-
 	float power = 0.5f;
 
 	const ImU32 red = 0xFF0000FF;
@@ -224,7 +374,7 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Always);
 
-	ImGuiWindowFlags flags = 
+	ImGuiWindowFlags flags =
 		ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoScrollbar
 		| ImGuiWindowFlags_NoMove
@@ -234,9 +384,9 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 	//Time window
-	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::Begin("Time Window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
 	ImGui::SetWindowFontScale(2.5f);
-	
+
 	ImGui::PushFont(fontMainDlg);
 	ImGui::Text(" Time : %.2fs", f);               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
@@ -249,7 +399,7 @@ void NCL::CSC8503::TutorialGame::renderHUD(float dt)
 	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
 
 	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
-	
+
 	ImGui::PushFont(fontMainDlg);
 	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
@@ -301,6 +451,10 @@ void TutorialGame::UpdateKeys() {
 		audioEngine.TogglePauseAllChannels();
 	}
 		
+
+	
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
+		ToggleEndgameMenu();
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
 		useGravity = !useGravity; //Toggle gravity!
@@ -508,8 +662,12 @@ void TutorialGame::InitCamera() {
 }
 
 void TutorialGame::InitWorld() {
+	bool closed = false;
+	InitCamera();
+
 	world->ClearAndErase();
 	physics->Clear();
+
 
 	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	AddGooseToWorld(Vector3(30, 2, 0));
@@ -521,6 +679,11 @@ void TutorialGame::InitWorld() {
 	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
 
 	//AddFloorToWorld(Vector3(0, -2, 0));
+
+	if (level) {
+		level->init(this);
+	}
+
 }
 
 //From here on it's functions to add in objects to the world!
