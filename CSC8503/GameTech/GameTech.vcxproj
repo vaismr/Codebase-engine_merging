@@ -217,7 +217,9 @@
     <ClCompile Include="NetworkedGame.cpp" />
     <ClCompile Include="NetworkPlayer.cpp" />
     <ClCompile Include="Particles\ParticleEffect.cpp" />
-    <ClCompile Include="Sound\AudioEngine.cpp" />
+    <ClCompile Include="Sound\AudioEngine.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\Admin\Desktop\Codebase\CSC8503\GameTech;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="Particles\SphereEmitter.cpp" />
     <ClCompile Include="TutorialGame.cpp" />
     <ClCompile Include="LevelBase.h" />
