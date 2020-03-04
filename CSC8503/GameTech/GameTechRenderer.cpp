@@ -95,6 +95,14 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 GameTechRenderer::~GameTechRenderer()	{
 	glDeleteTextures(1, &shadowTex);
 	glDeleteFramebuffers(1, &shadowFBO);
+
+	delete processShader;
+	delete quad;
+
+	glDeleteTextures(2, bufferColourTex);
+	glDeleteTextures(1, &bufferDepthTex);
+	glDeleteFramebuffers(1, &bufferFBO);
+	glDeleteFramebuffers(1, &processFBO);
 }
 
 void GameTechRenderer::RenderFrame() {
