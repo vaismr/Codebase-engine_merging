@@ -94,7 +94,7 @@ void TutorialGame::InitialiseAssets() {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
 	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
-	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 16);
+	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 36);
 	fontPauseHeader = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 36);
 
 	ImVec4* colors = ImGui::GetStyle().Colors;
@@ -278,6 +278,14 @@ void TutorialGame::UpdateEndgameMenu() {
 }
 
 void TutorialGame::RenderMainGameMenu(float dt) {
+
+	ImGuiWindowFlags Miainflags =
+		ImGuiWindowFlags_NoTitleBar
+		/*	| ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoNav
+			| ImGuiWindowFlags_NoBringToFrontOnFocus*/;
 	
 	auto dl = ImGui::GetBackgroundDrawList();
 	dl->AddImage(basicTex, ImVec2(0, 0), ImVec2(1920, 1080));
@@ -285,28 +293,36 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	// ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Once);
 	// ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Once);
 
-	ImGui::Begin("Main Menu");
+	ImGui::Begin("Main Menu",nullptr,Miainflags );
 
-	if (ImGui::Button("START GAME")) {
+	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
+
+	ImGui::PushFont(fontMainDlg);
+	if (ImGui::Button("START GAME", ImVec2(-1.0f, 0.0f))) {
 		state = GameState::LOADING;
 		level_number = 0;
 	}
 
-	if (ImGui::Button("CHOICE LEVEL")) {
+
+
+	if (ImGui::Button("CHOICE LEVEL", ImVec2(-1.0f, 0.0f))) {
 		// LOAD_LEVEL
 		state = GameState::LOADING;
 		level_number = level_number - 1;
 	}
 	ImGui::SliderInt("level", &level_number, 1, levels.size());
 
-	if (ImGui::Button("OPTIONS")) {
+	
+	if (ImGui::Button("OPTIONS", ImVec2(-1.0f, 0.0f))) {
 		
 	}
 
-	if (ImGui::Button("QUIT GAME")) {
+
+	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
 		closed = true;
 	}
 
+	ImGui::PopFont();
 	ImGui::End();
 }
 
@@ -319,8 +335,8 @@ void TutorialGame::RenderPauseMenu(float dt) {
 	ImGui::Begin("Pause menu");
 
 	// RGBA
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0xFF, 0, 0, 0x64));
-	ImGui::PushFont(fontPauseHeader);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
+	ImGui::PushFont(fontMainDlg);
 	if (ImGui::Button("quit game")) {
 		closed = true;
 	}
@@ -346,15 +362,17 @@ void TutorialGame::RenderEndgameMenu(float dt) {
 
 	ImGui::Begin("Endgame", nullptr, flags);
 
-	ImGui::PushFont(fontPauseHeader);
+	ImGui::PushFont(fontMainDlg);
 	ImGui::Text(" GAME OVER ");               // Display some text (you can use a format strings too)
-	ImGui::PopFont();
-
+	
 	if (ImGui::Button("quit game")) {
 		closed = true;
 	}
 	ImGui::SetWindowFontScale(2.5f);
 	ImGui::End();
+
+	ImGui::PopFont();
+
 }
 
 void TutorialGame::RenderInGameHud(float dt) {
@@ -383,7 +401,7 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGui::Begin("Time Window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
 	ImGui::SetWindowFontScale(1.0f);
 
-	ImGui::PushFont(fontPauseHeader);
+	ImGui::PushFont(fontMainDlg);
 	ImGui::Text(" Time : %.2fs", f);               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
 
@@ -394,24 +412,25 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGui::SetNextWindowPos(ImVec2(800, 450), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
 
-	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::Begin("Power window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
 
-	ImGui::PushFont(fontPauseHeader);
+	ImGui::PushFont(fontMainDlg);
 	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
 	ImGui::ProgressBar("##progress_bar1", power, ImVec2(500, 25), red, col);
 
-	ImGui::SetWindowFontScale(2.5f);
+	ImGui::SetWindowFontScale(1.0f);
 	ImGui::End();
 
 	//Name window
 	ImGui::SetNextWindowPos(ImVec2(50, 550), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
-	ImGui::Begin("Name", nullptr, flags); // Create a window called "Hello, world!" and append into it.
-	ImGui::SetWindowFontScale(2.5f);
+	ImGui::Begin("Name window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::SetWindowFontScale(1.0f);
 
 	static char name[32] = "Unknown";
 	char buf[64]; sprintf_s(buf, IM_ARRAYSIZE(buf), "Name: %s###ButtonChangeName", name);
+
 	if (ImGui::Button(buf))
 	{
 		ImGui::OpenPopup("PopupNameEditor");
