@@ -327,8 +327,25 @@ void GameTechRenderer::DrawPostProcess()
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[1], 0);
 		glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "isVertical"), 0);
 
+		//TODO: create quad class
+		/*quad->SetTexture(bufferColourTex[0]);
+		quad->Draw();*/
 
+		//Now swap the buffers and pass again
+		glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "isVertical"), 1);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
+
+		/*quad->SetTexture(bufferColourTex[0]);
+		quad->Draw();*/
 	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glEnable(GL_DEPTH_TEST);
+}
+
+void GameTechRenderer::PresentScene()
+{
+
 }
 
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
