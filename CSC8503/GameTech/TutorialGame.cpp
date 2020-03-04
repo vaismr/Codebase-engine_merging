@@ -298,7 +298,7 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	 ImGui::SetNextWindowSize(ImVec2(336,371), ImGuiCond_Once);
 
 	ImGui::Begin("Main Menu",nullptr,Miainflags );
-
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
 	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
 	ImGui::PushFont(fontMainDlg);
@@ -327,6 +327,7 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	}
 
 	ImGui::PopFont();
+	ImGui::PopStyleColor();
 	ImGui::End();
 }
 
@@ -347,7 +348,7 @@ void TutorialGame::RenderPauseMenu(float dt) {
 	ImGui::Begin("Pause menu",nullptr, pausedflags);
 	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
 	// RGBA
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
 	ImGui::PushFont(fontMainDlg);
 	if (ImGui::Button("MAIN MENU", ImVec2(-1.0f, 0.0f))) {
 		 state = GameState::MAIN_MENU;
