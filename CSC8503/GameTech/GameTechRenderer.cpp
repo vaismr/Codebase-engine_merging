@@ -212,7 +212,11 @@ void GameTechRenderer::RenderShadowMap() {
 	glCullFace(GL_BACK);
 }
 
-void GameTechRenderer::RenderCamera() {
+void GameTechRenderer::RenderCamera() 
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	glClear((GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
 	float screenAspect = (float)currentWidth / (float)currentHeight;
 	Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
 	Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
@@ -293,6 +297,9 @@ void GameTechRenderer::RenderCamera() {
 		BindMesh((*i).GetMesh());
 		DrawBoundMesh();
 	}
+
+	//glUseProgram(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
