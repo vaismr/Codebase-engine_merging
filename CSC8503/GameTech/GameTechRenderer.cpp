@@ -47,6 +47,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	lightRadius = 1000.0f;
 	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 
+	glDisable(GL_DEPTH_TEST);
+
 //post processing additions
 	/*quad = Mesh::GenerateQuad*/
 	processShader = new OGLShader("GameTechVert.glsl", "ProcessFrag.glsl");
@@ -71,6 +73,23 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, hostWindow.GetScreenSize().x, hostWindow.GetScreenSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	}
+
+	glGenFramebuffers(1, &bufferFBO); //render the scene into this
+	glGenFramebuffers(1, &processFBO); //and do post processing in this
+
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
+
+	//check FBO attachment success using this command
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || bufferDepthTex || bufferColourTex[0])
+	{
+		return;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glEnable(GL_DEPTH_TEST);
 }
 
 GameTechRenderer::~GameTechRenderer()	{
