@@ -551,7 +551,9 @@ void TutorialGame::InitWorld() {
 	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80),2,1);
 	ball = (Ball*)tempball;
 
-
+	GameObject* tempice = AddIcecubeToWorld(Vector3(70, 6, 70), Vector3(2,2,2));
+	icecube = (Icecube*)tempball;
+	icecube->GetTransform().SetWorldScale(Vector3(3, 3, 3));
 }
 
 //From here on it's functions to add in objects to the world!
@@ -638,7 +640,7 @@ GameObject* TutorialGame::AddIcecubeToWorld(const Vector3& position, Vector3 dim
 	icecube->GetTransform().SetWorldPosition(position);
 	icecube->GetTransform().SetWorldScale(dimensions);
 
-	icecube->SetRenderObject(new RenderObject(&icecube->GetTransform(), cubeMesh, nullptr, nullptr));
+	icecube->SetRenderObject(new RenderObject(&icecube->GetTransform(), cubeMesh, nullptr, nullptr,"icecube"));
 	icecube->SetPhysicsObject(new PhysicsObject(&icecube->GetTransform(), icecube->GetBoundingVolume()));
 
     icecube->GetPhysicsObject()->SetInverseMass(inverseMass);

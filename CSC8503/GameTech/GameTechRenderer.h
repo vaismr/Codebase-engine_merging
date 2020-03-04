@@ -37,7 +37,10 @@ namespace NCL {
 			void RenderSkybox();
 			void GenerateSkybox();
 			unsigned int skyboxVAO, skyboxVBO;
-			
+
+			//icecube
+			OGLShader* iceshader;
+			void GenerateIce();
 
 			void SetupDebugMatrix(OGLShader*s) override;
 
