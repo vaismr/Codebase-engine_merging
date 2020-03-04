@@ -51,7 +51,7 @@ namespace NCL {
 			//post process things
 			void PresentScene();
 			void DrawPostProcess();
-			void DrawScene();
+			//void DrawScene(); this is the RenderCamera() function
 
 			OGLShader* processShader;
 			OGLMesh* quad;

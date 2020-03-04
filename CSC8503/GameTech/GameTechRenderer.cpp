@@ -302,6 +302,35 @@ void GameTechRenderer::RenderCamera()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void GameTechRenderer::DrawPostProcess()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[1], 0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	BindShader(processShader);
+
+	float screenAspect = (float)currentWidth / (float)currentHeight;
+	Matrix4 viewMatrix; //identity by default
+	Matrix4 projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
+
+	/*Update Shader Matrices*/
+	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMatrix);
+
+	glDisable(GL_DEPTH_TEST);
+
+	glUniform2f(glGetUniformLocation(processShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
+
+	for (int i = 0; i < POST_PASSES; i++)
+	{
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[1], 0);
+		glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "isVertical"), 0);
+
+
+	}
+}
+
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
 	float screenAspect = (float)currentWidth / (float)currentHeight;
 	Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
