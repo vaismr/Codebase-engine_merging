@@ -191,6 +191,8 @@ void TutorialGame::UpdateGame(float dt) {
 			UpdateListener(dt);
 			audioEngine.Update();
 
+			UpdateArrow();
+
 			RenderInGameHud(dt);
 			break;
 
@@ -565,8 +567,13 @@ void TutorialGame::LockedObjectMovement() {
 	//the right axis, to hopefully get a vector that's good enough!
 
 	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
-
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
+		selectionObject->GetPhysicsObject()->AddForce(dir * 30.0f);
+		cout << dir << endl;
+	}
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
+
 		selectionObject->GetPhysicsObject()->AddForce(-rightAxis);
 	}
 
@@ -581,10 +588,23 @@ void TutorialGame::LockedObjectMovement() {
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
 		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis);
 	}
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::I)) {
+		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(totalImpulse);
+	}
+}
+
+void TutorialGame::UpdateArrow() {
+	Impulsedir= Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
+	Impulsesize+= Window::GetMouse()->GetWheelMovement();
+	Arrowlength = Impulsedir * Impulsesize * 10;
+	//Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
+	totalImpulse = Impulsedir *20 + Vector3(0,1,0) *Impulsesize ;
+	renderer->DrawLine(ball->GetTransform().GetWorldPosition(), (ball->GetTransform().GetWorldPosition()) + Arrowlength, Vector4(1, 0, 0, 1));
+
 }
 
 void  TutorialGame::LockedCameraMovement() {
-	if (lockedObject != nullptr) {
+	/*if ( != nullptr) {
 		Vector3 objPos = lockedObject->GetTransform().GetWorldPosition();
 		Vector3 camPos = objPos + lockedOffset;
 
@@ -598,6 +618,30 @@ void  TutorialGame::LockedCameraMovement() {
 		world->GetMainCamera()->SetPosition(camPos);
 		world->GetMainCamera()->SetPitch(angles.x);
 		world->GetMainCamera()->SetYaw(angles.y);
+	//}*/
+	if (lockedObject != nullptr) {
+		float deltaX = Window::GetMouse()->GetRelativePosition().x;
+		selectionObject->GetTransform().SetLocalOrientation(Quaternion::AxisAngleToQuaterion(Vector3(0, 1, 0), world->GetMainCamera()->GetYaw() - deltaX + 180));
+
+		Window::GetWindow()->ShowOSPointer(false);
+		Window::GetWindow()->LockMouseToWindow(true);
+
+		Vector3 gooseForward = selectionObject->GetTransform().GetLocalOrientation() * Vector3(0, 0, 1);
+
+		Vector3 objPos = lockedObject->GetTransform().GetWorldPosition();
+		Vector3 camPos = objPos + gooseForward * -20 + Vector3(0, 5, 0);
+
+		Matrix4 temp = Matrix4::BuildViewMatrix(camPos, objPos, Vector3(0, 1, 0));
+
+		Matrix4 modelMat = temp.Inverse();
+
+		Quaternion q(modelMat);
+		Vector3 angles = q.ToEuler(); //nearly there now!
+
+		world->GetMainCamera()->SetPosition(camPos);
+		world->GetMainCamera()->SetPitch(angles.x);
+		world->GetMainCamera()->SetYaw(angles.y);
+
 	}
 }
 
@@ -636,6 +680,7 @@ void TutorialGame::DebugObjectMovement() {
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM5)) {
 			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, -10, 0));
 		}
+		
 	}
 }
 
@@ -689,6 +734,7 @@ bool TutorialGame::SelectObject() {
 					lockedObject = selectionObject;
 				}
 			}
+			//lockedObject = ball;
 		}
 	}
 	else {
@@ -729,9 +775,12 @@ void TutorialGame::InitWorld() {
 	AddGooseToWorld(Vector3(30, 2, 0));
 	AddAppleToWorld(Vector3(35, 2, 0));
 
-	AddParkKeeperToWorld(Vector3(40, 2, 0));
-	AddCharacterToWorld(Vector3(45, 2, 0));
+	//AddParkKeeperToWorld(Vector3(40, 2, 0));
+	//AddCharacterToWorld(Vector3(45, 2, 0));
 
+	AddFloorToWorld(Vector3(0, -2, 0));
+	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80),2,1);
+	ball = (Ball*)tempball;
 	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
 
 	//AddFloorToWorld(Vector3(0, -2, 0));
@@ -785,7 +834,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 	sphere->GetTransform().SetWorldScale(sphereSize);
 	sphere->GetTransform().SetWorldPosition(position);
 
-	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, 0, basicShader));
 	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
