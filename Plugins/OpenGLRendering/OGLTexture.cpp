@@ -28,6 +28,34 @@ OGLTexture::~OGLTexture()
 	glDeleteTextures(1, &texID);
 }
 
+
+void OGLTexture::CubeTextureFromData(char* data, int width, int height, int channels,int i,unsigned int id) {
+	//OGLTexture* tex = new OGLTexture();
+
+	int sourceType = GL_RGB;
+
+	switch (channels) {
+	case 1: sourceType = GL_RED; break;
+
+	case 2: sourceType = GL_RG; break;
+	case 3: sourceType = GL_RGB; break;
+	case 4: sourceType = GL_RGBA; break;
+		//default:
+	}
+	glBindTexture(GL_TEXTURE_2D, id);
+
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	//glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//return tex;
+}
+
+
 TextureBase* OGLTexture::RGBATextureFromData(char* data, int width, int height, int channels) {
 	OGLTexture* tex = new OGLTexture();
 

@@ -385,15 +385,17 @@ void  TutorialGame::LockedCameraMovement() {
 	//}*/
 	if (lockedObject != nullptr) {
 		float deltaX = Window::GetMouse()->GetRelativePosition().x;
+		
 		selectionObject->GetTransform().SetLocalOrientation(Quaternion::AxisAngleToQuaterion(Vector3(0, 1, 0), world->GetMainCamera()->GetYaw() - deltaX + 180));
+		
 
 		Window::GetWindow()->ShowOSPointer(false);
 		Window::GetWindow()->LockMouseToWindow(true);
 
-		Vector3 gooseForward = selectionObject->GetTransform().GetLocalOrientation() * Vector3(0, 0, 1);
+		Vector3 gooseForward = selectionObject->GetTransform().GetLocalOrientation() * Vector3(0,0,1);
 
 		Vector3 objPos = lockedObject->GetTransform().GetWorldPosition();
-		Vector3 camPos = objPos + gooseForward * -20 + Vector3(0, 5, 0);
+		Vector3 camPos = objPos + gooseForward * (-20) + Vector3(0, 5, 0);
 
 		Matrix4 temp = Matrix4::BuildViewMatrix(camPos, objPos, Vector3(0, 1, 0));
 
@@ -402,10 +404,17 @@ void  TutorialGame::LockedCameraMovement() {
 		Quaternion q(modelMat);
 		Vector3 angles = q.ToEuler(); //nearly there now!
 
-		world->GetMainCamera()->SetPosition(camPos);
-		world->GetMainCamera()->SetPitch(angles.x);
-		world->GetMainCamera()->SetYaw(angles.y);
+		//float temppitch;
+		temppitch-= (Window::GetMouse()->GetRelativePosition().y);
 
+		world->GetMainCamera()->SetPosition(camPos);
+		//world->GetMainCamera()->SetPitch(angles.x);
+		world->GetMainCamera()->SetPitch(temppitch);
+		world->GetMainCamera()->SetYaw(angles.y);
+		
+		
+		//temppitch = std::min(pitch, 90.0f);
+		//temppitch = std::max(pitch, -90.0f);
 	}
 }
 
@@ -541,6 +550,8 @@ void TutorialGame::InitWorld() {
 	AddFloorToWorld(Vector3(0, -2, 0));
 	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80),2,1);
 	ball = (Ball*)tempball;
+
+
 }
 
 //From here on it's functions to add in objects to the world!
@@ -616,6 +627,27 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	world->AddGameObject(cube);
 
 	return cube;
+}
+
+GameObject* TutorialGame::AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass ) 
+{
+	GameObject* icecube = new GameObject("icecube");
+	AABBVolume* volume = new AABBVolume(dimensions);
+	icecube->SetBoundingVolume((CollisionVolume*)volume);
+
+	icecube->GetTransform().SetWorldPosition(position);
+	icecube->GetTransform().SetWorldScale(dimensions);
+
+	icecube->SetRenderObject(new RenderObject(&icecube->GetTransform(), cubeMesh, nullptr, nullptr));
+	icecube->SetPhysicsObject(new PhysicsObject(&icecube->GetTransform(), icecube->GetBoundingVolume()));
+
+    icecube->GetPhysicsObject()->SetInverseMass(inverseMass);
+	icecube->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(icecube);
+
+	return icecube;
+
 }
 
 GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)

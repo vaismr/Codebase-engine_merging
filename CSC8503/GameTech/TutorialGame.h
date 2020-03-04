@@ -7,6 +7,7 @@
 #include <imgui/imgui.h>
 #include "../CSC8503Common/LoadingScreen.h"
 #include "ball.h"
+#include "icecube.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -58,6 +59,7 @@ namespace NCL {
 			Vector3 Impulsedir;
 			Vector3 totalImpulse;
 			Vector3 Arrowlength;
+			
 
 
 			GameObject* AddFloorToWorld(const Vector3& position);
@@ -72,13 +74,19 @@ namespace NCL {
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
 			GameWorld* world;
+			//ball
 			Ball* ball;
+            //icecube
+			Icecube* icecube;
+			GameObject* AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			
 
 
 			bool useGravity;
 			bool inSelectionMode;
 
 			float		forceMagnitude;
+			float temppitch;
 
 			ImFont* fontMainDlg = nullptr;
 

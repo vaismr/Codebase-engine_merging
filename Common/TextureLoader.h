@@ -10,9 +10,12 @@ https://research.ncl.ac.uk/game/
 #include <map>
 #include <functional>
 #include <string>
+
+
 using std::map;
 
 #include "TextureBase.h"
+#include <vector>
 
 namespace NCL {
 
@@ -29,6 +32,8 @@ namespace NCL {
 		static void RegisterAPILoadFunction(APILoadFunction f);
 
 		static Rendering::TextureBase* LoadAPITexture(const std::string&filename);
+
+		//static unsigned char* readskytex(const char* c);
 	protected:
 
 		static std::string GetFileExtension(const std::string& fileExtension);

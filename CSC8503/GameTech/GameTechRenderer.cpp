@@ -3,12 +3,17 @@
 #include "../../Common/Camera.h"
 #include "../../Common/Vector2.h"
 #include "../../Common/Vector3.h"
-#include "../../Common/stb/stb_image.h"
-#include "../../Common/Assets.h"
+
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "../../Common/stb/stb_image.h"
+//#include "../../Common/Assets.h"
+
 using namespace NCL;
 using namespace Rendering;
 using namespace CSC8503;
-#define STB_IMAGE_IMPLEMENTATION
+
+
+
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -46,10 +51,78 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 	lightRadius = 1000.0f;
 	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
-
+	GenerateSkybox();
 	
 }
+void GameTechRenderer::GenerateSkybox() {
+	skyshader = new OGLShader("skyvertex.glsl", "skyfrag.glsl");
+	float skyboxVertices[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
 
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f
+	};
+	
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	vector<std::string> faces
+	{
+		"seed.png",
+		"seed.png",
+		"seed.png",
+		"seed.png",
+		"seed.png",
+		"seed.png"
+	};
+	cubemapTexture = loadCubemap(faces);
+
+
+
+}
 GameTechRenderer::~GameTechRenderer()	{
 	glDeleteTextures(1, &shadowTex);
 	glDeleteFramebuffers(1, &shadowFBO);
@@ -58,31 +131,48 @@ GameTechRenderer::~GameTechRenderer()	{
 void GameTechRenderer::RenderFrame() {
 	glEnable(GL_CULL_FACE);
 	glClearColor(1, 1, 1, 1);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	RenderSkybox();
 	BuildObjectList();
 	SortObjectList();
 	RenderShadowMap();
 	RenderCamera();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
-	//RenderSkybox();
+	
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 }
-unsigned int loadCubemap(vector<std::string> faces) {
+unsigned int GameTechRenderer::loadCubemap(vector<std::string> faces) {
 
-	unsigned int skytextureID;
+	
 	glGenTextures(1, &skytextureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skytextureID);
-
-	int width, height, nrChannels;
+char* texData = nullptr;
+	int width = 0;
+	int height = 0;
+	int channels = 0;
+	int flags = 0;
+	//int width, height, nrChannels;
 	for (unsigned int i = 0; i < faces.size(); i++)
 	{
+
+		TextureLoader::LoadTexture(faces[i].c_str(), texData, width, height, channels, flags);
+
+		OGLTexture::CubeTextureFromData(texData, width, height, channels, i,skytextureID);
+
+		free(texData);
+		/*
+		int width, height, nrChannels;
+		//const char* c = faces[i].c_str();
 		std::string realPath = Assets::TEXTUREDIR + faces[i].c_str();
 		unsigned char* data = stbi_load(realPath.c_str(), &width, &height, &nrChannels, 0);
+		//unsigned char* data = TextureLoader::readskytex(c);
 		if (data)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-			);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 			stbi_image_free(data);
 		}
 		else
@@ -90,7 +180,13 @@ unsigned int loadCubemap(vector<std::string> faces) {
 			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
 			stbi_image_free(data);
 		}
+		*/
+		
 	}
+
+	
+	
+
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -101,8 +197,32 @@ unsigned int loadCubemap(vector<std::string> faces) {
 }
 void GameTechRenderer::RenderSkybox() {
 	
-	
 
+	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+	BindShader(skyshader);
+	Matrix4 viewMatrix = Matrix4(Matrix3(gameWorld.GetMainCamera()->BuildViewMatrix())); // remove translation from the view matrix
+	//skyboxShader.setMat4("view", view);
+	//skyboxShader.setMat4("projection", projection);
+	float screenAspect = (float)currentWidth / (float)currentHeight;
+	//Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
+	Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
+	
+	int projLocation = glGetUniformLocation(skyshader->GetProgramID(), "projection");
+	int viewLocation = glGetUniformLocation(skyshader->GetProgramID(), "view");
+	glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
+	glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+
+	int cubetexLocation = glGetUniformLocation(skyshader->GetProgramID(), "skybox");
+	glUniform1i(cubetexLocation, 0);
+
+
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glDepthFunc(GL_LESS);
+	
 };
 
 void GameTechRenderer::BuildObjectList() {
@@ -183,6 +303,7 @@ void GameTechRenderer::RenderCamera() {
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 
 	for (const auto&i : activeObjects) {
+		//if(i->){
 		OGLShader* shader = (OGLShader*)(*i).GetShader();
 		BindShader(shader);
 
@@ -231,7 +352,13 @@ void GameTechRenderer::RenderCamera() {
 
 		BindMesh((*i).GetMesh());
 		DrawBoundMesh();
-	}
+		}
+	//}
+//else {
+
+
+	//}
+	
 }
 
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
