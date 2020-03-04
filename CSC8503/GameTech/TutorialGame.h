@@ -32,7 +32,7 @@ namespace NCL {
 				Window::GetWindow()->ShowOSPointer(isPaused);
 			}
 			void UpdatePauseMenu();
-			void UpdateVariables();
+			void UpdateVariables(float dt);
 
 			/*
 			These are some of the world/object creation functions I created when testing the functionality
@@ -105,14 +105,19 @@ namespace NCL {
 			bool isPaused;
 
 			LoadingScreen* loadingScreen;
-			StateMachine* stateMachine;
+			StateMachine* stateMachineChase;
+			StateMachine* stateMachinePatrol;
 
-			float enemyPlayerDist = 0;
-			Vector3 enemyPatrolPos = Vector3(0, 0, 0);
 
 			//@TODO create AI class for these
 			void EnemyAIChase();
 			void EnemyAIPatrol();
+
+			float enemyPlayerDist = 0;
+			float patrolIdleTime;
+			Vector3 enemyPatrolPos = Vector3();
+			Vector3 patrolSrc = Vector3();
+			Vector3 patrolDst = Vector3(1000,0,1000);
 		};
 	}
 }

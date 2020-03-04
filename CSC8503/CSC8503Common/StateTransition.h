@@ -59,6 +59,10 @@ namespace NCL {
 				return dataA != dataB;
 			}
 
+			static bool WithinRangeTransition(T dataA, U dataB) {
+				return (dataA - dataB < 0.05 || dataA - dataB > 0.05) ? true : false;
+			}
+
 		protected:
 			GenericTransitionFunc  func;
 			T dataA;

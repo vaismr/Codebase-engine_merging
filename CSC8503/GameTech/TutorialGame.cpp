@@ -25,7 +25,8 @@ TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
 	renderer	= new GameTechRenderer(*world);
 	physics		= new PhysicsSystem(*world);
-	stateMachine = new StateMachine();
+	stateMachineChase = new StateMachine();
+	stateMachinePatrol = new StateMachine();
 
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
@@ -86,7 +87,8 @@ TutorialGame::~TutorialGame()	{
 	delete gooseMesh;
 	delete basicTex;
 	delete basicShader;
-	delete stateMachine;
+	delete stateMachineChase;
+	delete stateMachinePatrol;
 
 	delete player;
 	delete enemyChase;
@@ -121,12 +123,13 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 		SelectObject();
 		MoveSelectedObject();
 
-		UpdateVariables();
+		UpdateVariables(dt);
 
 		world->UpdateWorld(dt);
 		renderer->Update(dt);
 		physics->Update(dt);
-		stateMachine->Update();
+		stateMachineChase->Update();
+		stateMachinePatrol->Update();
 		renderHUD(dt);
 
 		renderer->DrawString("State: " + selectionObject->GetStateDescription(), Vector2(200, 200));
@@ -185,8 +188,11 @@ void TutorialGame::UpdatePauseMenu() {
 	}		
 }
 
-void TutorialGame::UpdateVariables() {
+void TutorialGame::UpdateVariables(float dt) {
 	enemyPatrolPos = enemyPatrol->GetTransform().GetWorldPosition();
+	enemyPatrol->UpdateIdleTime(dt);
+	patrolIdleTime = enemyPatrol->GetIdleTime();
+	std::cout << enemyPatrol->GetIdleTime() << std::endl;
 	enemyPlayerDist = (player->GetTransform().GetWorldPosition() - enemyChase->GetTransform().GetWorldPosition()).Length();
 }
 
@@ -516,6 +522,7 @@ void TutorialGame::InitWorld() {
 	lockedObject = player;
 
 	EnemyAIChase();
+	EnemyAIPatrol();
 }
 
 void TutorialGame::EnemyAIChase() {
@@ -552,9 +559,9 @@ void TutorialGame::EnemyAIChase() {
 	EnemyState* spottedState = new EnemyState(spottedPlayer, enemyChase, player);
 	EnemyState* chaseState = new EnemyState(chaseFunc, enemyChase, player);
 
-	stateMachine->AddState(idleState);
-	stateMachine->AddState(spottedState);
-	stateMachine->AddState(chaseState);
+	stateMachineChase->AddState(idleState);
+	stateMachineChase->AddState(spottedState);
+	stateMachineChase->AddState(chaseState);
 
 	GenericTransition<float&, float>* idleToSpotted = new GenericTransition<float&, float>(
 		GenericTransition<float&, float>::LessThanTransition, enemyPlayerDist, 30.0f, idleState, spottedState);
@@ -569,10 +576,10 @@ void TutorialGame::EnemyAIChase() {
 	GenericTransition<float&, float>* chaseToSpotted = new GenericTransition<float&, float>(
 		GenericTransition<float&, float>::GreaterThanTransition, enemyPlayerDist, 25.0f, chaseState, spottedState);
 
-	stateMachine->AddTransition(idleToSpotted);
-	stateMachine->AddTransition(spottedToIdle);
-	stateMachine->AddTransition(spottedToChase);
-	stateMachine->AddTransition(chaseToSpotted);
+	stateMachineChase->AddTransition(idleToSpotted);
+	stateMachineChase->AddTransition(spottedToIdle);
+	stateMachineChase->AddTransition(spottedToChase);
+	stateMachineChase->AddTransition(chaseToSpotted);
 }
 
 void TutorialGame::EnemyAIPatrol() {
@@ -593,18 +600,26 @@ void TutorialGame::EnemyAIPatrol() {
 		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
 		enemyObject->GetPhysicsObject()->AddForce(dir * 6.0f);
+		enemyObject->ResetIdleTime();
 	};
 
-	Vector3 testDst = Vector3(0, 0, 0);
-
 	EnemyState* idleState = new EnemyState(idleFunc, enemyPatrol);
-	EnemyState* patrolState = new EnemyState(idleFunc, enemyPatrol, (void*)&testDst);
+	EnemyState* patrolState = new EnemyState(patrolFunc, enemyPatrol, (void*)&patrolDst);
 
-	stateMachine->AddState(idleState);
-	stateMachine->AddState(patrolState);
+	stateMachinePatrol->AddState(idleState);
+	stateMachinePatrol->AddState(patrolState);
+
+	// @TODO fix these
+	GenericTransition<float&, float>* idleToPatrol = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::GreaterThanTransition, patrolIdleTime, 1.0f, idleState, patrolState);
 
 	GenericTransition<Vector3&, Vector3>* patrolToIdle = new GenericTransition<Vector3&, Vector3>(
-		GenericTransition<Vector3&, Vector3>::EqualsTransition, enemyPatrolPos, testDst, idleState, patrolState);
+		GenericTransition<Vector3&, Vector3>::WithinRangeTransition, enemyPatrolPos, patrolDst, patrolState, idleState);
+
+	// @TODO make AI class
+
+	stateMachinePatrol->AddTransition(idleToPatrol);
+	stateMachinePatrol->AddTransition(patrolToIdle);
 }
 
 //From here on it's functions to add in objects to the world!
