@@ -84,9 +84,13 @@ namespace NCL {
 			void ToggleEndgameMenu() {
 				if (state == GameState::END_GAME) {
 					state = GameState::IN_GAME;
+					Window::GetWindow()->ShowOSPointer(false);
+					Window::GetWindow()->LockMouseToWindow(true);
 				}
 				else if (state == GameState::IN_GAME) {
 					state = GameState::END_GAME;
+					Window::GetWindow()->ShowOSPointer(true);
+					Window::GetWindow()->LockMouseToWindow(false);
 				}
 				Window::GetWindow()->ShowOSPointer(state == GameState::END_GAME);
 			}
@@ -123,7 +127,8 @@ namespace NCL {
 			float		forceMagnitude;
 
 			ImFont* fontMainDlg = nullptr;
-			ImFont* fontPauseHeader = nullptr;
+			ImFont* fontbutton = nullptr;
+			ImFont* fontHeader = nullptr;
 
 			GameObject* selectionObject = nullptr;
 

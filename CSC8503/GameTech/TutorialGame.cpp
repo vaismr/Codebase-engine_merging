@@ -94,8 +94,10 @@ void TutorialGame::InitialiseAssets() {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
 	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
-	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 36);
-	fontPauseHeader = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 36);
+	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 40);
+	fontbutton = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 36);
+	fontHeader = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 60);
+
 
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
@@ -192,10 +194,10 @@ void TutorialGame::UpdateGame(float dt) {
 
 		case GameState::PAUSED:
 			
-			Debug::Print("Game Paused", Vector2(50, 100));
+			//Debug::Print("Game Paused", Vector2(50, 100));
 			UpdatePauseMenu();
 
-			RenderInGameHud(dt);
+			RenderInGameHud(0);
 			RenderPauseMenu(dt);
 			
 			break;
@@ -260,8 +262,6 @@ void TutorialGame::UpdateListener(float dt)
 }
 
 
-
-//@TODO UI stuff - need on screen msg showing "Game Paused", quit game button, also mute audio
 void TutorialGame::UpdatePauseMenu() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
 	{
@@ -281,22 +281,22 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 
 	ImGuiWindowFlags Miainflags =
 		ImGuiWindowFlags_NoTitleBar
-		/*	| ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoScrollbar
 			| ImGuiWindowFlags_NoMove
 			| ImGuiWindowFlags_NoResize
 			| ImGuiWindowFlags_NoNav
-			| ImGuiWindowFlags_NoBringToFrontOnFocus*/;
+			| ImGuiWindowFlags_NoBringToFrontOnFocus;
 	
 	auto dl = ImGui::GetBackgroundDrawList();
 	dl->AddImage(basicTex, ImVec2(0, 0), ImVec2(1920, 1080));
 
-	// ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Once);
-	// ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Once);
+	 ImGui::SetNextWindowPos(ImVec2(454,190), ImGuiCond_Once);
+	 ImGui::SetNextWindowSize(ImVec2(336,371), ImGuiCond_Once);
 
 	ImGui::Begin("Main Menu",nullptr,Miainflags );
 
 	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
-
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
 	ImGui::PushFont(fontMainDlg);
 	if (ImGui::Button("START GAME", ImVec2(-1.0f, 0.0f))) {
 		state = GameState::LOADING;
@@ -304,20 +304,20 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	}
 
 
-
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
 	if (ImGui::Button("CHOICE LEVEL", ImVec2(-1.0f, 0.0f))) {
 		// LOAD_LEVEL
 		state = GameState::LOADING;
-		level_number = level_number - 1;
+	/*	level_number = level_number - 1;*/
 	}
-	ImGui::SliderInt("level", &level_number, 1, levels.size());
+	//ImGui::SliderInt("level", &level_number, 1, levels.size());
 
-	
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
 	if (ImGui::Button("OPTIONS", ImVec2(-1.0f, 0.0f))) {
 		
 	}
 
-
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
 	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
 		closed = true;
 	}
@@ -328,16 +328,28 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 
 void TutorialGame::RenderPauseMenu(float dt) {
 	
-	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Once);
+	ImGuiWindowFlags pausedflags =
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+	ImGui::SetNextWindowPos(ImVec2(511,314), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(229,176), ImGuiCond_Once);
 
 
-	ImGui::Begin("Pause menu");
-
+	ImGui::Begin("Pause menu",nullptr, pausedflags);
+	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
 	// RGBA
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
 	ImGui::PushFont(fontMainDlg);
-	if (ImGui::Button("quit game")) {
+	if (ImGui::Button("MAIN MENU", ImVec2(-1.0f, 0.0f))) {
+		 state = GameState::MAIN_MENU;
+	}
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
+	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
 		closed = true;
 	}
 	ImGui::PopFont();
@@ -348,30 +360,54 @@ void TutorialGame::RenderPauseMenu(float dt) {
 
 void TutorialGame::RenderEndgameMenu(float dt) {
 	
-	ImGuiWindowFlags flags =
+	ImGuiWindowFlags endflags =
 		ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoScrollbar
 		| ImGuiWindowFlags_NoMove
 		| ImGuiWindowFlags_NoResize
 		| ImGuiWindowFlags_NoNav
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+	ImGuiWindowFlags flags =
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBackground
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 	
-	ImGui::SetNextWindowPos(ImVec2(400, 200), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(550, 400), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(471,168), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(318,89), ImGuiCond_Always);
 
 
-	ImGui::Begin("Endgame", nullptr, flags);
-
-	ImGui::PushFont(fontMainDlg);
-	ImGui::Text(" GAME OVER ");               // Display some text (you can use a format strings too)
-	
-	if (ImGui::Button("quit game")) {
-		closed = true;
-	}
-	ImGui::SetWindowFontScale(2.5f);
+	ImGui::Begin("Endgamehud", nullptr, flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
+	ImGui::PushFont(fontHeader);
+	ImGui::Text(" GAME OVER "); 
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
 	ImGui::End();
 
+	ImGui::SetNextWindowPos(ImVec2(518,331), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(224,161), ImGuiCond_Always);
+
+	ImGui::Begin("Endgame", nullptr, endflags);
+	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
+	ImGui::PushFont(fontMainDlg);
+	
+	if (ImGui::Button("MAIN MENU", ImVec2(-1.0f, 0.0f))) {
+		state = GameState::MAIN_MENU;
+	}
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
+	if (ImGui::Button("quit game", ImVec2(-1.0f, 0.0f))) {
+		closed = true;
+	}
+	ImGui::SetWindowFontScale(1.0f);
 	ImGui::PopFont();
+	ImGui::PopStyleColor();
+	ImGui::End();
 
 }
 
@@ -385,9 +421,7 @@ void TutorialGame::RenderInGameHud(float dt) {
 	const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
 	const ImU32 bg = ImGui::GetColorU32(ImGuiCol_Button);
 
-	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Always);
-
+	
 	ImGuiWindowFlags flags =
 		ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoScrollbar
@@ -396,38 +430,42 @@ void TutorialGame::RenderInGameHud(float dt) {
 		| ImGuiWindowFlags_NoNav
 		| ImGuiWindowFlags_NoBackground
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+	
+	
 
 	//Time window
-	ImGui::Begin("Time Window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
-	ImGui::SetWindowFontScale(1.0f);
+	ImGui::SetNextWindowPos(ImVec2(466,6), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(317,95), ImGuiCond_Always);
+	ImGui::Begin("Time Window", nullptr, flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
+	ImGui::PushFont(fontHeader);
 
-	ImGui::PushFont(fontMainDlg);
-	ImGui::Text(" Time : %.2fs", f);               // Display some text (you can use a format strings too)
+	ImGui::Text(" Time : %.2fs", f);             
 	ImGui::PopFont();
-
+	ImGui::PopStyleColor();
 
 	ImGui::End();
 
 	//power window
-	ImGui::SetNextWindowPos(ImVec2(800, 450), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(16,575), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(344,109), ImGuiCond_Always);
 
-	ImGui::Begin("Power window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
-
+	ImGui::Begin("Power window", nullptr, flags); 
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
 	ImGui::PushFont(fontMainDlg);
 	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
 	ImGui::ProgressBar("##progress_bar1", power, ImVec2(500, 25), red, col);
+	ImGui::PopStyleColor();
 
-	ImGui::SetWindowFontScale(1.0f);
 	ImGui::End();
 
 	//Name window
-	ImGui::SetNextWindowPos(ImVec2(50, 550), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
-	ImGui::Begin("Name window", nullptr, flags); // Create a window called "Hello, world!" and append into it.
-	ImGui::SetWindowFontScale(1.0f);
-
+	ImGui::SetNextWindowPos(ImVec2(966,593), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(276,71), ImGuiCond_Always);
+	ImGui::Begin("Name window", nullptr, flags); 
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
+	ImGui::PushFont(fontMainDlg);
 	static char name[32] = "Unknown";
 	char buf[64]; sprintf_s(buf, IM_ARRAYSIZE(buf), "Name: %s###ButtonChangeName", name);
 
@@ -445,6 +483,8 @@ void TutorialGame::RenderInGameHud(float dt) {
 			ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
 
 	ImGui::End();
 }
