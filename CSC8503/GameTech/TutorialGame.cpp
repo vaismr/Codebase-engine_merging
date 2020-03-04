@@ -89,7 +89,7 @@ TutorialGame::~TutorialGame()	{
 	delete stateMachine;
 
 	delete player;
-	delete enemy;
+	delete enemyChase;
 
 	delete physics;
 	delete renderer;
@@ -121,8 +121,7 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 		SelectObject();
 		MoveSelectedObject();
 
-		// @TODO make func e.g. UpdateVariables()
-		enemyPlayerDist = (player->GetTransform().GetWorldPosition() - enemy->GetTransform().GetWorldPosition()).Length();
+		UpdateVariables();
 
 		world->UpdateWorld(dt);
 		renderer->Update(dt);
@@ -184,6 +183,11 @@ void TutorialGame::UpdatePauseMenu() {
 		TogglePauseMenu();
 		audioEngine.TogglePauseAllChannels();
 	}		
+}
+
+void TutorialGame::UpdateVariables() {
+	enemyPatrolPos = enemyPatrol->GetTransform().GetWorldPosition();
+	enemyPlayerDist = (player->GetTransform().GetWorldPosition() - enemyChase->GetTransform().GetWorldPosition()).Length();
 }
 
 void NCL::CSC8503::TutorialGame::renderHUD(float dt)
@@ -503,18 +507,18 @@ void TutorialGame::InitWorld() {
 	AddAppleToWorld(Vector3(35, 2, 0));
 
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
-	enemy = AddCharacterToWorld(Vector3(45, 2, 0));
+	enemyChase = AddCharacterToWorld(Vector3(45, 2, 0));
+	enemyPatrol = AddCharacterToWorld(Vector3(40, 2, -10));
 
 	AddFloorToWorld(Vector3(0, -2, 0));
 
 	selectionObject = player;
 	lockedObject = player;
 
-	TestEnemyAI();
+	EnemyAIChase();
 }
 
-// @TODO change from test func
-void TutorialGame::TestEnemyAI() {
+void TutorialGame::EnemyAIChase() {
 
 	EnemyFunc idleFunc = [](void* enemy, void* player) {
 		GameObject* enemyObject = (GameObject*)enemy;
@@ -544,9 +548,9 @@ void TutorialGame::TestEnemyAI() {
 		enemyObject->GetPhysicsObject()->AddForce(dir * 8.0f);
 	};
 
-	EnemyState* idleState = new EnemyState(idleFunc, enemy, player);
-	EnemyState* spottedState = new EnemyState(spottedPlayer, enemy, player);
-	EnemyState* chaseState = new EnemyState(chaseFunc, enemy, player);
+	EnemyState* idleState = new EnemyState(idleFunc, enemyChase);
+	EnemyState* spottedState = new EnemyState(spottedPlayer, enemyChase, player);
+	EnemyState* chaseState = new EnemyState(chaseFunc, enemyChase, player);
 
 	stateMachine->AddState(idleState);
 	stateMachine->AddState(spottedState);
@@ -569,6 +573,38 @@ void TutorialGame::TestEnemyAI() {
 	stateMachine->AddTransition(spottedToIdle);
 	stateMachine->AddTransition(spottedToChase);
 	stateMachine->AddTransition(chaseToSpotted);
+}
+
+void TutorialGame::EnemyAIPatrol() {
+
+	EnemyFunc idleFunc = [](void* enemy, void* data) {
+		GameObject* enemyObject = (GameObject*)enemy;
+		enemyObject->SetStateDescription("idle");
+	};
+
+	// @TODO add src point, so AI patrols between 2 src and dst
+	EnemyFunc patrolFunc = [](void* enemy, void* dst) {
+		GameObject* enemyObject = (GameObject*)enemy;
+		Vector3* dstPoint = (Vector3*)dst;
+		Vector3 enemyPos = enemyObject->GetTransform().GetWorldPosition();
+		enemyObject->SetStateDescription("patrolling");
+		Vector3 dir = *dstPoint - enemyPos;
+		float dirAngle = atan2(dir.x, dir.z);
+		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
+		enemyObject->GetTransform().SetLocalOrientation(orientation);
+		enemyObject->GetPhysicsObject()->AddForce(dir * 6.0f);
+	};
+
+	Vector3 testDst = Vector3(0, 0, 0);
+
+	EnemyState* idleState = new EnemyState(idleFunc, enemyPatrol);
+	EnemyState* patrolState = new EnemyState(idleFunc, enemyPatrol, (void*)&testDst);
+
+	stateMachine->AddState(idleState);
+	stateMachine->AddState(patrolState);
+
+	GenericTransition<Vector3&, Vector3>* patrolToIdle = new GenericTransition<Vector3&, Vector3>(
+		GenericTransition<Vector3&, Vector3>::EqualsTransition, enemyPatrolPos, testDst, idleState, patrolState);
 }
 
 //From here on it's functions to add in objects to the world!

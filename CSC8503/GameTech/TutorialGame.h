@@ -32,6 +32,7 @@ namespace NCL {
 				Window::GetWindow()->ShowOSPointer(isPaused);
 			}
 			void UpdatePauseMenu();
+			void UpdateVariables();
 
 			/*
 			These are some of the world/object creation functions I created when testing the functionality
@@ -74,7 +75,8 @@ namespace NCL {
 
 			GameObject* selectionObject = nullptr;
 			GameObject* player = nullptr;
-			GameObject* enemy = nullptr;
+			GameObject* enemyChase = nullptr;
+			GameObject* enemyPatrol = nullptr;
 
 
 			OGLMesh* cubeMesh = nullptr;
@@ -106,8 +108,11 @@ namespace NCL {
 			StateMachine* stateMachine;
 
 			float enemyPlayerDist = 0;
+			Vector3 enemyPatrolPos = Vector3(0, 0, 0);
 
-			void TestEnemyAI();
+			//@TODO create AI class for these
+			void EnemyAIChase();
+			void EnemyAIPatrol();
 		};
 	}
 }
