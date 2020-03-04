@@ -312,11 +312,10 @@ void GameTechRenderer::DrawPostProcess()
 
 	BindShader(processShader);
 
-	float screenAspect = (float)currentWidth / (float)currentHeight;
 	Matrix4 viewMatrix; //identity by default
 	Matrix4 projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
 
-	/*Update Shader Matrices*/
+	/*Update Shader Matrices*/ //TODO: make into function
 	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
 	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMatrix);
 
@@ -349,7 +348,17 @@ void GameTechRenderer::PresentScene()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	BindShader(sha)
+	BindShader(sceneShader);
+
+	Matrix4 viewMatrix; //identity by default
+	Matrix4 projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
+
+	/*Update Shader Matrices*/
+	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMatrix);
+
+	quad->SetTexture(bufferColourTex[0]);
+	quad->Draw();
 }
 
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
