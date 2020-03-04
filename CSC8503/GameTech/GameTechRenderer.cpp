@@ -59,6 +59,18 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, hostWindow.GetScreenSize().x, hostWindow.GetScreenSize().y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+
+	//generate colour texture
+	for (int i = 0; i < 2; i++)
+	{
+		glGenTextures(1, &bufferColourTex[i]);
+		glBindTexture(GL_TEXTURE_2D, bufferColourTex[i]);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, hostWindow.GetScreenSize().x, hostWindow.GetScreenSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	}
 }
 
 GameTechRenderer::~GameTechRenderer()	{
