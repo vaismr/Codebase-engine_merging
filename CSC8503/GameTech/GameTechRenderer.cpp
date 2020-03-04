@@ -47,7 +47,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	lightRadius = 1000.0f;
 	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 
-	
+	//post process additions
+	quad = 
 }
 
 GameTechRenderer::~GameTechRenderer()	{
