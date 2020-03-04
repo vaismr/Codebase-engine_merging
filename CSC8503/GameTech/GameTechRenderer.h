@@ -6,6 +6,8 @@
 
 #include "../CSC8503Common/GameWorld.h"
 
+#define POST_PASSES 10
+
 namespace NCL {
 	class Maths::Vector3;
 	class Maths::Vector4;
@@ -43,6 +45,20 @@ namespace NCL {
 			}
 
 			vector<const RenderObject*> activeObjects;
+
+
+			//post process things
+			void PresentScene();
+			void DrawPostProcess();
+			void DrawScene();
+
+			OGLShader* processShader;
+			OGLMesh* quad;
+
+			GLuint bufferFBO;
+			GLuint processFBO;
+			GLuint bufferColourTex[2];
+			GLuint bufferDepthTex;
 
 			//shadow mapping things
 			OGLShader*	shadowShader;
