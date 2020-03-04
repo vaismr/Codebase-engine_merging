@@ -6,10 +6,13 @@
 
 #include "../CSC8503Common/GameWorld.h"
 
+<<<<<<< HEAD
 #include "../CSC8503Common/"
 
 #define POST_PASSES 10
 
+=======
+>>>>>>> parent of aa21b98... Added to header as per pp tutorial
 namespace NCL {
 	class Maths::Vector3;
 	class Maths::Vector4;
@@ -48,6 +51,7 @@ namespace NCL {
 
 			vector<const RenderObject*> activeObjects;
 
+<<<<<<< HEAD
 
 			//post process things
 			void PresentScene();
@@ -62,6 +66,8 @@ namespace NCL {
 			GLuint bufferColourTex[2];
 			GLuint bufferDepthTex;
 
+=======
+>>>>>>> parent of aa21b98... Added to header as per pp tutorial
 			//shadow mapping things
 			OGLShader*	shadowShader;
 			GLuint		shadowTex;
