@@ -52,6 +52,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 //post processing additions
 	/*quad = Mesh::GenerateQuad*/
 	processShader = new OGLShader("GameTechVert.glsl", "ProcessFrag.glsl");
+	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
 	//generate our scene depth texture
 	glGenTextures(1, &bufferDepthTex);
@@ -97,6 +98,7 @@ GameTechRenderer::~GameTechRenderer()	{
 	glDeleteFramebuffers(1, &shadowFBO);
 
 	delete processShader;
+	delete sceneShader;
 	delete quad;
 
 	glDeleteTextures(2, bufferColourTex);
@@ -345,7 +347,9 @@ void GameTechRenderer::DrawPostProcess()
 
 void GameTechRenderer::PresentScene()
 {
-
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	BindShader(sha)
 }
 
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {

@@ -54,6 +54,7 @@ namespace NCL {
 			//void DrawScene(); this is the RenderCamera() function
 
 			OGLShader* processShader;
+			OGLShader* sceneShader;
 			OGLMesh* quad;
 
 			GLuint bufferFBO;
