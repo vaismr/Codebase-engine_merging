@@ -10,7 +10,9 @@
 #include "../CSC8503Common/PositionConstraint.h"
 
 #include <iostream>
-
+#include <fstream>
+#include <sstream>
+#include <ctime>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -703,14 +705,13 @@ void TutorialGame::InitWorld() {
 	physics->Clear();
 
 
-	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	AddGooseToWorld(Vector3(30, 2, 0));
-	AddAppleToWorld(Vector3(35, 2, 0));
+	InitMixedGridWorld(100, 100, 2.0f, 2.0f);
+	//AddGooseToWorld(Vector3(30, 2, 0));
+	//AddAppleToWorld(Vector3(35, 2, 0));
 
 	//AddParkKeeperToWorld(Vector3(40, 2, 0));
 	//AddCharacterToWorld(Vector3(45, 2, 0));
 
-	AddFloorToWorld(Vector3(0, -2, 0));
 	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80),2,1);
 	ball = (Ball*)tempball;
 	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
@@ -937,19 +938,29 @@ void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacin
 }
 
 void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing) {
-	float sphereRadius = 1.0f;
-	Vector3 cubeDims = Vector3(1, 1, 1);
-
+	std::ifstream map(Assets::DATADIR + "TestGrid.txt");
+	char temp;
+	string s;
+	std::getline(map, s);
+	std::getline(map, s);
+	std::getline(map, s);
 	for (int x = 0; x < numCols; ++x) {
 		for (int z = 0; z < numRows; ++z) {
-			Vector3 position = Vector3(x * colSpacing, 10.0f, z * rowSpacing);
+			Vector3 position = Vector3(z * colSpacing, 0.1f, x * rowSpacing);
+			map >> temp;
+			if (temp == '2') {
 
-			if (rand() % 2) {
-				AddCubeToWorld(position, cubeDims);
+				Vector3 cubeDims = Vector3(1, 1, 1);
+				Vector3 position = Vector3(z * colSpacing, 1.f, x * rowSpacing);
+				AddCubeToWorld(position, cubeDims, 0.f)->GetPhysicsObject()->SetType(ObjectType::Wall);
 			}
-			else {
-				AddSphereToWorld(position, sphereRadius);
-			}
+			//else if (temp == '1') {
+			//	AddWaterToWorld(position)->SetCollisionType(ObjectType::WATER);
+			//}
+			//else if (temp == '3')
+			//{
+			//	AddIslandToWorld(position)->SetCollisionType(ObjectType::HOME);
+			//}
 		}
 	}
 	AddFloorToWorld(Vector3(0, -2, 0));
@@ -962,7 +973,7 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 			AddCubeToWorld(position, cubeDims, 1.0f);
 		}
 	}
-	AddFloorToWorld(Vector3(0, -2, 0));
+	AddFloorToWorld(Vector3(100, -2, 100))->GetPhysicsObject()->SetType(ObjectType::Floor);
 }
 
 void TutorialGame::BridgeConstraintTest() {

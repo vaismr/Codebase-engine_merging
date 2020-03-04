@@ -12,6 +12,9 @@ namespace NCL {
 		Floor = 2,
 		Enemy = 4,
 		Collectable = 16,
+		Fire = 32,
+		Ice = 64,
+		Wall = 128,
 		Invalid = 256
 	};
 
