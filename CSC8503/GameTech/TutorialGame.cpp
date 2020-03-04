@@ -494,39 +494,34 @@ void TutorialGame::UpdateKeys() {
 }
 
 void TutorialGame::LockedObjectMovement() {
-	Matrix4 view		= world->GetMainCamera()->BuildViewMatrix();
-	Matrix4 camWorld	= view.Inverse();
-
-	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
-
-	//forward is more tricky -  camera forward is 'into' the screen...
-	//so we can take a guess, and use the cross of straight up, and
-	//the right axis, to hopefully get a vector that's good enough!
-
-	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
+	Matrix4 view = world->GetMainCamera()->BuildViewMatrix();
+	Matrix4 camWorld = view.Inverse();
+	float force = 30.0f;
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
 		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
-		selectionObject->GetPhysicsObject()->AddForce(dir * 30.0f);
-		cout << dir << endl;
-	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 
-		selectionObject->GetPhysicsObject()->AddForce(-rightAxis);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-		selectionObject->GetPhysicsObject()->AddForce(rightAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, 1);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
+
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-		selectionObject->GetPhysicsObject()->AddForce(fwdAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(-1, 0, 0);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(1, 0, 0);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::I)) {
-		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(totalImpulse);
+	
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
+		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(dir * force);
 	}
 }
 
