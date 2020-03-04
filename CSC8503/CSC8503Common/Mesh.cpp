@@ -1,5 +1,8 @@
 # include "Mesh.h"
 
+#include "../../Common/Vector2.h"
+#include "../../Common/Vector3.h"
+
 Mesh::Mesh(void) 
 {
 	for (int i = 0; i < MAX_BUFFER; ++i) 

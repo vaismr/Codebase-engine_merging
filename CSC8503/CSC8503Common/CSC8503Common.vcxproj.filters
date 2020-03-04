@@ -129,6 +129,7 @@
     <ClInclude Include="LoadingScreen.h">
       <Filter>Other</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp">
@@ -212,5 +213,6 @@
     <ClCompile Include="Test1.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp" />
   </ItemGroup>
 </Project>

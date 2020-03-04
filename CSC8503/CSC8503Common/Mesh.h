@@ -1,5 +1,7 @@
 # pragma once
-# include "OGLRenderer.h"
+# include "../../Plugins/OpenGLRendering/OGLRenderer.h"
+#include "../../Common/MeshGeometry.h"
+#include "../../Plugins/OpenGLRendering/glad/glad.h"
 
 enum MeshBuffer 
 {
