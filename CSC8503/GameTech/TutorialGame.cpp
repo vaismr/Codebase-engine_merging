@@ -187,6 +187,8 @@ void TutorialGame::UpdateGame(float dt) {
 			UpdateListener(dt);
 			audioEngine.Update();
 
+			UpdateArrow();
+
 			RenderInGameHud(dt);
 			break;
 
