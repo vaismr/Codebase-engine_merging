@@ -6,6 +6,7 @@
 #include "../GameTech/Sound/AudioEngine.h"
 #include <imgui/imgui.h>
 #include "../CSC8503Common/LoadingScreen.h"
+#include "ball.h"
 
 class LevelBase;
 
@@ -66,6 +67,7 @@ namespace NCL {
 			void UpdateKeys();
 
 			void InitWorld();
+			void Initball();
 
 			void TogglePauseMenu() {
 				if (state == GameState::PAUSED) {
@@ -105,6 +107,16 @@ namespace NCL {
 			void DebugObjectMovement();
 			void LockedObjectMovement();
 			void LockedCameraMovement();
+			
+			void renderHUD(float dt);
+			//arrow
+			float dir;
+			void UpdateArrow();
+			float Impulsesize=0;
+			Vector3 Impulsedir;
+			Vector3 totalImpulse;
+			Vector3 Arrowlength;
+
 
 
 			void RenderInGameHud(float dt);
@@ -113,9 +125,12 @@ namespace NCL {
 			void TutorialGame::RenderEndgameMenu(float dt);
 
 
+
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
 			GameWorld* world;
+			Ball* ball;
+
 
 			bool useGravity;
 			bool inSelectionMode;
