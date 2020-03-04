@@ -401,7 +401,7 @@ void TutorialGame::RenderEndgameMenu(float dt) {
 		state = GameState::MAIN_MENU;
 	}
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
-	if (ImGui::Button("quit game", ImVec2(-1.0f, 0.0f))) {
+	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
 		closed = true;
 	}
 	ImGui::SetWindowFontScale(1.0f);
