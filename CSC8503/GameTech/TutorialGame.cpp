@@ -87,6 +87,8 @@ void TutorialGame::InitialiseAssets() {
 	particleMesh->SetPrimitiveType(GeometryPrimitive::Points);
 
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
+	backgroundTex = (OGLTexture*)TextureLoader::LoadAPITexture("fantasy.png");
+
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 	particleShader = new OGLShader("particleVert.glsl", "particleFrag.glsl", "particleGeom.glsl");
 
@@ -288,7 +290,7 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 			| ImGuiWindowFlags_NoBringToFrontOnFocus;
 	
 	auto dl = ImGui::GetBackgroundDrawList();
-	dl->AddImage(basicTex, ImVec2(0, 0), ImVec2(1920, 1080));
+	dl->AddImage(backgroundTex->GetImGuiID(), ImVec2(0, 0), ImVec2(1280, 720));
 
 	 ImGui::SetNextWindowPos(ImVec2(454,190), ImGuiCond_Once);
 	 ImGui::SetNextWindowSize(ImVec2(336,371), ImGuiCond_Once);

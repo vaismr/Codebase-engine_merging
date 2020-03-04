@@ -135,6 +135,7 @@ namespace NCL {
 			OGLMesh* cubeMesh = nullptr;
 			OGLMesh* sphereMesh = nullptr;
 			OGLTexture* basicTex = nullptr;
+			OGLTexture* backgroundTex = nullptr;
 			OGLShader* basicShader = nullptr;
 			OGLShader* particleShader = nullptr;
 
