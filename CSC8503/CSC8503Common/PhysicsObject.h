@@ -9,7 +9,7 @@ namespace NCL {
 	
 	enum class ObjectType {
 		Regular = 1,
-		Floor = 2,
+		Floor = 2, 
 		Enemy = 4,
 		Collectable = 16,
 		Invalid = 256

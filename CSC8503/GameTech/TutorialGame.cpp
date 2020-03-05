@@ -1,4 +1,4 @@
-#include "TutorialGame.h"
+ #include "TutorialGame.h"
 #include "../CSC8503Common/GameWorld.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
@@ -8,8 +8,8 @@
 #include "../../Common/Assets.h"
 
 #include "../CSC8503Common/PositionConstraint.h"
-
 #include <iostream>
+
 
 
 #include <imgui/imgui.h>
@@ -18,17 +18,8 @@
 
 #include "imgui_progressbar.h"
 
-#include "LevelTest.h"
-
-#include "Level1.h"
-
-#include "../CSC8503Common/LoadingScreen.h"
-
-
 using namespace NCL;
 using namespace CSC8503;
-
-
 
 TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
@@ -41,24 +32,12 @@ TutorialGame::TutorialGame()	{
 
 	Debug::SetRenderer(renderer);
 
-
 	InitialiseAssets();
 
 	audioEngine.Init();
 	audioEngine.LoadSound("../../Assets/Sounds/jaguar.wav");
 	audioEngine.LoadSound("../../Assets/Sounds/wave.mp3");
-	/*audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });*/
-
-
-	//levels.push_back(new LevelTest()); // level 0
-	//levels.push_back(new Level1());
-	//levels.push_back(new Level1());
-
-	//;
-	//levels.push_back(new Level1());
-	//levels.push_back(new Level1()); // level 5
-
-
+	audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });
 }
 
 /*
@@ -75,7 +54,6 @@ void TutorialGame::InitialiseAssets() {
 		(*into)->UploadToGPU();
 	};
 
-	loadFunc("Particle.msh"		 , &particleMesh);
 	loadFunc("cube.msh"		 , &cubeMesh);
 	loadFunc("sphere.msh"	 , &sphereMesh);
 	loadFunc("goose.msh"	 , &gooseMesh);
@@ -84,30 +62,21 @@ void TutorialGame::InitialiseAssets() {
 	loadFunc("CharacterF.msh", &charB);
 	loadFunc("Apple.msh"	 , &appleMesh);
 
-	particleMesh->SetPrimitiveType(GeometryPrimitive::Points);
-
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
-	backgroundTex = (OGLTexture*)TextureLoader::LoadAPITexture("fantasy.png");
-
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
-	particleShader = new OGLShader("particleVert.glsl", "particleFrag.glsl", "particleGeom.glsl");
-
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
 	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
-	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 40);
-	fontbutton = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 36);
-	fontHeader = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 60);
-
+	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 16);
 
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
 
 
+
 	InitCamera();
 	InitWorld();
-
 }
 
 TutorialGame::~TutorialGame()	{
@@ -121,189 +90,56 @@ TutorialGame::~TutorialGame()	{
 	delete renderer;
 	delete world;
 
-	delete particleMesh;
-	delete particleShader;
-
 	audioEngine.Shutdown();
 }
 
 void TutorialGame::UpdateGame(float dt) {
-
-	lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
+lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is updated below
 
 	if (!isPaused) {
-		ImGui_ImplOpenGL3_NewFrame();
-#if _WIN32
-		ImGui_ImplWin32_NewFrame();
-#elif __ORBIS__
-		// TODO: PS4 New Frame?? GLFW + gl3w?
-		ImGui_Impl ? ? ? ? _NewFrame();
-#endif
-		ImGui::NewFrame();
-
-		switch (state) {
-		case GameState::MAIN_MENU:
-			RenderMainGameMenu(dt);
-			break;
-
-		case GameState::LOADING:
-
-			loadingScreen = new LoadingScreen();
-
-			//level = levels[level_number];
-			InitWorld();
-			//Sleep(200);
-			state = GameState::IN_GAME;
-			Window::GetWindow()->ShowOSPointer(false);
-			Window::GetWindow()->LockMouseToWindow(true);
-
-			delete loadingScreen;
-			loadingScreen = nullptr;
-			break;
-
-		case GameState::IN_GAME:
-
-			if (!inSelectionMode) {
-				world->GetMainCamera()->UpdateCamera(dt);
-			}
-			if (lockedObject != nullptr) {
-				LockedCameraMovement();
-			}
-
-			UpdateKeys();
-
-			/*if (useGravity) {
-				Debug::Print("(G)ravity on", Vector2(10, 40));
-			}
-			else {
-				Debug::Print("(G)ravity off", Vector2(10, 40));
-			}*/
-
-			SelectObject();
-			MoveSelectedObject();
-
-			if (inDebugMode) {
-				RenderDebugUi(dt);
-
-			}
-			else {
-				world->UpdateWorld(dt);
-				renderer->Update(dt);
-				physics->Update(dt);
-
-
-				Debug::FlushRenderables();
-				UpdateListener(dt);
-				audioEngine.Update();
-
-				UpdateArrow();
-
-				RenderInGameHud(dt);
-			}
-			break;
-
-		case GameState::PAUSED:
-			
-			//Debug::Print("Game Paused", Vector2(50, 100));
-			UpdatePauseMenu();
-
-			RenderInGameHud(0);
-			RenderPauseMenu(dt);
-			
-			break;
-
-		case GameState::END_GAME:
-
-			UpdateEndgameMenu();
-
-			RenderEndgameMenu(dt);
-
-			break;
+		if (!inSelectionMode) {
+			world->GetMainCamera()->UpdateCamera(dt);
 		}
+		if (lockedObject != nullptr) {
+			LockedCameraMovement();
+		}
+
+		UpdateKeys();
+
+		/*if (useGravity) {
+			Debug::Print("(G)ravity on", Vector2(10, 40));
+		}
+		else {
+			Debug::Print("(G)ravity off", Vector2(10, 40));
+		}*/
+
+		SelectObject();
+		MoveSelectedObject();
+
+		world->UpdateWorld(dt);
+		renderer->Update(dt);
+        //Updateballco();
+		physics->Update(dt);
+		renderHUD(dt);
+		
+		UpdateListener(dt);
+		UpdateBridge(dt);
+		
+		audioEngine.Update();
+		UpdateArrow();
+		Debug::FlushRenderables();
+		renderer->Render();
 	}
-	ImGui::Render();
-
-	Debug::FlushRenderables();
-	renderer->Render();
-}
-
-
-void TutorialGame::RenderDebugUi(float dt) {
-
-	ImGuiWindowFlags debugflags =
-		ImGuiWindowFlags_NoScrollbar
-		| ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoNav
-		| ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(340, 300), ImGuiCond_Always);
-
-	ImGui::Begin("Debug", nullptr, debugflags);
-	ImGui::SetWindowFontScale(1.0f);
-
-	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-	std::clock_t start;
-
-	start = std::clock();
-	world->UpdateWorld(dt);
-	float duration = ((std::clock() - start) / (float)CLOCKS_PER_SEC) / 1000.0f;
-	ImGui::Text("Update World: %.10f", duration);
-
-	start = std::clock();
-	renderer->Update(dt);
-	duration = (std::clock() - start) / (float)CLOCKS_PER_SEC / 1000.0f;
-	ImGui::Text("Update Renderer: %.10f", duration);
-
-	start = std::clock();
-	physics->Update(dt);
-	duration = (std::clock() - start) / (float)CLOCKS_PER_SEC / 1000.0f;
-	ImGui::Text("Update Physics: %.10f", duration);
-
-	start = std::clock();
-	UpdateListener(dt);
-	duration = (std::clock() - start) / (float)CLOCKS_PER_SEC / 1000.0f;
-	ImGui::Text("Update Listener: %.10f", duration);
-
-	start = std::clock();
-	audioEngine.Update();
-	duration = (std::clock() - start) / (float)CLOCKS_PER_SEC / 1000.0f;
-	ImGui::Text("Update Audio: %.10f", duration);
-
-	PROCESS_MEMORY_COUNTERS_EX pmc;
-	GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-	SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
-	SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-
-	MEMORYSTATUSEX memInfo;
-	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-	GlobalMemoryStatusEx(&memInfo);
-	DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
-	DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
-
-	totalPhysMem /= 1048576; // convert from bytes to megabytes, int division top round down and make it easier to read
-	totalVirtualMem /= 1048576;
-	physMemUsedByMe /= 1048576;
-	virtualMemUsedByMe /= 1048576;
-
-	ImGui::Text("Physical Memory Used (MB): %d/%d", physMemUsedByMe, totalPhysMem);
-	ImGui::Text("Virtual Memory Used (MB): %d/%d", virtualMemUsedByMe, totalVirtualMem);
-	
-	if (selectionObject) {
-		ImGui::Text("Object info");
-		ImGui::Text("Object Position: %.3f %.3f %.3f", selectionObject->GetConstTransform().GetWorldPosition().x,
-			selectionObject->GetConstTransform().GetWorldPosition().y, selectionObject->GetConstTransform().GetWorldPosition().z);
-
-		ImGui::Text("Object Orientation: %.3f %.3f %.3f", selectionObject->GetConstTransform().GetWorldOrientation().x,
-			selectionObject->GetConstTransform().GetWorldOrientation().y, selectionObject->GetConstTransform().GetWorldOrientation().z, (int)selectionObject->GetConstTransform().GetWorldOrientation().w);
+	else {
+		UpdatePauseMenu();
+		Debug::Print("Game Paused", Vector2(50, 100));
+		Debug::FlushRenderables();
+		renderer->Render();
 	}
-	ImGui::End();
-
-	UpdateArrow();
-	RenderInGameHud(dt);
 }
+//void TutorialGame::Updateballco() {
+//	isOnWater = ball->onWater;
+//}
 void TutorialGame::UpdateListener(float dt)
 {
 	//update audio
@@ -312,8 +148,6 @@ void TutorialGame::UpdateListener(float dt)
 
 	//calculate distance between camera in this frame and last frame, using dt to get velocity - used for doppler effect
 	Vec3 cameraVelocity = Vec3{ (world->GetMainCamera()->GetPosition().x - lastCamPos.x) / dt, (world->GetMainCamera()->GetPosition().y - lastCamPos.y) / dt, (world->GetMainCamera()->GetPosition().z - lastCamPos.z) / dt };
-
-	
 
 	float cosPitch = cos(world->GetMainCamera()->GetPitch());
 	float cosYaw = cos(world->GetMainCamera()->GetYaw());
@@ -329,187 +163,49 @@ void TutorialGame::UpdateListener(float dt)
 	Vec3 cameraForward = Vec3{ comp0 / forwardMagnitude, comp1 / forwardMagnitude, comp2 / forwardMagnitude }; //forwards orientation, unit vector and perpendicular to up
 
 	//up = (forward x 0,1,0) x forward
-	Vec3 cameraUpTemp = Vec3{ (cameraForward.y * 0) - (cameraForward.z * 1), (cameraForward.z * 0) - (cameraForward.x * 0), (cameraForward.x * 1) - (cameraForward.y * 0) };
-	Vec3 cameraUp = Vec3{ (cameraUpTemp.y * cameraForward.z) - (cameraUpTemp.z * cameraForward.y), (cameraUpTemp.z * cameraForward.x) - (cameraUpTemp.x * cameraForward.z), (cameraUpTemp.x * cameraForward.y) - (cameraUpTemp.y * cameraForward.x) };
+	Vec3 cameraUp = Vec3{ (cameraForward.y * 0) - (cameraForward.z * 1), (cameraForward.z * 0) - (cameraForward.x * 0), (cameraForward.x * 1) - (cameraForward.y * 0) };
+	cameraUp = Vec3{ (cameraUp.y * cameraForward.z) - (cameraUp.z * cameraForward.y), (cameraUp.z * cameraForward.x) - (cameraUp.x * cameraForward.z), (cameraUp.x * cameraForward.y) - (cameraUp.y * cameraForward.x) };
 
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
-	{
-		cout << cameraUp.x << " " << cameraUp.y << " " << cameraUp.z << endl;
-	}
-
-	//camerup giving negative values, not allowed so not setting listener, maybe normalise? maybe magnitude value?
 	audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, cameraUp);
-	//audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, Vec3{0,1,0});
-
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
-	{
-		cout << lastCamPos.x << endl;
-	}		
 }
 
 
+
+//@TODO UI stuff - need on screen msg showing "Game Paused", quit game button, also mute audio
 void TutorialGame::UpdatePauseMenu() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P))
 	{
 		TogglePauseMenu();
 		audioEngine.TogglePauseAllChannels();
 	}		
-
 }
 
-void TutorialGame::UpdateEndgameMenu() {
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
-		ToggleEndgameMenu();
+void NCL::CSC8503::TutorialGame::renderHUD(float dt)
+{
 
-}
+	ImGui_ImplOpenGL3_NewFrame();
+#if _WIN32
+	ImGui_ImplWin32_NewFrame();
+#elif __ORBIS__
+	// TODO: PS4 New Frame?? GLFW + gl3w?
+	ImGui_Impl????_NewFrame();
+#endif
+	ImGui::NewFrame();
 
-void TutorialGame::RenderMainGameMenu(float dt) {
-
-	ImGuiWindowFlags Miainflags =
-		ImGuiWindowFlags_NoTitleBar
-			| ImGuiWindowFlags_NoScrollbar
-			| ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoResize
-			| ImGuiWindowFlags_NoNav
-			| ImGuiWindowFlags_NoBringToFrontOnFocus;
-	
-	auto dl = ImGui::GetBackgroundDrawList();
-	dl->AddImage(backgroundTex->GetImGuiID(), ImVec2(0, 0), ImVec2(1280, 720));
-
-	 ImGui::SetNextWindowPos(ImVec2(454,190), ImGuiCond_Once);
-	 ImGui::SetNextWindowSize(ImVec2(336,371), ImGuiCond_Once);
-
-	ImGui::Begin("Main Menu",nullptr,Miainflags );
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
-	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
-	ImGui::PushFont(fontMainDlg);
-	if (ImGui::Button("START GAME", ImVec2(-1.0f, 0.0f))) {
-		state = GameState::LOADING;
-		level_number = 0;
-	}
-
-
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
-	if (ImGui::Button("CHOICE LEVEL", ImVec2(-1.0f, 0.0f))) {
-		// LOAD_LEVEL
-		state = GameState::LOADING;
-	/*	level_number = level_number - 1;*/
-	}
-	//ImGui::SliderInt("level", &level_number, 1, levels.size());
-
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
-	if (ImGui::Button("OPTIONS", ImVec2(-1.0f, 0.0f))) {
-		
-	}
-
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
-	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
-		closed = true;
-	}
-
-	ImGui::PopFont();
-	ImGui::PopStyleColor();
-	ImGui::End();
-}
-
-void TutorialGame::RenderPauseMenu(float dt) {
-	
-	ImGuiWindowFlags pausedflags =
-		ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoScrollbar
-		| ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoNav
-		| ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-	ImGui::SetNextWindowPos(ImVec2(511,314), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(229,176), ImGuiCond_Once);
-
-
-	ImGui::Begin("Pause menu",nullptr, pausedflags);
-	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
-	// RGBA
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
-	ImGui::PushFont(fontMainDlg);
-	if (ImGui::Button("MAIN MENU", ImVec2(-1.0f, 0.0f))) {
-		 state = GameState::MAIN_MENU;
-	}
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
-	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
-		closed = true;
-	}
-	ImGui::PopFont();
-	ImGui::PopStyleColor();
-
-	ImGui::End();
-}
-
-void TutorialGame::RenderEndgameMenu(float dt) {
-	
-	ImGuiWindowFlags endflags =
-		ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoScrollbar
-		| ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoNav
-		| ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-	ImGuiWindowFlags flags =
-		ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoScrollbar
-		| ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoNav
-		| ImGuiWindowFlags_NoBackground
-		| ImGuiWindowFlags_NoBringToFrontOnFocus;
-	
-	ImGui::SetNextWindowPos(ImVec2(471,168), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(318,89), ImGuiCond_Always);
-
-
-	ImGui::Begin("Endgamehud", nullptr, flags);
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
-	ImGui::PushFont(fontHeader);
-	ImGui::Text(" GAME OVER "); 
-	ImGui::PopFont();
-	ImGui::PopStyleColor();
-	ImGui::End();
-
-	ImGui::SetNextWindowPos(ImVec2(518,331), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(224,161), ImGuiCond_Always);
-
-	ImGui::Begin("Endgame", nullptr, endflags);
-	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
-	ImGui::PushFont(fontMainDlg);
-	
-	if (ImGui::Button("MAIN MENU", ImVec2(-1.0f, 0.0f))) {
-		state = GameState::MAIN_MENU;
-	}
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
-	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
-		closed = true;
-	}
-	ImGui::SetWindowFontScale(1.0f);
-	ImGui::PopFont();
-	ImGui::PopStyleColor();
-	ImGui::End();
-
-}
-
-void TutorialGame::RenderInGameHud(float dt) {
 	// Start the Dear ImGui frame
 	static float f = 100.0f;
 	f -= dt;
+
 	float power = 0.5f;
 
 	const ImU32 red = 0xFF0000FF;
 	const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
 	const ImU32 bg = ImGui::GetColorU32(ImGuiCol_Button);
 
-	
-	ImGuiWindowFlags flags =
+	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_Always);
+
+	ImGuiWindowFlags flags = 
 		ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoScrollbar
 		| ImGuiWindowFlags_NoMove
@@ -517,45 +213,40 @@ void TutorialGame::RenderInGameHud(float dt) {
 		| ImGuiWindowFlags_NoNav
 		| ImGuiWindowFlags_NoBackground
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
-	
-	
 
 	//Time window
-	ImGui::SetNextWindowPos(ImVec2(466,6), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(317,95), ImGuiCond_Always);
-	ImGui::Begin("Time Window", nullptr, flags);
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
-	ImGui::PushFont(fontHeader);
-
-	ImGui::Text(" Time : %.2fs", f);             
+	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::SetWindowFontScale(2.5f);
+	
+	ImGui::PushFont(fontMainDlg);
+	ImGui::Text(" Time : %.2fs", f);               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
-	ImGui::PopStyleColor();
+
 
 	ImGui::End();
 
 	//power window
-	ImGui::SetNextWindowPos(ImVec2(16,575), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(344,109), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(800, 450), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
 
-	ImGui::Begin("Power window", nullptr, flags); 
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
+	ImGui::Begin("Hello, world!", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	
 	ImGui::PushFont(fontMainDlg);
 	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
 	ImGui::ProgressBar("##progress_bar1", power, ImVec2(500, 25), red, col);
-	ImGui::PopStyleColor();
 
+	ImGui::SetWindowFontScale(2.5f);
 	ImGui::End();
 
 	//Name window
-	ImGui::SetNextWindowPos(ImVec2(966,593), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(276,71), ImGuiCond_Always);
-	ImGui::Begin("Name window", nullptr, flags); 
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
-	ImGui::PushFont(fontMainDlg);
+	ImGui::SetNextWindowPos(ImVec2(50, 550), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1000, 1000), ImGuiCond_Always);
+	ImGui::Begin("Name", nullptr, flags); // Create a window called "Hello, world!" and append into it.
+	ImGui::SetWindowFontScale(2.5f);
+
 	static char name[32] = "Unknown";
 	char buf[64]; sprintf_s(buf, IM_ARRAYSIZE(buf), "Name: %s###ButtonChangeName", name);
-
 	if (ImGui::Button(buf))
 	{
 		ImGui::OpenPopup("PopupNameEditor");
@@ -570,12 +261,10 @@ void TutorialGame::RenderInGameHud(float dt) {
 			ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
-	ImGui::PopFont();
-	ImGui::PopStyleColor();
 
 	ImGui::End();
+	ImGui::Render();
 }
-
 
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
@@ -594,19 +283,10 @@ void TutorialGame::UpdateKeys() {
 	}
 		
 
-	
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
-		ToggleEndgameMenu();
-
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
 		useGravity = !useGravity; //Toggle gravity!
 		physics->UseGravity(useGravity);
 	}
-
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::TAB)) {
-		inDebugMode = !inDebugMode;
-	}
-
 	//Running certain physics updates in a consistent order might cause some
 	//bias in the calculations - the same objects might keep 'winning' the constraint
 	//allowing the other one to stretch too much etc. Shuffling the order so that it
@@ -628,7 +308,7 @@ void TutorialGame::UpdateKeys() {
 	//sounds testing
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) 
 	{
-		//audioEngine.PlaySounds("../../Assets/Sounds/jaguar.wav", Vec3{0,10,0}, 10.0f);
+		audioEngine.PlaySounds("../../Assets/Sounds/jaguar.wav", Vec3{0,10,0}, 10.0f);
 		audioEngine.PrintListenerPos();
 	}
 	
@@ -648,6 +328,18 @@ void TutorialGame::UpdateKeys() {
 void TutorialGame::LockedObjectMovement() {
 	Matrix4 view		= world->GetMainCamera()->BuildViewMatrix();
 	Matrix4 camWorld	= view.Inverse();
+	Vector3 floatingforce(0.0f   ,0.1f, -1.0f);
+	float force = 30.0f;
+	if (ball->onBridge== true) {
+		ball->GetPhysicsObject()->ApplyLinearImpulse(floatingforce);
+		//ball->GetPhysicsObject()->ApplyLinearImpulse(totalImpulse * -1);
+		
+	}
+	if (ball->onWater == true && isSlowDown == false) {
+		Vector3 BallVelocity = ball->GetPhysicsObject()->GetLinearVelocity();
+		ball->GetPhysicsObject()->SetLinearVelocity(BallVelocity*0.5f);
+		isSlowDown = true;
+	}
 
 	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
 
@@ -656,38 +348,52 @@ void TutorialGame::LockedObjectMovement() {
 	//the right axis, to hopefully get a vector that's good enough!
 
 	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
+
+
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
 		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
-		selectionObject->GetPhysicsObject()->AddForce(dir * 30.0f);
-		cout << dir << endl;
-	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 
-		selectionObject->GetPhysicsObject()->AddForce(-rightAxis);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-		selectionObject->GetPhysicsObject()->AddForce(rightAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, 1);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
+
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-		selectionObject->GetPhysicsObject()->AddForce(fwdAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(-1, 0, 0);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(1, 0, 0);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::I)) {
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
 		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(totalImpulse);
+
+		isSlowDown = false;
 	}
 }
+
 
 void TutorialGame::UpdateArrow() {
 	Impulsedir= Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
 	Impulsesize+= Window::GetMouse()->GetWheelMovement();
-	Arrowlength = Impulsedir * Impulsesize * 10;
-	//Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
-	totalImpulse = Impulsedir *20 + Vector3(0,1,0) *Impulsesize ;
+	if (Impulsesize <= 0)
+	{
+		Impulsesize = 0;
+		totalImpulse =Vector3(0,0, 0);
+
+	}
+	else {
+		Arrowlength = Impulsedir * Impulsesize * 10;
+		//Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
+		totalImpulse = Impulsedir * 20 + Vector3(0, 1, 0) * Impulsesize;
+	}
 	renderer->DrawLine(ball->GetTransform().GetWorldPosition(), (ball->GetTransform().GetWorldPosition()) + Arrowlength, Vector4(1, 0, 0, 1));
 
 }
@@ -862,39 +568,39 @@ void TutorialGame::InitCamera() {
 }
 
 void TutorialGame::InitWorld() {
-	bool closed = false;
-	InitCamera();
-
 	world->ClearAndErase();
 	physics->Clear();
 
-
-	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	AddGooseToWorld(Vector3(30, 2, 0));
-	AddAppleToWorld(Vector3(35, 2, 0));
+	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	//AddGooseToWorld(Vector3(30, 2, 0));
+	//AddAppleToWorld(Vector3(35, 2, 0));
 
 	//AddParkKeeperToWorld(Vector3(40, 2, 0));
 	//AddCharacterToWorld(Vector3(45, 2, 0));
 
 	AddFloorToWorld(Vector3(0, -2, 0));
-	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80),2,1);
+	AddWaterToWorld(Vector3(60, 0.1f, 60));
+
+	MoveBridge=AddBridgeToWorld(Vector3(0, 0.1f, 0));
+	//MoveBridge = AddCubeToWorld(Vector3(0, 0, 50), Vector3(5, 1, 30), 0);
+
+	Ball* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 0.5);
 	ball = (Ball*)tempball;
-	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
-
-	//AddFloorToWorld(Vector3(0, -2, 0));
-
-	GameObject* tempice = AddIcecubeToWorld(Vector3(70, 6, 70), Vector3(2, 2, 2));
-	icecube = (Icecube*)tempball;
-	icecube->GetTransform().SetWorldScale(Vector3(3, 3, 3));
-
-	if (level) {
-		level->init(this);
-	}
-
-
+	//ball->SetCollisionType(CollisionType::DEFAULT);
 
 }
+void TutorialGame::UpdateBridge(float dt) {
 
+	MoveBridge->GetPhysicsObject()->SetLinearVelocity(velocity1);
+	BridgePosition = MoveBridge->GetTransform().GetWorldPosition();
+	cout << BridgePosition.x << endl;
+	if (BridgePosition.x >= 50) {
+		velocity1.x = -50;
+	}
+	else if (BridgePosition.x <= -50) {
+		velocity1.x = 50;
+	}
+}
 //From here on it's functions to add in objects to the world!
 
 /*
@@ -903,7 +609,7 @@ A single function to add a large immoveable cube to the bottom of our world
 
 */
 GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
-	GameObject* floor = new GameObject();
+	GameObject* floor = new GameObject("FLOOR");
 
 	Vector3 floorSize = Vector3(100, 2, 100);
 	AABBVolume* volume = new AABBVolume(floorSize);
@@ -921,7 +627,21 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 
 	return floor;
 }
+/*
+GameObject* TutorialGame::AddBridgeToWorld(const Vector3& position) {
+	GameObject* Bridge = new GameObject();
+	Vector3 bridgeSize = Vector3(40, 10, 10);
+	AABBVolume* volume = new AABBVolume(bridgeSize);
+	Bridge->SetBoundingVolume((CollisionVolume*)volume);
+	Bridge->GetTransform().SetWorldScale(bridgeSize);
 
+	Vector3 velocity= Vector3(300, 0, 0);
+	Bridge->GetPhysicsObject()->SetLinearVelocity(velocity);
+	Bridge->
+
+
+
+}*/
 /*
 
 Builds a game object that uses a sphere mesh for its graphics, and a bounding sphere for its
@@ -929,8 +649,8 @@ rigid body representation. This and the cube function will let you build a lot o
 physics worlds. You'll probably need another function for the creation of OBB cubes too.
 
 */
-GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
-	GameObject* sphere = new GameObject();
+Ball* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
+	Ball* sphere = new Ball("ball");
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
@@ -969,28 +689,59 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 
 	return cube;
 }
-
-GameObject* TutorialGame::AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass ) 
+GameObject* TutorialGame::AddWaterToWorld(const Vector3& position)
 {
-	GameObject* icecube = new GameObject("icecube");
-	AABBVolume* volume = new AABBVolume(dimensions);
-	icecube->SetBoundingVolume((CollisionVolume*)volume);
 
-	icecube->GetTransform().SetWorldPosition(position);
-	icecube->GetTransform().SetWorldScale(dimensions);
+	GameObject* water = new GameObject("WATER");
+	Vector3 dimensions = Vector3(50, 0.1f, 50);
+	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
 
-	icecube->SetRenderObject(new RenderObject(&icecube->GetTransform(), cubeMesh, nullptr, nullptr,"icecube"));
-	icecube->SetPhysicsObject(new PhysicsObject(&icecube->GetTransform(), icecube->GetBoundingVolume()));
+	water->SetBoundingVolume((CollisionVolume*)volume);
 
-    icecube->GetPhysicsObject()->SetInverseMass(inverseMass);
-	icecube->GetPhysicsObject()->InitCubeInertia();
+	water->GetTransform().SetWorldPosition(position);
+	water->GetTransform().SetWorldScale(dimensions);
 
-	world->AddGameObject(icecube);
+	water->SetRenderObject(new RenderObject(&water->GetTransform(), cubeMesh, 0, basicShader));
+	water->SetPhysicsObject(new PhysicsObject(&water->GetTransform(), water->GetBoundingVolume()));
+	water->GetRenderObject()->SetColour(Vector4(0.2f, 0.2f, 1.0f, 1.0f));
 
-	return icecube;
+	water->GetPhysicsObject()->SetInverseMass(0);
+	water->GetPhysicsObject()->InitCubeInertia();
 
+	world->AddGameObject(water);
+
+	return water;
 }
+GameObject* TutorialGame::AddBridgeToWorld(const Vector3& position)
+{
+	GameObject* Bridge = new GameObject("BRIDGE");
+//	Vector3 dimensions = Vector3(10.0f, 0.1f, 10.0f);;
+	Vector3 BridgeSize = Vector3(5, 0.1, 15);
 
+	AABBVolume* volume = new AABBVolume(BridgeSize);
+
+	Bridge->SetBoundingVolume((CollisionVolume*)volume);
+
+	Bridge->GetTransform().SetWorldPosition(position);
+	Bridge->GetTransform().SetWorldScale(BridgeSize);
+
+	Bridge->SetRenderObject(new RenderObject(&Bridge->GetTransform(), cubeMesh, basicTex, basicShader));
+	Bridge->SetPhysicsObject(new PhysicsObject(&Bridge->GetTransform(), Bridge->GetBoundingVolume()));
+	Bridge->GetRenderObject()->SetColour(Vector4(0.1f, 0.2f, 1.0f, 1.0f));
+	Bridge->GetPhysicsObject()->SetInverseMass(0);
+	Bridge->GetPhysicsObject()->InitCubeInertia();
+	/*Bridge->GetPhysicsObject()->SetLinearVelocity(velocity1);
+	BridgePosition = Bridge->GetTransform().GetWorldPosition();
+	cout << BridgePosition.x << endl;
+	if (BridgePosition.x >= 550) {
+		velocity1.x = -500;
+	}
+	else if (BridgePosition.x <= -550) {
+		velocity1.x = 500;
+	}*/
+	world->AddGameObject(Bridge);
+	return Bridge;
+}
 GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
 {
 	float size			= 1.0f;
@@ -1093,30 +844,6 @@ GameObject* TutorialGame::AddAppleToWorld(const Vector3& position) {
 	world->AddGameObject(apple);
 
 	return apple;
-}
-
-GameObject* TutorialGame::AddParticleToWorld(const Vector3& position, OGLTexture* texture, const float alpha)
-{
-	GameObject* particle = new GameObject();
-
-	SphereVolume* volume = new SphereVolume(0.7f);
-	particle->SetBoundingVolume((CollisionVolume*)volume);
-
-	particle->GetTransform().SetWorldScale(Vector3(10, 10, 10));
-	particle->GetTransform().SetWorldPosition(position);
-
-	RenderObject* rObj = new RenderObject(&particle->GetTransform(), particleMesh, texture, particleShader);
-	rObj->SetColour(Vector4(0.5, 1, 1, 0.5));
-
-	particle->SetRenderObject(rObj);
-	particle->SetPhysicsObject(new PhysicsObject(&particle->GetTransform(), particle->GetBoundingVolume()));
-
-	particle->GetPhysicsObject()->SetInverseMass(1.0f);
-	particle->GetPhysicsObject()->InitSphereInertia();
-
-	world->AddGameObject(particle);
-
-	return particle;
 }
 
 void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius) {
