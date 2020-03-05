@@ -509,9 +509,6 @@ void TutorialGame::InitWorld() {
 	patrolAI = (EnemyAIPatrol*)AddPatrolAIToWorld(Vector3(40, 2, -10));
 
 	AddFloorToWorld(Vector3(0, -2, 0));
-
-	selectionObject = ball;
-	lockedObject = ball;
 }
 
 //From here on it's functions to add in objects to the world!
