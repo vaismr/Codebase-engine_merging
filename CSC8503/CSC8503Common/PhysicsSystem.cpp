@@ -315,6 +315,10 @@ void PhysicsSystem::NarrowPhase() {
 		CollisionDetection::CollisionInfo info = *i;
 		if (info.a->IsStatic() && info.b->IsStatic()) {
 			continue;
+
+		}
+		if (info.a->IsActive() == false || info.b->IsActive() == false) {
+			continue;
 		}
 		if (CollisionDetection::ObjectIntersection(info.a, info.b, info)) {
 			info.framesLeft = numCollisionFrames;

@@ -328,14 +328,18 @@ void TutorialGame::LockedObjectMovement() {
 	Matrix4 camWorld	= view.Inverse();
 	Vector3 floatingforce(0, 0, 40.0f);
 	float force = 30.0f;
-	if (selectionObject->GetIsOnBridge() == true) {
-		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(floatingforce);
-	}
+	//if (selectionObject->GetIsOnBridge() == true) {
+	//	selectionObject->GetPhysicsObject()->ApplyLinearImpulse(floatingforce);
+	//}
 
-	if (ball->onWater == true && isSlowDown == false) {
+	if (ball->isOnWater == true && ball->isSlowDown == false) {
 		Vector3 BallVelocity = ball->GetPhysicsObject()->GetLinearVelocity();
 		ball->GetPhysicsObject()->SetLinearVelocity(BallVelocity*0.5f);
-		isSlowDown = true;
+		ball->isSlowDown = true;
+	}
+
+	if (ball->GetName() == "FIRE" && ball->hitIce == true) {
+		
 	}
 
 	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
@@ -379,9 +383,14 @@ void TutorialGame::LockedObjectMovement() {
 void TutorialGame::UpdateArrow() {
 	Impulsedir= Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
 	Impulsesize+= Window::GetMouse()->GetWheelMovement();
-	Arrowlength = Impulsedir * Impulsesize * 10;
-	//Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
-	totalImpulse = Impulsedir *20 + Vector3(0,1,0) *Impulsesize ;
+	if(Impulsesize <= 0){
+		totalImpulse = Vector3(0, 0, 0);
+	}
+	else {
+		Arrowlength = Impulsedir * Impulsesize * 10;
+		//Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
+		totalImpulse = Impulsedir * 20 + Vector3(0, 1, 0) * Impulsesize;
+	}
 	renderer->DrawLine(ball->GetTransform().GetWorldPosition(), (ball->GetTransform().GetWorldPosition()) + Arrowlength, Vector4(1, 0, 0, 1));
 
 }
@@ -567,11 +576,13 @@ void TutorialGame::InitWorld() {
 	//AddCharacterToWorld(Vector3(45, 2, 0));
 
 	AddFloorToWorld(Vector3(0, -2, 0));
-	AddWaterToWorld(Vector3(60, 0.1f, 60))->SetCollisionType(CollisionType::WATER);
+	AddWaterToWorld(Vector3(60, 0.1f, 60));
+	AddIceToWorld(Vector3(40, 1.0f, 40), Vector3(1.0f, 1.0f, 1.0f));
 
 	Ball* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 1);
 	ball = (Ball*)tempball;
-	ball->SetCollisionType(CollisionType::DEFAULT);
+
+	
 
 }
 
@@ -624,7 +635,7 @@ physics worlds. You'll probably need another function for the creation of OBB cu
 
 */
 Ball* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
-	Ball* sphere = new Ball("ball");
+	Ball* sphere = new Ball("FIRE");
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
@@ -663,6 +674,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 
 	return cube;
 }
+
 GameObject* TutorialGame::AddWaterToWorld(const Vector3& position)
 {
 
@@ -686,6 +698,29 @@ GameObject* TutorialGame::AddWaterToWorld(const Vector3& position)
 
 	return water;
 }
+
+GameObject* TutorialGame::AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
+	GameObject* ice = new GameObject("ICE");
+
+	AABBVolume* volume = new AABBVolume(dimensions);
+
+	ice->SetBoundingVolume((CollisionVolume*)volume);
+
+	ice->GetTransform().SetWorldPosition(position);
+	ice->GetTransform().SetWorldScale(dimensions);
+
+	ice->SetRenderObject(new RenderObject(&ice->GetTransform(), cubeMesh, 0, basicShader));
+	ice->SetPhysicsObject(new PhysicsObject(&ice->GetTransform(), ice->GetBoundingVolume()));
+	ice->GetRenderObject()->SetColour(Vector4(0.8f, 1.0f, 1.0f, 1.0f));
+
+	ice->GetPhysicsObject()->SetInverseMass(0);
+	ice->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(ice);
+
+	return ice;
+}
+
 GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
 {
 	float size			= 1.0f;

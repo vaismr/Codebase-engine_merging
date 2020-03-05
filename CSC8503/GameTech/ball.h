@@ -10,29 +10,29 @@ namespace NCL {
 
 		public:
 			Ball(string name = "");
-			bool onWater = false;
-			//void OnCollisionBegin(GameObject* otherObject)
+			bool isOnFloor = false;
+
+			//ball on water will slow down
+			bool isOnWater = false;
+			bool isSlowDown = false;
+			bool hitIce = false;
 
 			void OnCollisionBegin(GameObject* otherObject) override
-			{
-		
 
-				if (otherObject->GetName()=="WATER")
+			{
+				if (otherObject->GetName()=="FLOOR")
 				{
-					this->onWater = true;
+					this->isOnFloor = true;
+					this->isOnWater = false;
 				}
-				else if (otherObject->GetName() == "FLOOR") {
-					this->onWater = false;
+				else if (otherObject->GetName() == "WATER") {
+					this->isOnFloor = false;
+					this->isOnWater = true;
 				}
-				//if (otherObject->GetCollisitionType() == CollisionType::BRIDGE && !IsOnBridge)
-				//{
-				//	SetIsOnBridge(true);
-				//}
-				//if (otherObject->GetCollisitionType() == CollisionType::FLOOR && IsOnWater)
-				//{
-				//	SetIsOnWater(false);
-				//	SetIsOnBridge(false);
-				//}
+				else if (otherObject->GetName() == "ICE") {
+					this->hitIce = true;
+					otherObject->SetActive(false);
+				}
 			}
 		};
 	}

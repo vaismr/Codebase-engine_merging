@@ -51,35 +51,36 @@ void GameObject::UpdateBroadphaseAABB() {
 		broadphaseAABB = mat * halfSizes;
 	}
 }
-void GameObject::SetCollisionType(CollisionType b)
-{
-	this->collisionlayer = b;
-
-}
-CollisionType GameObject::GetCollisitionType(){
-	return collisionlayer;
-
-}
-void GameObject::SetIsOnWater(bool b)
-{
-	IsOnWater = b;
-}
-
-bool GameObject::GetIsOnWater()
-{
-	return IsOnWater;
-}
-
-void GameObject::SetIsOnBridge(bool b)
-{
-	IsOnBridge = b;
-}
-
-bool GameObject::GetIsOnBridge()
-{
-	return IsOnBridge;
-
-}/*
+//void GameObject::SetCollisionType(CollisionType b)
+//{
+//	this->collisionlayer = b;
+//
+//}
+//CollisionType GameObject::GetCollisitionType(){
+//	return collisionlayer;
+//
+//}
+//void GameObject::SetIsOnWater(bool b)
+//{
+//	IsOnWater = b;
+//}
+//
+//bool GameObject::GetIsOnWater()
+//{
+//	return IsOnWater;
+//}
+//
+//void GameObject::SetIsOnBridge(bool b)
+//{
+//	IsOnBridge = b;
+//}
+//
+//bool GameObject::GetIsOnBridge()
+//{
+//	return IsOnBridge;
+//
+//}
+/*
 void GameObject::SetIsBuoyancyAdded(bool b)
 {
 	isBuoyancyAdded = b;

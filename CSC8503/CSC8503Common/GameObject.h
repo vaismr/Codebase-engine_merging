@@ -45,7 +45,9 @@ namespace NCL {
 			bool IsActive() const {
 				return isActive;
 			}
-
+			void SetActive(bool b) {
+				this->isActive = b;
+			}
 			void SetStatic(bool isStat) {
 				isStatic = isStat;
 			}
@@ -102,15 +104,16 @@ namespace NCL {
 
 			void UpdateBroadphaseAABB();
 #pragma region 04/03 collisionType
-			void SetCollisionType(CollisionType);
-			CollisionType GetCollisitionType();
 
-			void SetIsOnWater(bool b);
-			bool GetIsOnWater();
-			void SetIsOnBridge(bool b);
-			bool GetIsOnBridge();
+			//void SetCollisionType(CollisionType);
+			//CollisionType GetCollisitionType();
+
+			//void SetIsOnWater(bool b);
+			//bool GetIsOnWater();
+			//void SetIsOnBridge(bool b);
+			//bool GetIsOnBridge();
 			//void SetIsBuoyancyAdded(bool b);
-			bool GetIsBuoyancyAdded();
+			//bool GetIsBuoyancyAdded();
 
 #pragma endregion 
 
