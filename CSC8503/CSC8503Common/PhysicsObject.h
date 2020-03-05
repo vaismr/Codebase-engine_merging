@@ -9,12 +9,9 @@ namespace NCL {
 	
 	enum class ObjectType {
 		Regular = 1,
-		Floor = 2,
+		Floor = 2, 
 		Enemy = 4,
 		Collectable = 16,
-		Fire = 32,
-		Ice = 64,
-		Wall = 128,
 		Invalid = 256
 	};
 

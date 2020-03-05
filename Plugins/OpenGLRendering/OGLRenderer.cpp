@@ -100,9 +100,6 @@ void OGLRenderer::BeginFrame()		{
 void OGLRenderer::RenderFrame()		{
 }
 
-void OGLRenderer::RenderLoadingFrame() {
-}
-
 void OGLRenderer::EndFrame()		{
 	DrawDebugData();
 	::SwapBuffers(deviceContext);

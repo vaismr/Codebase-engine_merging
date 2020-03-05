@@ -9,6 +9,17 @@
 #include <vector>
 
 using std::vector;
+enum CollisionType
+{
+
+	DEFAULT,
+	FLOOR,
+	BRIDGE,
+	WATER,
+	HOME,
+	
+
+};
 
 namespace NCL {
 	namespace CSC8503 {
@@ -19,6 +30,10 @@ namespace NCL {
 			GameObject(string name = "");
 			~GameObject();
 
+			string Getobjectname() {
+				return this->name;
+
+			}
 			void SetBoundingVolume(CollisionVolume* vol) {
 				boundingVolume = vol;
 			}
@@ -82,9 +97,27 @@ namespace NCL {
 			bool GetBroadphaseAABB(Vector3&outsize) const;
 
 			void UpdateBroadphaseAABB();
+#pragma region 04/03 collisionType
+			void SetCollisionType(CollisionType);
+			CollisionType GetCollisitionType();
+
+			void SetIsOnWater(bool b);
+			bool GetIsOnWater();
+			void SetIsOnBridge(bool b);
+			bool GetIsOnBridge();
+			//void SetIsBuoyancyAdded(bool b);
+			bool GetIsBuoyancyAdded();
+
+#pragma endregion 
+
 
 		protected:
 			Transform			transform;
+			CollisionType collisionlayer;
+			bool IsOnWater;
+			bool IsOnBridge;
+			bool isBuoyancyAdded;
+
 
 			CollisionVolume*	boundingVolume;
 			PhysicsObject*		physicsObject;

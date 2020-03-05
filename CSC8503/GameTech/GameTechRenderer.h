@@ -5,7 +5,7 @@
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 
 #include "../CSC8503Common/GameWorld.h"
-
+#include "../../Common/TextureLoader.h"
 namespace NCL {
 	class Maths::Vector3;
 	class Maths::Vector4;
@@ -19,7 +19,6 @@ namespace NCL {
 
 		protected:
 			void RenderFrame()	override;
-			void RenderLoadingFrame() override;
 
 			OGLShader*		defaultShader;
 
@@ -31,16 +30,16 @@ namespace NCL {
 			void RenderCamera(); 
 
 			//skybox
+			unsigned int skytextureID;
+			unsigned int cubemapTexture;
 			OGLShader* skyshader;
 			unsigned int loadCubemap(vector<std::string> faces);
 			void RenderSkybox();
+			void GenerateSkybox();
+			unsigned int skyboxVAO, skyboxVBO;
+			
 
 			void SetupDebugMatrix(OGLShader*s) override;
-
-			void UpdateParticleTime(float dt)
-			{
-
-			}
 
 			vector<const RenderObject*> activeObjects;
 
