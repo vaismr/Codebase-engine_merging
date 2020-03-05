@@ -15,12 +15,13 @@ namespace NCL {
 			//ball on water will slow down
 			bool isOnWater = false;
 			bool isSlowDown = false;
-			bool hitIce = false;
+			bool isSpeedUp = false;
+			bool isTelePorted = false;
 
 			void OnCollisionBegin(GameObject* otherObject) override
 
 			{
-				if (otherObject->GetName()=="FLOOR")
+				if (otherObject->GetName() == "FLOOR")
 				{
 					this->isOnFloor = true;
 					this->isOnWater = false;
@@ -28,6 +29,11 @@ namespace NCL {
 				else if (otherObject->GetName() == "WATER") {
 					this->isOnFloor = false;
 					this->isOnWater = true;
+					if (this->GetName() == "BALL") {
+						Vector3 Veloctity = this->GetPhysicsObject()->GetLinearVelocity();
+						this->GetPhysicsObject()->SetLinearVelocity(Veloctity * 0.5f);
+						isSlowDown = true;
+					}
 					if (this->GetName() == "FIRE") {
 						this->SetName("BALL");
 						this->GetRenderObject()->SetColour(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -46,8 +52,20 @@ namespace NCL {
 					this->GetRenderObject()->SetColour(Vector4(0.0f, 0.8f, 0.8f, 1.0f));
 				}
 				else if (this->GetName() == "FIRE" && otherObject->GetName() == "ICE") {
-					this->hitIce = true;
 					otherObject->SetActive(false);
+				}
+				else if (this->GetName() != "FIRE" && otherObject->GetName() == "ICE") {
+					Vector3 Veloctity = this->GetPhysicsObject()->GetLinearVelocity();
+					this->GetPhysicsObject()->SetLinearVelocity(Veloctity * 1.5f);
+					isSpeedUp = true;
+				}
+				else if (otherObject->GetName() == "PORTAL1" && isTelePorted == false) {
+					this->GetTransform().SetWorldPosition(Vector3(10, 5.0f, 10));
+					isTelePorted = true;
+				}
+				else if (otherObject->GetName() == "PORTAL2" && isTelePorted == false) {
+					this->GetTransform().SetWorldPosition(Vector3(30, 5.0f, 30));
+					isTelePorted = true;
 				}
 			}
 		};

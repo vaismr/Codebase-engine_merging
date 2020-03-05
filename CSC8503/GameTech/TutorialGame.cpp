@@ -121,7 +121,6 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
         //Updateballco();
 		physics->Update(dt);
 		renderHUD(dt);
-		
 		UpdateListener(dt);
 		audioEngine.Update();
 		UpdateArrow();
@@ -332,16 +331,6 @@ void TutorialGame::LockedObjectMovement() {
 	//	selectionObject->GetPhysicsObject()->ApplyLinearImpulse(floatingforce);
 	//}
 
-	if (ball->isOnWater == true && ball->isSlowDown == false) {
-		Vector3 BallVelocity = ball->GetPhysicsObject()->GetLinearVelocity();
-		ball->GetPhysicsObject()->SetLinearVelocity(BallVelocity*0.5f);
-		ball->isSlowDown = true;
-	}
-
-	if (ball->GetName() == "FIRE" && ball->hitIce == true) {
-		
-	}
-
 	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
 
 	//forward is more tricky -  camera forward is 'into' the screen...
@@ -372,10 +361,13 @@ void TutorialGame::LockedObjectMovement() {
 		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(1, 0, 0);
 		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 	}
+
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
 		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
 		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(dir * force);
-		isSlowDown = false;
+		ball->isSlowDown = false;
+		ball->isSpeedUp = false;
+		ball->isTelePorted = false;
 	}
 }
 
@@ -568,6 +560,9 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
+	Vector3 Portal1 = Vector3(30, 0.1f, 30);
+	Vector3 Portal2 = Vector3(10, 0.1f, 10);
+
 	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	//AddGooseToWorld(Vector3(30, 2, 0));
 	//AddAppleToWorld(Vector3(35, 2, 0));
@@ -580,6 +575,9 @@ void TutorialGame::InitWorld() {
 	AddIceToWorld(Vector3(40, 6.0f, 40), Vector3(5.0f, 6.0f, 1.0f));
 	AddFirePowerUpToWorld(Vector3(50, 0.1f, 50));
 	AddIcePowerUpToWorld(Vector3(55, 0.1f, 55));
+	AddPortalToWorld(Portal1)->SetName("PORTAL1");
+	AddPortalToWorld(Portal2)->SetName("PORTAL2");
+
 	Ball* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 1);
 	ball = (Ball*)tempball;
 
@@ -769,6 +767,31 @@ GameObject* TutorialGame::AddIceToWorld(const Vector3& position, Vector3 dimensi
 
 	return ice;
 }
+
+GameObject* TutorialGame::AddPortalToWorld(const Vector3& position)
+{
+
+	GameObject* portal = new GameObject();
+	Vector3 dimensions = Vector3(1.0f, 0.1f, 1.0f);
+	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
+
+	portal->SetBoundingVolume((CollisionVolume*)volume);
+
+	portal->GetTransform().SetWorldPosition(position);
+	portal->GetTransform().SetWorldScale(dimensions);
+
+	portal->SetRenderObject(new RenderObject(&portal->GetTransform(), cubeMesh, 0, basicShader));
+	portal->SetPhysicsObject(new PhysicsObject(&portal->GetTransform(), portal->GetBoundingVolume()));
+	portal->GetRenderObject()->SetColour(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+	portal->GetPhysicsObject()->SetInverseMass(0);
+	portal->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(portal);
+
+	return portal;
+}
+
 
 GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
 {

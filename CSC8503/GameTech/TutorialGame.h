@@ -67,6 +67,7 @@ namespace NCL {
 			GameObject* AddWaterToWorld(const Vector3& position);
 			GameObject* AddFirePowerUpToWorld(const Vector3& position);
 			GameObject* AddIcePowerUpToWorld(const Vector3& position);
+			GameObject* AddPortalToWorld(const Vector3& position);
 			//IT'S HAPPENING
 			GameObject* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
@@ -87,9 +88,6 @@ namespace NCL {
 			//ball
 			Ball* ball;
 			//void Updateballco();
-			bool isOnFloor = false;
-			bool isOnWater = false;
-			bool isSlowDown = false;
 
 			bool useGravity;
 			bool inSelectionMode;
