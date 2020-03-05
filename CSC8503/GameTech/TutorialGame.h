@@ -107,7 +107,7 @@ namespace NCL {
 			EnemyAIPatrol* patrolAI;
 
 			Vector3 patrolA = Vector3(0, 0, 0);
-			Vector3 patrolB = Vector3(60, 0, 60);
+			Vector3 patrolB = Vector3(40, 0, 40);
 		};
 	}
 }

@@ -506,7 +506,7 @@ void TutorialGame::InitWorld() {
 
 	//AddParkKeeperToWorld(Vector3(40, 2, 0));
 	chaseAI = (EnemyAIChase*)AddChaseAIToWorld(Vector3(45, 2, 0));
-	patrolAI = (EnemyAIPatrol*)AddPatrolAIToWorld(Vector3(40, 2, -10));
+	patrolAI = (EnemyAIPatrol*)AddPatrolAIToWorld(Vector3(-10, 2, -10));
 
 	AddFloorToWorld(Vector3(0, -2, 0));
 }

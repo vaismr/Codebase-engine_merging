@@ -23,7 +23,6 @@ void EnemyAIChase::SetupStateMachine() {
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
 	};
 
-	// @TODO stop pushing player once collided
 	EnemyFunc chaseFunc = [](void* enemy, void* player) {
 		EnemyAIChase* enemyObject = (EnemyAIChase*)enemy;
 		GameObject* playerObject = (GameObject*)player;
@@ -34,34 +33,53 @@ void EnemyAIChase::SetupStateMachine() {
 		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
 		// @TODO pathfind?
-		enemyObject->GetPhysicsObject()->AddForce(dir * enemyObject->GetSpeedMultiplier());
+		enemyObject->GetPhysicsObject()->AddForce((dir * enemyObject->GetSpeedMultiplier()) * Vector3(1.0, 0.0, 1.0));
+	};
+
+	// @TODO placeholder until decided on how AI should behave on collision with player/ball
+	EnemyFunc stop = [](void* enemy, void* data) {
+		EnemyAIChase* enemyObject = (EnemyAIChase*)enemy;
+		enemyObject->SetStateDescription("stopped");
+		enemyObject->GetPhysicsObject()->ClearForces();
 	};
 
 	EnemyState* idleState = new EnemyState(idleFunc, this);
 	EnemyState* spottedState = new EnemyState(spottedPlayer, this, chaseObject);
 	EnemyState* chaseState = new EnemyState(chaseFunc, this, chaseObject);
+	EnemyState* stoppedState = new EnemyState(stop, this);
 
 	sM->AddState(idleState);
 	sM->AddState(spottedState);
 	sM->AddState(chaseState);
+	sM->AddState(stoppedState);
 
 	GenericTransition<float&, float>* idleToSpotted = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::LessThanTransition, distToObject, 30.0f, idleState, spottedState);
+		GenericTransition<float&, float>::LessThanTransition, distToObject, 50.0f, idleState, spottedState);
 
 	GenericTransition<float&, float>* spottedToIdle = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::GreaterThanTransition, distToObject, 40.0f, spottedState, idleState);
+		GenericTransition<float&, float>::GreaterThanTransition, distToObject, 60.0f, spottedState, idleState);
 
 
 	GenericTransition<float&, float>* spottedToChase = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::LessThanTransition, distToObject, 15.0f, spottedState, chaseState);
+		GenericTransition<float&, float>::LessThanTransition, distToObject, 35.0f, spottedState, chaseState);
 
 	GenericTransition<float&, float>* chaseToSpotted = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::GreaterThanTransition, distToObject, 25.0f, chaseState, spottedState);
+		GenericTransition<float&, float>::GreaterThanTransition, distToObject, 45.0f, chaseState, spottedState);
+
+	/***********@TODO Placeholder - AI simply stops once close to player/ball, need to decide on most appropriate response**************/
+	GenericTransition<float&, float>* chaseToStopped = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::LessThanTransition, distToObject, 5.0f, chaseState, stoppedState);
+
+	GenericTransition<float&, float>* stoppedToChase = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::GreaterThanTransition, distToObject, 15.0f, stoppedState, chaseState);
+	/******************************************************************************************************************************************/
 
 	sM->AddTransition(idleToSpotted);
 	sM->AddTransition(spottedToIdle);
 	sM->AddTransition(spottedToChase);
 	sM->AddTransition(chaseToSpotted);
+	sM->AddTransition(chaseToStopped);
+	sM->AddTransition(stoppedToChase);
 }
 
 void EnemyAIPatrol::SetupStateMachine() {
@@ -99,7 +117,7 @@ void EnemyAIPatrol::SetupStateMachine() {
 
 	GenericTransition<float&, float>* patrolToWait = new GenericTransition<float&, float>(
 		GenericTransition<float&, float>::LessThanTransition, distToCurrentDest, 5.0, patrolToPointState, waitState);
-	
+
 	GenericTransition<float&, float>* waitToPatrol = new GenericTransition<float&, float>(
 		GenericTransition<float&, float>::GreaterThanTransition, waitTime, 1.0, waitState, patrolToPointState);
 
