@@ -86,6 +86,10 @@ namespace NCL {
 				return name;
 			}
 
+			void SetName(string newname) {
+				name = newname;
+			}
+
 			virtual void OnCollisionBegin(GameObject* otherObject) {
 				//std::cout << "OnCollisionBegin event occured!\n";
 			}
@@ -111,9 +115,6 @@ namespace NCL {
 #pragma endregion 
 
 
-			void SetStateDescription(const string description) { stateDescription = description; }
-			string GetStateDescription() const { return stateDescription; }
-
 		protected:
 			Transform			transform;
 			CollisionType collisionlayer;
@@ -130,7 +131,6 @@ namespace NCL {
 			bool	isActive;
 			bool	isStatic;
 			string	name;
-			string stateDescription = "N/A";
 
 			Vector3 broadphaseAABB;
 		};

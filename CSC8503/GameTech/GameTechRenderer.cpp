@@ -52,7 +52,6 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	lightRadius = 1000.0f;
 	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 	GenerateSkybox();
-	GenerateIce();
 	
 }
 void GameTechRenderer::GenerateSkybox() {
@@ -121,12 +120,6 @@ void GameTechRenderer::GenerateSkybox() {
 	};
 	cubemapTexture = loadCubemap(faces);
 
-
-
-}
-void GameTechRenderer::GenerateIce() {
-	iceshader = new OGLShader("icecubev.glsl","reflect.glsl");
-}
 
 
 }
@@ -310,7 +303,6 @@ void GameTechRenderer::RenderCamera() {
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 
 	for (const auto&i : activeObjects) {
-		if(i->GetRenderName()!="icecube"){
 		OGLShader* shader = (OGLShader*)(*i).GetShader();
 		BindShader(shader);
 
@@ -359,34 +351,7 @@ void GameTechRenderer::RenderCamera() {
 
 		BindMesh((*i).GetMesh());
 		DrawBoundMesh();
-		}
-	//render icecube	
-else {
-			BindShader(iceshader);
-			//Bind Texture of skybox
-			int cubetexLocation = glGetUniformLocation(iceshader->GetProgramID(), "skybox");
-			glUniform1i(cubetexLocation, 0);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-
-			projLocation = glGetUniformLocation(iceshader->GetProgramID(), "projection");
-			viewLocation = glGetUniformLocation(iceshader->GetProgramID(), "view");
-			modelLocation = glGetUniformLocation(iceshader->GetProgramID(), "model");
-			cameraLocation = glGetUniformLocation(iceshader->GetProgramID(), "cameraPos");
-
-			glUniform3fv(cameraLocation, 1, (float*)&gameWorld.GetMainCamera()->GetPosition());
-
-			glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
-			glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
-			Matrix4 modelMatrix = (*i).GetTransform()->GetWorldMatrix();
-			glUniformMatrix4fv(modelLocation, 1, false, (float*)&modelMatrix);
-			BindMesh((*i).GetMesh());
-			DrawBoundMesh();
 	}
-	
-	}
-
-	
 }
 
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {

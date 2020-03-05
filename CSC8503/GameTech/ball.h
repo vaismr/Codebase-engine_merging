@@ -10,7 +10,7 @@ namespace NCL {
 
 		public:
 			Ball(string name = "");
-			bool collisionwater = false;
+			bool onWater = false;
 			//void OnCollisionBegin(GameObject* otherObject)
 
 			void OnCollisionBegin(GameObject* otherObject) override
@@ -19,9 +19,10 @@ namespace NCL {
 
 				if (otherObject->GetName()=="WATER")
 				{
-					//SetIsOnWater(true);
-					this->collisionwater = true;
-					std:: cout << "colwater" << std::endl;
+					this->onWater = true;
+				}
+				else if (otherObject->GetName() == "FLOOR") {
+					this->onWater = false;
 				}
 				//if (otherObject->GetCollisitionType() == CollisionType::BRIDGE && !IsOnBridge)
 				//{
