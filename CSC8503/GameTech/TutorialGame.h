@@ -136,7 +136,12 @@ namespace NCL {
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
 			GameWorld* world;
+			//ball
 			Ball* ball;
+            //icecube
+			Icecube* icecube;
+			GameObject* AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			
 
 
 			bool useGravity;
@@ -144,6 +149,7 @@ namespace NCL {
 			bool inDebugMode;
 
 			float		forceMagnitude;
+			float temppitch;
 
 			ImFont* fontMainDlg = nullptr;
 			ImFont* fontbutton = nullptr;

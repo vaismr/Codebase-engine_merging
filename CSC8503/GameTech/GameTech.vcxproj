@@ -212,6 +212,7 @@
     <ClCompile Include="arrow.cpp" />
     <ClCompile Include="ball.cpp" />
     <ClCompile Include="GameTechRenderer.cpp" />
+    <ClCompile Include="icecube.cpp" />
     <ClCompile Include="imgui_progressbar.cpp" />
     <ClCompile Include="Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug BoostTests|Win32'">true</ExcludedFromBuild>
@@ -239,6 +240,7 @@
     <ClInclude Include="arrow.h" />
     <ClInclude Include="ball.h" />
     <ClInclude Include="GameTechRenderer.h" />
+    <ClInclude Include="icecube.h" />
     <ClInclude Include="imgui_progressbar.h" />
     <ClInclude Include="NetworkedGame.h" />
     <ClInclude Include="NetworkPlayer.h" />
