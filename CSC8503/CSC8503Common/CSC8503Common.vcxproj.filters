@@ -129,9 +129,6 @@
     <ClInclude Include="LoadingScreen.h">
       <Filter>Other</Filter>
     </ClInclude>
-    <ClInclude Include="Buoyancy.h">
-      <Filter>Physics</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp">
@@ -212,8 +209,8 @@
     <ClCompile Include="Test.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>
-    <ClCompile Include="Buoyancy.cpp">
-      <Filter>Physics</Filter>
+    <ClCompile Include="Test1.cpp">
+      <Filter>UnitTests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

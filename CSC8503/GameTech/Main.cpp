@@ -20,6 +20,36 @@ using namespace NCL;
 using namespace CSC8503;
 
 void TestStateMachine() {
+	StateMachine* testMachine = new StateMachine();
+
+	int someData = 0;
+
+	StateFunc AFunc = [](void* data) {
+		int* realData = (int*)data;
+		(*realData)++;
+		std::cout << "In state A" << std::endl;
+	};
+
+	StateFunc BFunc = [](void* data) {
+		int* realData = (int*)data;
+		(*realData)--;
+		std::cout << "In state B" << std::endl;
+	};
+
+	GenericState* stateA = new GenericState(AFunc, (void*)&someData);
+	GenericState* stateB = new GenericState(BFunc, (void*)&someData);
+	testMachine->AddState(stateA);
+	testMachine->AddState(stateB);
+
+	GenericTransition<int&, int>* transitionA = new GenericTransition<int&, int>(GenericTransition<int&, int>::GreaterThanTransition, someData, 10, stateA, stateB);
+	GenericTransition<int&, int>* transitionB = new GenericTransition<int&, int>(GenericTransition<int&, int>::EqualsTransition, someData, 0, stateB, stateA);
+
+	testMachine->AddTransition(transitionA);
+	testMachine->AddTransition(transitionB);
+
+	for (int i = 0; i < 100; ++i)
+		testMachine->Update();
+	delete testMachine;
 }
 
 void TestNetworking() {
@@ -65,14 +95,21 @@ int main() {
 	//TestNetworking();
 	//TestPathfinding();
 	
-	w->ShowOSPointer(false);
+	w->ShowOSPointer(true);
 	w->LockMouseToWindow(true);
 
 	TutorialGame* g = new TutorialGame();
 
+	bool isMouseLocked = false;
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
 
+		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::U)) {
+			isMouseLocked = !isMouseLocked;
+			w->LockMouseToWindow(isMouseLocked);
+		}
+
+#ifdef _DEBUG
 		if (dt > 1.0f) {
 			std::cout << "Skipping large time delta" << std::endl;
 			continue; //must have hit a breakpoint or something to have a 1 second frame time!
@@ -83,12 +120,15 @@ int main() {
 		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NEXT)) {
 			w->ShowConsole(false);
 		}
+#endif
 
 		DisplayPathfinding();
 
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
 		g->UpdateGame(dt);
+		if (g->IsClosed()) break;
 	}
+
 	Window::DestroyGameWindow();
 }

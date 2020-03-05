@@ -1,8 +1,6 @@
 #include "GameWorld.h"
 #include "GameObject.h"
-#include "../GameTech/ball.h"
 #include "Constraint.h"
-#include"Buoyancy.h"
 #include "CollisionDetection.h"
 #include "../../Common/Camera.h"
 #include <algorithm>
@@ -25,7 +23,6 @@ GameWorld::~GameWorld()	{
 void GameWorld::Clear() {
 	gameObjects.clear();
 	constraints.clear();
-	//buoyancies.clear();
 }
 
 void GameWorld::ClearAndErase() {
@@ -35,10 +32,6 @@ void GameWorld::ClearAndErase() {
 	for (auto& i : constraints) {
 		delete i;
 	}
-/*	for (auto& i : buoyancies)
-	{
-		delete i;
-	}*/
 	Clear();
 }
 
@@ -66,7 +59,6 @@ void GameWorld::OperateOnContents(GameObjectFunc f) {
 
 void GameWorld::UpdateWorld(float dt) {
 	UpdateTransforms();
-	UpdateConstraint();
 
 	if (shuffleObjects) {
 		std::random_shuffle(gameObjects.begin(), gameObjects.end());
@@ -81,25 +73,6 @@ void GameWorld::UpdateTransforms() {
 	for (auto& i : gameObjects) {
 		i->GetTransform().UpdateMatrices();
 	}
-}
-void GameWorld::UpdateConstraint() {
-	/*for (auto& i : gameObjects)
-	{
-		std::cout << i->GetIsBuoyancyAdded() << " " << i->GetIsOnWater() << std::endl;
-		if (i->GetCollisitionType() == CollisionType::DEFAULT && !i->GetIsBuoyancyAdded() && i->GetIsOnWater())
-		{
-			Buoyancy* buoyancy = new Buoyancy(i);
-			i->SetIsBuoyancyAdded(true);
-			AddBuoyancy(buoyancy);
-		}
-		if (i->GetCollisitionType() == CollisionType::DEFAULT && i->GetIsBuoyancyAdded() && !i->GetIsOnWater())
-		{
-
-			ClearBuoyancies();
-			i->SetIsBuoyancyAdded(false);
-		}
-	
-	}*/
 }
 
 void GameWorld::UpdateQuadTree() {
@@ -157,46 +130,9 @@ void GameWorld::RemoveConstraint(Constraint* c) {
 	std::remove(constraints.begin(), constraints.end(), c);
 }
 
-bool GameWorld::GetConstraintIterators(
+void GameWorld::GetConstraintIterators(
 	std::vector<Constraint*>::const_iterator& first,
 	std::vector<Constraint*>::const_iterator& last) const {
-	if (constraints.empty())
-	{
-		return false;
-	}
 	first	= constraints.begin();
 	last	= constraints.end();
-	return true;
-}
-void GameWorld::AddBuoyancy(Constraint* c)
-{
-	buoyancies.emplace_back(c);
-}
-void GameWorld::ClearBuoyancies()
-{
-	//std::vector<Constraint*>::const_iterator it;
-	//it = std::find(buoyancies.begin(), buoyancies.end(), c);
-	//if (it != buoyancies.end())
-	//{
-	//	buoyancies.erase(it);
-	//}
-	//buoyancies.erase(std::remove(buoyancies.begin(), buoyancies.end(), c));
-	std::vector<Constraint*>::iterator it = buoyancies.begin();
-	for (; it != buoyancies.end();)
-	{
-		it = buoyancies.erase(it);
-	}
-}
-
-bool GameWorld::GetBuoyancyIterators(
-	std::vector<Constraint*>::const_iterator& first,
-	std::vector<Constraint*>::const_iterator& last) const
-{
-	if (buoyancies.empty())
-	{
-		return false;
-	}
-	first = buoyancies.begin();
-	last = buoyancies.end();
-	return true;
 }

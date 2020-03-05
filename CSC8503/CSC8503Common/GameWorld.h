@@ -26,11 +26,7 @@ namespace NCL {
 
 			void AddConstraint(Constraint* c);
 			void RemoveConstraint(Constraint* c);
-#pragma region floating on water
-			void AddBuoyancy(Constraint* c);
-			void ClearBuoyancies();
 
-#pragma endregion
 			Camera* GetMainCamera() const {
 				return mainCamera;
 			}
@@ -53,24 +49,17 @@ namespace NCL {
 				GameObjectIterator& first,
 				GameObjectIterator& last) const;
 
-			bool GetConstraintIterators(
-				std::vector<Constraint*>::const_iterator& first,
-				std::vector<Constraint*>::const_iterator& last) const;
-			bool GetBuoyancyIterators(
+			void GetConstraintIterators(
 				std::vector<Constraint*>::const_iterator& first,
 				std::vector<Constraint*>::const_iterator& last) const;
 
 		protected:
 			void UpdateTransforms();
 			void UpdateQuadTree();
-			void UpdateConstraint();
-
 
 			std::vector<GameObject*> gameObjects;
 
 			std::vector<Constraint*> constraints;
-			std::vector<Constraint*> buoyancies;
-
 
 			QuadTree<GameObject*>* quadTree;
 
