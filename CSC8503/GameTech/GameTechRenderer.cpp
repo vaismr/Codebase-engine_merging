@@ -49,7 +49,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 
 //post processing additions
 	quad = Mesh::GenerateQuad();
-	processShader = new OGLShader("postv.glsl", "grey.glsl");
+	processDefaultShader = new OGLShader("PostVertex.glsl", "PostFrag.glsl");
+	processGreyShader = new OGLShader("PostVertex.glsl", "PostFragGrey.glsl");
+	processInvShader = new OGLShader("PostVertex.glsl", "PostFragInv.glsl");
 	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
 	glGenTextures(1, &processTexture);
@@ -80,7 +82,9 @@ GameTechRenderer::~GameTechRenderer()	{
 	glDeleteTextures(1, &shadowTex);
 	glDeleteFramebuffers(1, &shadowFBO);
 
-	delete processShader;
+	delete processDefaultShader;
+	delete processGreyShader;
+	delete processInvShader;
 	delete sceneShader;
 	delete quad;
 
@@ -104,15 +108,42 @@ void GameTechRenderer::RenderFrame()
 	RenderCamera();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glDisable(GL_DEPTH_TEST);
-	BindShader(processShader);
-	glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "texture1"), 0);
-	Matrix4 modelMatrix = Matrix4::Rotation(180.0f, Vector3(0, 0, 1)) * Matrix4::Rotation(180.0f, Vector3(0, 1, 0));
-	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "model"), 1, false, (float*)&modelMatrix);
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD1))
+	{
+		greyPost = true;
+		invPost = false;
+	}
+	
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD2))
+	{
+		greyPost = false;
+		invPost = true;
+	}
+	
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD0))
+	{
+		greyPost = false;
+		invPost = false;
+	}
+
+	if (greyPost)
+	{
+		DrawWithShader(processGreyShader);
+	}
+	else if (invPost)
+	{
+		DrawWithShader(processInvShader);
+	}
+	else
+	{
+		DrawWithShader(processDefaultShader);
+	}
+	
+	
+	
 	quad->SetTexture(processTexture);
 	quad->Draw();
 	glUseProgram(0);
-
 
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -312,4 +343,13 @@ void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
 	int matLocation = glGetUniformLocation(s->GetProgramID(), "viewProjMatrix");
 
 	glUniformMatrix4fv(matLocation, 1, false, (float*)&vp);
+}
+
+void GameTechRenderer::DrawWithShader(OGLShader* shader)
+{
+	glDisable(GL_DEPTH_TEST);
+	BindShader(shader);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture1"), 0);
+	Matrix4 modelMatrix = Matrix4::Rotation(180.0f, Vector3(0, 0, 1)) * Matrix4::Rotation(180.0f, Vector3(0, 1, 0));
+	glUniformMatrix4fv(glGetUniformLocation(shader->GetProgramID(), "model"), 1, false, (float*)&modelMatrix);
 }
