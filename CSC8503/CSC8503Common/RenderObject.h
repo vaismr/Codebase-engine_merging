@@ -31,6 +31,11 @@ namespace NCL {
 				return mesh;
 			}
 
+			void SetMesh(MeshGeometry* newmesh) {
+				this->mesh = newmesh;
+
+			}
+
 			Transform*		GetTransform() const {
 				return transform;
 			}

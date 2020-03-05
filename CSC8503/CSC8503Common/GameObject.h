@@ -31,6 +31,15 @@ namespace NCL {
 				return isActive;
 			}
 
+			void SetActive(bool active) {
+				this->isActive = active;
+
+			}
+			void deletethis() {
+				this->isActive = false;
+				this->GetRenderObject()->SetMesh(nullptr);
+			}
+
 			void SetStatic(bool isStat) {
 				isStatic = isStat;
 			}

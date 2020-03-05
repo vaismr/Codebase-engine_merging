@@ -736,6 +736,8 @@ void TutorialGame::UpdateKeys() {
 	else {
 		DebugObjectMovement();
 	}
+
+	
 }
 
 void TutorialGame::LockedObjectMovement() {
@@ -773,15 +775,22 @@ void TutorialGame::LockedObjectMovement() {
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::I)) {
 		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(totalImpulse);
 	}
+
+	
 }
 
 void TutorialGame::UpdateArrow() {
+
 	float delta = Window::GetMouse()->GetWheelMovement();
 	Impulsedir= Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
 	Impulsesize = restrict_float(Impulsesize + delta, 0, MAX_POWER_VALUE); 
+	Impulsedir= Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
 	Arrowlength = Impulsedir * Impulsesize * 10;
 	//Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
-	totalImpulse = Impulsedir *20 + Vector3(0,1,0) *Impulsesize ;
+	
+	if (Impulsesize == 0) { totalImpulse = Vector3(0, 0, 0); }
+	else{totalImpulse = Impulsedir *20 + Vector3(0,1,0) *Impulsesize ;}
+	
 	renderer->DrawLine(ball->GetTransform().GetWorldPosition(), (ball->GetTransform().GetWorldPosition()) + Arrowlength, Vector4(1, 0, 0, 1));
 }
 
