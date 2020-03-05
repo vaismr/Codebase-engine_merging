@@ -9,6 +9,7 @@
 #include "ball.h"
 #include <ctime>
 #include "psapi.h"
+#include "icecube.h"
 
 class LevelBase;
 
