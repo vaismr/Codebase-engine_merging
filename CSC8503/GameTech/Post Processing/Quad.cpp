@@ -16,9 +16,15 @@ Quad::Quad()
 	texture = 0;
 	numVertices = 0;
 	type = GL_TRIANGLE_STRIP;
+	texCoords = NULL;
 }
 
 Quad::~Quad()
 {
-
+	glDeleteVertexArrays(1, &arrayObject);
+	glDeleteBuffers(MAX_BUFFER, bufferObject);
+	delete[] colours;
+	delete[] vertices;
+	delete[] texCoords;
+	glDeleteTextures(1, &texture);
 }

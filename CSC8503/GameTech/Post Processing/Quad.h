@@ -31,6 +31,7 @@ namespace NCL {
 		GLuint numVertices;
 		GLuint type;
 
+		Vector2* texCoords;
 		Vector3* vertices;
 		Vector4* colours;
 	};
