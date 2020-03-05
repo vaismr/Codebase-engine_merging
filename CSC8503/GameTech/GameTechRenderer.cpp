@@ -103,8 +103,6 @@ void GameTechRenderer::RenderFrame()
 	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
 	RenderCamera();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//DrawPostProcess();
-	//PresentScene();
 
 	glDisable(GL_DEPTH_TEST);
 	BindShader(processShader);
@@ -118,7 +116,6 @@ void GameTechRenderer::RenderFrame()
 
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	//SwapBuffers(0);
 }
 unsigned int loadCubemap(vector<std::string> faces) {
 
@@ -304,7 +301,6 @@ void GameTechRenderer::RenderCamera()
 	glUseProgram(0);
 	
 }
-
 
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
 	float screenAspect = (float)currentWidth / (float)currentHeight;
