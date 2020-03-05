@@ -30,7 +30,7 @@ namespace NCL {
 				Window::GetWindow()->ShowOSPointer(isPaused);
 			}
 			void UpdatePauseMenu();
-			void UpdateAI();
+			void UpdateAI(float dt);
 
 			/*
 			These are some of the world/object creation functions I created when testing the functionality

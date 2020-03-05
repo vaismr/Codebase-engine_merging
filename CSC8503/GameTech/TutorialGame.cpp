@@ -120,7 +120,7 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 		SelectObject();
 		MoveSelectedObject();
 
-		UpdateAI();
+		UpdateAI(dt);
 
 		world->UpdateWorld(dt);
 		renderer->Update(dt);
@@ -181,11 +181,11 @@ void TutorialGame::UpdatePauseMenu() {
 	}		
 }
 
-void TutorialGame::UpdateAI() {
+void TutorialGame::UpdateAI(float dt) {
 	if(chaseAI)
-		chaseAI->Update();
+		chaseAI->Update(dt);
 	if(patrolAI)
-		patrolAI->Update();
+		patrolAI->Update(dt);
 }
 
 void NCL::CSC8503::TutorialGame::renderHUD(float dt)
@@ -500,11 +500,11 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	ball = AddGooseToWorld(Vector3(30, 2, 0));
-	AddAppleToWorld(Vector3(35, 2, 0));
+	//AddAppleToWorld(Vector3(35, 2, 0));
 
-	AddParkKeeperToWorld(Vector3(40, 2, 0));
+	//AddParkKeeperToWorld(Vector3(40, 2, 0));
 	chaseAI = (EnemyAIChase*)AddChaseAIToWorld(Vector3(45, 2, 0));
 	patrolAI = (EnemyAIPatrol*)AddPatrolAIToWorld(Vector3(40, 2, -10));
 
