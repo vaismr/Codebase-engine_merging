@@ -21,6 +21,7 @@ namespace NCL {
 			LOADING,
 			IN_GAME,
 			PAUSED,
+			END_GAME_WIN,
 			END_GAME,
 		};
 
@@ -115,16 +116,15 @@ namespace NCL {
 			void LockedObjectMovement();
 			void LockedCameraMovement();
 			
+			float timeLeft = 0;
 			void renderHUD(float dt);
 			//arrow
 			float dir;
 			void UpdateArrow();
-			float Impulsesize=0;
+			float Impulsesize = 0;
 			Vector3 Impulsedir;
 			Vector3 totalImpulse;
 			Vector3 Arrowlength;
-
-
 
 			void RenderInGameHud(float dt);
 			void RenderMainGameMenu(float dt);
@@ -133,6 +133,7 @@ namespace NCL {
 			void RenderDebugUi(float dt);
 
 
+			int backgroundMusic = -1;
 
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
@@ -143,8 +144,6 @@ namespace NCL {
 			Icecube* icecube;
 			GameObject* AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
-
-
 			bool useGravity;
 			bool inSelectionMode;
 			bool inDebugMode;
@@ -162,6 +161,8 @@ namespace NCL {
 			OGLMesh* sphereMesh = nullptr;
 			OGLTexture* basicTex = nullptr;
 			OGLTexture* backgroundTex = nullptr;
+			OGLTexture* Itemicon = nullptr;
+
 			OGLShader* basicShader = nullptr;
 			OGLShader* particleShader = nullptr;
 

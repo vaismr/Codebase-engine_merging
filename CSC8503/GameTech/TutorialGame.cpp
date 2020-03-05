@@ -28,7 +28,11 @@
 using namespace NCL;
 using namespace CSC8503;
 
+#define MAX_POWER_VALUE (20) // Impulsesize
+#define LEVEL_TIME (300) // Time count
 
+#define restrict_float(V, MIN, MAX) \
+	((V < MIN) ? MIN : ((V > MAX) ? MAX : V)) // between MIN and MAX
 
 TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
@@ -49,7 +53,6 @@ TutorialGame::TutorialGame()	{
 	audioEngine.LoadSound("../../Assets/Sounds/wave.mp3");
 	/*audioEngine.Set3DListenerAndOrientation(Vec3{ 0,10,0 });*/
 
-
 	//levels.push_back(new LevelTest()); // level 0
 	//levels.push_back(new Level1());
 	//levels.push_back(new Level1());
@@ -57,8 +60,6 @@ TutorialGame::TutorialGame()	{
 	//;
 	//levels.push_back(new Level1());
 	//levels.push_back(new Level1()); // level 5
-
-
 }
 
 /*
@@ -88,6 +89,7 @@ void TutorialGame::InitialiseAssets() {
 
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	backgroundTex = (OGLTexture*)TextureLoader::LoadAPITexture("fantasy.png");
+	Itemicon = (OGLTexture*)TextureLoader::LoadAPITexture("banana.png");
 
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 	particleShader = new OGLShader("particleVert.glsl", "particleFrag.glsl", "particleGeom.glsl");
@@ -213,11 +215,16 @@ void TutorialGame::UpdateGame(float dt) {
 			break;
 
 		case GameState::END_GAME:
-
+			
 			UpdateEndgameMenu();
 
 			RenderEndgameMenu(dt);
 
+			break;
+
+		case GameState::END_GAME_WIN:
+
+		
 			break;
 		}
 	}
@@ -360,7 +367,6 @@ void TutorialGame::UpdatePauseMenu() {
 void TutorialGame::UpdateEndgameMenu() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
 		ToggleEndgameMenu();
-
 }
 
 void TutorialGame::RenderMainGameMenu(float dt) {
@@ -373,11 +379,33 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 			| ImGuiWindowFlags_NoNav
 			| ImGuiWindowFlags_NoBringToFrontOnFocus;
 	
+
+	ImGuiWindowFlags Title_flags =
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBackground
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+
 	auto dl = ImGui::GetBackgroundDrawList();
 	dl->AddImage(backgroundTex->GetImGuiID(), ImVec2(0, 0), ImVec2(1280, 720));
 
-	 ImGui::SetNextWindowPos(ImVec2(454,190), ImGuiCond_Once);
-	 ImGui::SetNextWindowSize(ImVec2(336,371), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(474, 79), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(336, 100), ImGuiCond_Once);
+
+	ImGui::Begin("Main Menu Title", nullptr, Title_flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
+	ImGui::PushFont(fontHeader);
+	ImGui::Text(" MINI GOLF ! ");
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
+	ImGui::End();
+
+
+	ImGui::SetNextWindowPos(ImVec2(454,190), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(336,371), ImGuiCond_Once);
 
 	ImGui::Begin("Main Menu",nullptr,Miainflags );
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
@@ -423,8 +451,28 @@ void TutorialGame::RenderPauseMenu(float dt) {
 		| ImGuiWindowFlags_NoNav
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-	ImGui::SetNextWindowPos(ImVec2(511,314), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(229,176), ImGuiCond_Once);
+	ImGuiWindowFlags Title_flags =
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBackground
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+	ImGui::SetNextWindowPos(ImVec2(504, 183), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(255, 103), ImGuiCond_Once);
+
+	ImGui::Begin("Paused Title", nullptr, Title_flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
+	ImGui::PushFont(fontHeader);
+	ImGui::Text(" PAUSED ! ");
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
+	ImGui::End();
+
+	ImGui::SetNextWindowPos(ImVec2(511, 314), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(229, 220), ImGuiCond_Once);
 
 
 	ImGui::Begin("Pause menu",nullptr, pausedflags);
@@ -434,6 +482,10 @@ void TutorialGame::RenderPauseMenu(float dt) {
 	ImGui::PushFont(fontMainDlg);
 	if (ImGui::Button("MAIN MENU", ImVec2(-1.0f, 0.0f))) {
 		 state = GameState::MAIN_MENU;
+	}
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
+	if (ImGui::Button("CONTINUE", ImVec2(-1.0f, 0.0f))) {
+		TogglePauseMenu();
 	}
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
 	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
@@ -455,7 +507,7 @@ void TutorialGame::RenderEndgameMenu(float dt) {
 		| ImGuiWindowFlags_NoNav
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-	ImGuiWindowFlags flags =
+	ImGuiWindowFlags Title_flags =
 		ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoScrollbar
 		| ImGuiWindowFlags_NoMove
@@ -467,11 +519,12 @@ void TutorialGame::RenderEndgameMenu(float dt) {
 	ImGui::SetNextWindowPos(ImVec2(471,168), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(318,89), ImGuiCond_Always);
 
+	//Display final socre
 
-	ImGui::Begin("Endgamehud", nullptr, flags);
+	ImGui::Begin("Endgamehud", nullptr, Title_flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
 	ImGui::PushFont(fontHeader);
-	ImGui::Text(" GAME OVER "); 
+	ImGui::Text(" GAME OVER !"); 
 	ImGui::PopFont();
 	ImGui::PopStyleColor();
 	ImGui::End();
@@ -500,9 +553,12 @@ void TutorialGame::RenderEndgameMenu(float dt) {
 
 void TutorialGame::RenderInGameHud(float dt) {
 	// Start the Dear ImGui frame
-	static float f = 100.0f;
-	f -= dt;
-	float power = 0.5f;
+	timeLeft = restrict_float(timeLeft - dt, 0, LEVEL_TIME);
+	if (timeLeft <= 0) {
+		Window::GetWindow()->ShowOSPointer(true);
+		Window::GetWindow()->LockMouseToWindow(false);
+		state = GameState::END_GAME;
+	}
 
 	const ImU32 red = 0xFF0000FF;
 	const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
@@ -518,20 +574,51 @@ void TutorialGame::RenderInGameHud(float dt) {
 		| ImGuiWindowFlags_NoBackground
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 	
-	
-
-	//Time window
-	ImGui::SetNextWindowPos(ImVec2(466,6), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(317,95), ImGuiCond_Always);
-	ImGui::Begin("Time Window", nullptr, flags);
+	//Level window
+	ImGui::SetNextWindowPos(ImVec2(487, 29), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(277, 74), ImGuiCond_Once);
+	ImGui::Begin("Level Window", nullptr, flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
 	ImGui::PushFont(fontHeader);
 
-	ImGui::Text(" Time : %.2fs", f);             
+	ImGui::Text(" Level Test ");
+	
 	ImGui::PopFont();
 	ImGui::PopStyleColor();
 
 	ImGui::End();
+
+
+	//Time window
+	ImGui::SetNextWindowPos(ImVec2(1062,6), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(213, 132), ImGuiCond_Once);
+	ImGui::Begin("Time Window", nullptr, flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
+	ImGui::PushFont(fontHeader);
+
+	ImGui::Text(" Time ", timeLeft);      
+	ImGui::Text(" %.0f", timeLeft);
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
+
+	ImGui::End();
+
+	auto Banana = ImGui::GetBackgroundDrawList();
+	Banana->AddImage(Itemicon->GetImGuiID(), ImVec2(0, 0), ImVec2(100, 100));
+	// Item count
+	ImGui::SetNextWindowPos(ImVec2(81, 38), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(141, 66), ImGuiCond_Once);
+	ImGui::Begin("Item Window", nullptr, flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
+	ImGui::PushFont(fontHeader);
+	ImGui::SameLine();
+	ImGui::Text(" x00 ");
+
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
+
+	ImGui::End();
+	// Stroke count
 
 	//power window
 	ImGui::SetNextWindowPos(ImVec2(16,575), ImGuiCond_Always);
@@ -542,28 +629,29 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGui::PushFont(fontMainDlg);
 	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
-	ImGui::ProgressBar("##progress_bar1", power, ImVec2(500, 25), red, col);
+	ImGui::ProgressBar("##progress_bar1", Impulsesize / MAX_POWER_VALUE, ImVec2(500, 25), red, col);
 	ImGui::PopStyleColor();
 
 	ImGui::End();
 
 	//Name window
-	ImGui::SetNextWindowPos(ImVec2(966,593), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(276,71), ImGuiCond_Always);
-	ImGui::Begin("Name window", nullptr, flags); 
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
-	ImGui::PushFont(fontMainDlg);
-	static char name[32] = "Unknown";
-	char buf[64]; sprintf_s(buf, IM_ARRAYSIZE(buf), "Name: %s###ButtonChangeName", name);
+	//ImGui::SetNextWindowPos(ImVec2(966,593), ImGuiCond_Always);
+	//ImGui::SetNextWindowSize(ImVec2(276,71), ImGuiCond_Always);
 
-	if (ImGui::Button(buf))
-	{
-		ImGui::OpenPopup("PopupNameEditor");
-	}
+	//ImGui::Begin("Name window", nullptr, flags); 
+	//ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
+	//ImGui::PushFont(fontMainDlg);
+	//static char name[32] = "Unknown";
+	//char buf[64]; sprintf_s(buf, IM_ARRAYSIZE(buf), "Name: %s###ButtonChangeName", name);
+
+	//if (ImGui::Button(buf))
+	//{
+	//	ImGui::OpenPopup("PopupNameEditor");
+	//}
 
 	// Popup
 
-	if (ImGui::BeginPopup("PopupNameEditor")) {
+	/*if (ImGui::BeginPopup("PopupNameEditor")) {
 		ImGui::Text("Your name:");
 		ImGui::InputText("##edit", name, IM_ARRAYSIZE(name));
 		if (ImGui::Button("Close"))
@@ -573,7 +661,7 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGui::PopFont();
 	ImGui::PopStyleColor();
 
-	ImGui::End();
+	ImGui::End();*/
 }
 
 
@@ -595,11 +683,11 @@ void TutorialGame::UpdateKeys() {
 		
 
 	
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))		// Endgame test
 		ToggleEndgameMenu();
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
-		useGravity = !useGravity; //Toggle gravity!
+		useGravity = !useGravity;								//Toggle gravity!
 		physics->UseGravity(useGravity);
 	}
 
@@ -632,10 +720,15 @@ void TutorialGame::UpdateKeys() {
 		audioEngine.PrintListenerPos();
 	}
 	
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::L)) 
+	/*if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::L))											// conflict with objectlock
 	{
-		audioEngine.PlaySounds("../../Assets/Sounds/wave.mp3", Vec3{-60,40,60}, 20.0f);
-	}
+		if (backgroundMusic != -1) {																	// press again to stop
+			audioEngine.PlayChannel(backgroundMusic, !audioEngine.IsPaused(backgroundMusic));
+		}
+		else {
+			backgroundMusic = audioEngine.PlaySounds("../../Assets/Sounds/wave.mp3", Vec3{ -60,40,60 }, 20.0f);
+		}
+	}*/
 
 	if (lockedObject) {
 		LockedObjectMovement();
@@ -683,13 +776,13 @@ void TutorialGame::LockedObjectMovement() {
 }
 
 void TutorialGame::UpdateArrow() {
+	float delta = Window::GetMouse()->GetWheelMovement();
 	Impulsedir= Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
-	Impulsesize+= Window::GetMouse()->GetWheelMovement();
+	Impulsesize = restrict_float(Impulsesize + delta, 0, MAX_POWER_VALUE); 
 	Arrowlength = Impulsedir * Impulsesize * 10;
 	//Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
 	totalImpulse = Impulsedir *20 + Vector3(0,1,0) *Impulsesize ;
 	renderer->DrawLine(ball->GetTransform().GetWorldPosition(), (ball->GetTransform().GetWorldPosition()) + Arrowlength, Vector4(1, 0, 0, 1));
-
 }
 
 void  TutorialGame::LockedCameraMovement() {
@@ -892,7 +985,7 @@ void TutorialGame::InitWorld() {
 	}
 
 
-
+	timeLeft = LEVEL_TIME;
 }
 
 //From here on it's functions to add in objects to the world!
