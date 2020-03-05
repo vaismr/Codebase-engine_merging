@@ -40,57 +40,40 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	glDrawBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glClearColor(1, 1, 1, 1);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	//Set up the light properties
 	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 	lightRadius = 1000.0f;
 	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 
-	glDisable(GL_DEPTH_TEST);
-
 //post processing additions
 	quad = Mesh::GenerateQuad();
-	processShader = new OGLShader("GameTechVert.glsl", "ProcessFrag.glsl");
+	processShader = new OGLShader("postv.glsl", "grey.glsl");
 	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
-	//generate our scene depth texture
-	glGenTextures(1, &bufferDepthTex);
-	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, currentWidth, currentHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+	glGenTextures(1, &processTexture);
+	glBindTexture(GL_TEXTURE_2D, processTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, currentWidth, currentHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-	//generate colour texture
-	for (int i = 0; i < 2; i++)
-	{
-		glGenTextures(1, &bufferColourTex[i]);
-		glBindTexture(GL_TEXTURE_2D, bufferColourTex[i]);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, currentWidth, currentHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	}
+	glGenFramebuffers(1, &processFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
 
-	glGenFramebuffers(1, &bufferFBO); //render the scene into this
-	glGenFramebuffers(1, &processFBO); //and do post processing in this
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, processTexture, 0);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, currentWidth, currentHeight);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-	//check FBO attachment success using this command
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || bufferDepthTex || bufferColourTex[0])
-	{
-		return;
-	}
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glEnable(GL_DEPTH_TEST);
 }
 
 GameTechRenderer::~GameTechRenderer()	{
@@ -101,23 +84,41 @@ GameTechRenderer::~GameTechRenderer()	{
 	delete sceneShader;
 	delete quad;
 
-	glDeleteTextures(2, bufferColourTex);
-	glDeleteTextures(1, &bufferDepthTex);
-	glDeleteFramebuffers(1, &bufferFBO);
+	glDeleteTextures(1, &processTexture);
 	glDeleteFramebuffers(1, &processFBO);
+	glDeleteRenderbuffers(1, &rbo);
 }
 
-void GameTechRenderer::RenderFrame() {
+void GameTechRenderer::RenderFrame() 
+{
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glClearColor(1, 1, 1, 1);
-	BuildObjectList();
-	SortObjectList();
-	RenderShadowMap();
-	RenderCamera();
-	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//RenderSkybox();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	BuildObjectList();
+	SortObjectList();	
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+	RenderShadowMap();
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+	RenderCamera();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//DrawPostProcess();
+	//PresentScene();
 
+	glDisable(GL_DEPTH_TEST);
+	BindShader(processShader);
+	glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "texture1"), 0);
+	Matrix4 modelMatrix = Matrix4::Rotation(180.0f, Vector3(0, 0, 1)) * Matrix4::Rotation(180.0f, Vector3(0, 1, 0));
+	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "model"), 1, false, (float*)&modelMatrix);
+	quad->SetTexture(processTexture);
+	quad->Draw();
+	glUseProgram(0);
+
+
+	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	//SwapBuffers(0);
 }
 unsigned int loadCubemap(vector<std::string> faces) {
 
@@ -216,7 +217,7 @@ void GameTechRenderer::RenderShadowMap() {
 
 void GameTechRenderer::RenderCamera() 
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	
 	glClear((GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
 	float screenAspect = (float)currentWidth / (float)currentHeight;
@@ -300,66 +301,10 @@ void GameTechRenderer::RenderCamera()
 		DrawBoundMesh();
 	}
 
-	//glUseProgram(0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
+	
 }
 
-void GameTechRenderer::DrawPostProcess()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[1], 0);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-	BindShader(processShader);
-
-	Matrix4 viewMatrix; //identity by default
-	Matrix4 projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
-
-	/*Update Shader Matrices*/ //TODO: make into function
-	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMatrix);
-
-	glDisable(GL_DEPTH_TEST);
-
-	glUniform2f(glGetUniformLocation(processShader->GetProgramID(), "pixelSize"), 1.0f / currentWidth, 1.0f / currentHeight);
-
-	for (int i = 0; i < POST_PASSES; i++)
-	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[1], 0);
-		glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "isVertical"), 0);
-
-		//TODO: create quad class
-		quad->SetTexture(bufferColourTex[0]);
-		quad->Draw();
-
-		//Now swap the buffers and pass again
-		glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "isVertical"), 1);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
-
-		quad->SetTexture(bufferColourTex[0]);
-		quad->Draw();
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glEnable(GL_DEPTH_TEST);
-}
-
-void GameTechRenderer::PresentScene()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	BindShader(sceneShader);
-
-	Matrix4 viewMatrix; //identity by default
-	Matrix4 projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
-
-	/*Update Shader Matrices*/
-	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "viewMatrix"), 1, false, (float*)&viewMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(processShader->GetProgramID(), "projMatrix"), 1, false, (float*)&projMatrix);
-
-	quad->SetTexture(bufferColourTex[0]);
-	quad->Draw();
-}
 
 void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
 	float screenAspect = (float)currentWidth / (float)currentHeight;

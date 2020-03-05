@@ -51,18 +51,13 @@ namespace NCL {
 
 
 			//post process things
-			void PresentScene();
-			void DrawPostProcess();
-			//void DrawScene(); this is the RenderCamera() function
-
 			OGLShader* processShader;
 			OGLShader* sceneShader;
 			Mesh* quad;
 
-			GLuint bufferFBO;
 			GLuint processFBO;
-			GLuint bufferColourTex[2];
-			GLuint bufferDepthTex;
+			GLuint processTexture;
+			GLuint rbo;
 
 			//shadow mapping things
 			OGLShader*	shadowShader;
