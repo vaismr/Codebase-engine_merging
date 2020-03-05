@@ -7,6 +7,8 @@
 #include <imgui/imgui.h>
 #include "../CSC8503Common/LoadingScreen.h"
 #include "ball.h"
+#include <ctime>
+#include "psapi.h"
 
 class LevelBase;
 
@@ -127,6 +129,7 @@ namespace NCL {
 			void RenderMainGameMenu(float dt);
 			void RenderPauseMenu(float dt);
 			void TutorialGame::RenderEndgameMenu(float dt);
+			void RenderDebugUi(float dt);
 
 
 
@@ -138,6 +141,7 @@ namespace NCL {
 
 			bool useGravity;
 			bool inSelectionMode;
+			bool inDebugMode;
 
 			float		forceMagnitude;
 

@@ -182,18 +182,24 @@ void TutorialGame::UpdateGame(float dt) {
 			SelectObject();
 			MoveSelectedObject();
 
-			world->UpdateWorld(dt);
-			renderer->Update(dt);
-			physics->Update(dt);
+			if (inDebugMode) {
+				RenderDebugUi(dt);
+
+			}
+			else {
+				world->UpdateWorld(dt);
+				renderer->Update(dt);
+				physics->Update(dt);
 
 
-			Debug::FlushRenderables();
-			UpdateListener(dt);
-			audioEngine.Update();
+				Debug::FlushRenderables();
+				UpdateListener(dt);
+				audioEngine.Update();
 
-			UpdateArrow();
+				UpdateArrow();
 
-			RenderInGameHud(dt);
+				RenderInGameHud(dt);
+			}
 			break;
 
 		case GameState::PAUSED:
@@ -222,6 +228,82 @@ void TutorialGame::UpdateGame(float dt) {
 }
 
 
+void TutorialGame::RenderDebugUi(float dt) {
+
+	ImGuiWindowFlags debugflags =
+		ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoNav
+		| ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(340, 300), ImGuiCond_Always);
+
+	ImGui::Begin("Debug", nullptr, debugflags);
+	ImGui::SetWindowFontScale(1.0f);
+
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+	std::clock_t start;
+
+	start = std::clock();
+	world->UpdateWorld(dt);
+	float duration = ((std::clock() - start) / (float)CLOCKS_PER_SEC) / 1000.0f;
+	ImGui::Text("Update World: %.10f", duration);
+
+	start = std::clock();
+	renderer->Update(dt);
+	duration = (std::clock() - start) / (float)CLOCKS_PER_SEC / 1000.0f;
+	ImGui::Text("Update Renderer: %.10f", duration);
+
+	start = std::clock();
+	physics->Update(dt);
+	duration = (std::clock() - start) / (float)CLOCKS_PER_SEC / 1000.0f;
+	ImGui::Text("Update Physics: %.10f", duration);
+
+	start = std::clock();
+	UpdateListener(dt);
+	duration = (std::clock() - start) / (float)CLOCKS_PER_SEC / 1000.0f;
+	ImGui::Text("Update Listener: %.10f", duration);
+
+	start = std::clock();
+	audioEngine.Update();
+	duration = (std::clock() - start) / (float)CLOCKS_PER_SEC / 1000.0f;
+	ImGui::Text("Update Audio: %.10f", duration);
+
+	PROCESS_MEMORY_COUNTERS_EX pmc;
+	GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+	SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
+	SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
+
+	MEMORYSTATUSEX memInfo;
+	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+	GlobalMemoryStatusEx(&memInfo);
+	DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
+	DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
+
+	totalPhysMem /= 1048576; // convert from bytes to megabytes, int division top round down and make it easier to read
+	totalVirtualMem /= 1048576;
+	physMemUsedByMe /= 1048576;
+	virtualMemUsedByMe /= 1048576;
+
+	ImGui::Text("Physical Memory Used (MB): %d/%d", physMemUsedByMe, totalPhysMem);
+	ImGui::Text("Virtual Memory Used (MB): %d/%d", virtualMemUsedByMe, totalVirtualMem);
+	
+	if (selectionObject) {
+		ImGui::Text("Object info");
+		ImGui::Text("Object Position: %.3f %.3f %.3f", selectionObject->GetConstTransform().GetWorldPosition().x,
+			selectionObject->GetConstTransform().GetWorldPosition().y, selectionObject->GetConstTransform().GetWorldPosition().z);
+
+		ImGui::Text("Object Orientation: %.3f %.3f %.3f", selectionObject->GetConstTransform().GetWorldOrientation().x,
+			selectionObject->GetConstTransform().GetWorldOrientation().y, selectionObject->GetConstTransform().GetWorldOrientation().z, (int)selectionObject->GetConstTransform().GetWorldOrientation().w);
+	}
+	ImGui::End();
+
+	UpdateArrow();
+	RenderInGameHud(dt);
+}
 void TutorialGame::UpdateListener(float dt)
 {
 	//update audio
@@ -494,6 +576,7 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGui::End();
 }
 
+
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
 		InitWorld(); //We can reset the simulation at any time with F1
@@ -519,6 +602,11 @@ void TutorialGame::UpdateKeys() {
 		useGravity = !useGravity; //Toggle gravity!
 		physics->UseGravity(useGravity);
 	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::TAB)) {
+		inDebugMode = !inDebugMode;
+	}
+
 	//Running certain physics updates in a consistent order might cause some
 	//bias in the calculations - the same objects might keep 'winning' the constraint
 	//allowing the other one to stretch too much etc. Shuffling the order so that it
