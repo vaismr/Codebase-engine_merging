@@ -6,6 +6,8 @@
 
 #include "../CSC8503Common/GameWorld.h"
 
+#include "Post Processing/Mesh.h"
+
 #define POST_PASSES 10
 
 namespace NCL {
@@ -55,7 +57,7 @@ namespace NCL {
 
 			OGLShader* processShader;
 			OGLShader* sceneShader;
-			OGLMesh* quad;
+			Mesh* quad;
 
 			GLuint bufferFBO;
 			GLuint processFBO;

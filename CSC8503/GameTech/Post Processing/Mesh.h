@@ -12,14 +12,14 @@ namespace NCL {
 		MAX_BUFFER
 	};
 
-	class Quad
+	class Mesh
 	{
 	public:
-		Quad();
-		~Quad();
+		Mesh();
+		~Mesh();
 
 		void Draw();
-		static Quad* GenerateQuad();
+		static Mesh* GenerateQuad();
 		void BufferData();
 		void SetTexture(GLuint tex) { texture = tex; }
 		GLuint GetTexture() { return texture; }

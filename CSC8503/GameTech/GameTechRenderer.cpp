@@ -50,7 +50,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	glDisable(GL_DEPTH_TEST);
 
 //post processing additions
-	/*quad = Mesh::GenerateQuad*/
+	quad = Mesh::GenerateQuad();
 	processShader = new OGLShader("GameTechVert.glsl", "ProcessFrag.glsl");
 	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
@@ -329,15 +329,15 @@ void GameTechRenderer::DrawPostProcess()
 		glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "isVertical"), 0);
 
 		//TODO: create quad class
-		/*quad->SetTexture(bufferColourTex[0]);
-		quad->Draw();*/
+		quad->SetTexture(bufferColourTex[0]);
+		quad->Draw();
 
 		//Now swap the buffers and pass again
 		glUniform1i(glGetUniformLocation(processShader->GetProgramID(), "isVertical"), 1);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
 
-		/*quad->SetTexture(bufferColourTex[0]);
-		quad->Draw();*/
+		quad->SetTexture(bufferColourTex[0]);
+		quad->Draw();
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

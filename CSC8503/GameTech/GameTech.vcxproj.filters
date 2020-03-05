@@ -14,7 +14,7 @@
     <ClCompile Include="LevelTest.h" />
     <ClCompile Include="arrow.cpp" />
     <ClCompile Include="ball.cpp" />
-    <ClCompile Include="Post Processing\Quad.cpp" />
+    <ClCompile Include="Post Processing\Mesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Library\imgui\imconfig.h" />
@@ -38,6 +38,6 @@
     <ClInclude Include="Level1.h" />
     <ClInclude Include="arrow.h" />
     <ClInclude Include="ball.h" />
-    <ClInclude Include="Post Processing\Quad.h" />
+    <ClInclude Include="Post Processing\Mesh.h" />
   </ItemGroup>
 </Project>
