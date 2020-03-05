@@ -9,6 +9,7 @@
 
 #include "../CSC8503Common/PositionConstraint.h"
 #include <iostream>
+#include <sstream>
 
 
 
@@ -25,8 +26,6 @@ TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
 	renderer	= new GameTechRenderer(*world);
 	physics		= new PhysicsSystem(*world);
-	stateMachineChase = new StateMachine();
-	stateMachinePatrol = new StateMachine();
 
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
@@ -87,11 +86,10 @@ TutorialGame::~TutorialGame()	{
 	delete gooseMesh;
 	delete basicTex;
 	delete basicShader;
-	delete stateMachineChase;
-	delete stateMachinePatrol;
 
 	delete player;
-	delete enemyChase;
+	delete chaseAI;
+	delete patrolAI;
 
 	delete physics;
 	delete renderer;
@@ -123,16 +121,12 @@ lastCamPos = world->GetMainCamera()->GetPosition(); //get this before camera is 
 		SelectObject();
 		MoveSelectedObject();
 
-		UpdateVariables(dt);
+		UpdateAI();
 
 		world->UpdateWorld(dt);
 		renderer->Update(dt);
 		physics->Update(dt);
-		stateMachineChase->Update();
-		stateMachinePatrol->Update();
 		renderHUD(dt);
-
-		renderer->DrawString("State: " + selectionObject->GetStateDescription(), Vector2(200, 200));
 
 		UpdateListener(dt);
 		audioEngine.Update();
@@ -188,12 +182,9 @@ void TutorialGame::UpdatePauseMenu() {
 	}		
 }
 
-void TutorialGame::UpdateVariables(float dt) {
-	enemyPatrolPos = enemyPatrol->GetTransform().GetWorldPosition();
-	enemyPatrol->UpdateIdleTime(dt);
-	patrolIdleTime = enemyPatrol->GetIdleTime();
-	std::cout << enemyPatrol->GetIdleTime() << std::endl;
-	enemyPlayerDist = (player->GetTransform().GetWorldPosition() - enemyChase->GetTransform().GetWorldPosition()).Length();
+void TutorialGame::UpdateAI() {
+	chaseAI->Update();
+	patrolAI->Update();
 }
 
 void NCL::CSC8503::TutorialGame::renderHUD(float dt)
@@ -513,113 +504,13 @@ void TutorialGame::InitWorld() {
 	AddAppleToWorld(Vector3(35, 2, 0));
 
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
-	enemyChase = AddCharacterToWorld(Vector3(45, 2, 0));
-	enemyPatrol = AddCharacterToWorld(Vector3(40, 2, -10));
+	chaseAI = (EnemyAIChase*)AddChaseAIToWorld(Vector3(45, 2, 0));
+	patrolAI = (EnemyAIPatrol*)AddPatrolAIToWorld(Vector3(40, 2, -10));
 
 	AddFloorToWorld(Vector3(0, -2, 0));
 
 	selectionObject = player;
 	lockedObject = player;
-
-	EnemyAIChase();
-	EnemyAIPatrol();
-}
-
-void TutorialGame::EnemyAIChase() {
-
-	EnemyFunc idleFunc = [](void* enemy, void* player) {
-		GameObject* enemyObject = (GameObject*)enemy;
-		enemyObject->SetStateDescription("idle");
-	};
-
-	// @TODO raycast for this?
-	EnemyFunc spottedPlayer = [](void* enemy, void* player) {
-		GameObject* enemyObject = (GameObject*)enemy;
-		GameObject* playerObject = (GameObject*)player;
-		enemyObject->SetStateDescription("spotted player");
-		Vector3 dir = playerObject->GetTransform().GetWorldPosition() - enemyObject->GetTransform().GetWorldPosition();
-		dir.Normalise();
-		float dirAngle = atan2(dir.x, dir.z);
-		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
-		enemyObject->GetTransform().SetLocalOrientation(orientation);
-	};
-
-	EnemyFunc chaseFunc = [](void* enemy, void* player) {
-		GameObject* enemyObject = (GameObject*)enemy;
-		GameObject* playerObject = (GameObject*)player;
-		enemyObject->SetStateDescription("chasing");
-		Vector3 dir = playerObject->GetTransform().GetWorldPosition() - enemyObject->GetTransform().GetWorldPosition();
-		float dirAngle = atan2(dir.x, dir.z);
-		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
-		enemyObject->GetTransform().SetLocalOrientation(orientation);
-		enemyObject->GetPhysicsObject()->AddForce(dir * 8.0f);
-	};
-
-	EnemyState* idleState = new EnemyState(idleFunc, enemyChase);
-	EnemyState* spottedState = new EnemyState(spottedPlayer, enemyChase, player);
-	EnemyState* chaseState = new EnemyState(chaseFunc, enemyChase, player);
-
-	stateMachineChase->AddState(idleState);
-	stateMachineChase->AddState(spottedState);
-	stateMachineChase->AddState(chaseState);
-
-	GenericTransition<float&, float>* idleToSpotted = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::LessThanTransition, enemyPlayerDist, 30.0f, idleState, spottedState);
-
-	GenericTransition<float&, float>* spottedToIdle = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::GreaterThanTransition, enemyPlayerDist, 40.0f, spottedState, idleState);
-
-
-	GenericTransition<float&, float>* spottedToChase = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::LessThanTransition, enemyPlayerDist, 15.0f, spottedState, chaseState);
-
-	GenericTransition<float&, float>* chaseToSpotted = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::GreaterThanTransition, enemyPlayerDist, 25.0f, chaseState, spottedState);
-
-	stateMachineChase->AddTransition(idleToSpotted);
-	stateMachineChase->AddTransition(spottedToIdle);
-	stateMachineChase->AddTransition(spottedToChase);
-	stateMachineChase->AddTransition(chaseToSpotted);
-}
-
-void TutorialGame::EnemyAIPatrol() {
-
-	EnemyFunc idleFunc = [](void* enemy, void* data) {
-		GameObject* enemyObject = (GameObject*)enemy;
-		enemyObject->SetStateDescription("idle");
-	};
-
-	// @TODO add src point, so AI patrols between 2 src and dst
-	EnemyFunc patrolFunc = [](void* enemy, void* dst) {
-		GameObject* enemyObject = (GameObject*)enemy;
-		Vector3* dstPoint = (Vector3*)dst;
-		Vector3 enemyPos = enemyObject->GetTransform().GetWorldPosition();
-		enemyObject->SetStateDescription("patrolling");
-		Vector3 dir = *dstPoint - enemyPos;
-		float dirAngle = atan2(dir.x, dir.z);
-		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
-		enemyObject->GetTransform().SetLocalOrientation(orientation);
-		enemyObject->GetPhysicsObject()->AddForce(dir * 6.0f);
-		enemyObject->ResetIdleTime();
-	};
-
-	EnemyState* idleState = new EnemyState(idleFunc, enemyPatrol);
-	EnemyState* patrolState = new EnemyState(patrolFunc, enemyPatrol, (void*)&patrolDst);
-
-	stateMachinePatrol->AddState(idleState);
-	stateMachinePatrol->AddState(patrolState);
-
-	// @TODO fix these
-	GenericTransition<float&, float>* idleToPatrol = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::GreaterThanTransition, patrolIdleTime, 1.0f, idleState, patrolState);
-
-	GenericTransition<Vector3&, Vector3>* patrolToIdle = new GenericTransition<Vector3&, Vector3>(
-		GenericTransition<Vector3&, Vector3>::WithinRangeTransition, enemyPatrolPos, patrolDst, patrolState, idleState);
-
-	// @TODO make AI class
-
-	stateMachinePatrol->AddTransition(idleToPatrol);
-	stateMachinePatrol->AddTransition(patrolToIdle);
 }
 
 //From here on it's functions to add in objects to the world!
@@ -761,6 +652,78 @@ GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 	}
 
 	GameObject* character = new GameObject();
+
+	float r = rand() / (float)RAND_MAX;
+
+
+	AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
+	character->SetBoundingVolume((CollisionVolume*)volume);
+
+	character->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
+	character->GetTransform().SetWorldPosition(position);
+
+	character->SetRenderObject(new RenderObject(&character->GetTransform(), r > 0.5f ? charA : charB, nullptr, basicShader));
+	character->SetPhysicsObject(new PhysicsObject(&character->GetTransform(), character->GetBoundingVolume()));
+
+	character->GetPhysicsObject()->SetInverseMass(inverseMass);
+	character->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(character);
+
+	return character;
+}
+
+GameObject* TutorialGame::AddChaseAIToWorld(const Vector3& position) {
+	float meshSize = 4.0f;
+	float inverseMass = 0.5f;
+
+	auto pos = keeperMesh->GetPositionData();
+
+	Vector3 minVal = pos[0];
+	Vector3 maxVal = pos[0];
+
+	for (auto& i : pos) {
+		maxVal.y = max(maxVal.y, i.y);
+		minVal.y = min(minVal.y, i.y);
+	}
+
+	EnemyAI* character = new EnemyAIChase(player);
+
+	float r = rand() / (float)RAND_MAX;
+
+
+	AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
+	character->SetBoundingVolume((CollisionVolume*)volume);
+
+	character->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
+	character->GetTransform().SetWorldPosition(position);
+
+	character->SetRenderObject(new RenderObject(&character->GetTransform(), r > 0.5f ? charA : charB, nullptr, basicShader));
+	character->SetPhysicsObject(new PhysicsObject(&character->GetTransform(), character->GetBoundingVolume()));
+
+	character->GetPhysicsObject()->SetInverseMass(inverseMass);
+	character->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(character);
+
+	return character;
+}
+
+GameObject* TutorialGame::AddPatrolAIToWorld(const Vector3& position) {
+	float meshSize = 4.0f;
+	float inverseMass = 0.5f;
+
+	auto pos = keeperMesh->GetPositionData();
+
+	Vector3 minVal = pos[0];
+	Vector3 maxVal = pos[0];
+
+	for (auto& i : pos) {
+		maxVal.y = max(maxVal.y, i.y);
+		minVal.y = min(minVal.y, i.y);
+	}
+
+	EnemyAI* character = new EnemyAIPatrol(patrolA, patrolB);
 
 	float r = rand() / (float)RAND_MAX;
 

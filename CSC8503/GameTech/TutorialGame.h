@@ -1,9 +1,7 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
-#include "../CSC8503Common/StateMachine.h"
-#include "../CSC8503Common/StateTransition.h"
-#include "../CSC8503Common/State.h"
+#include "../CSC8503Common/EnemyAI.h"
 
 #include <iostream>
 #include "../GameTech/Sound/AudioEngine.h"
@@ -32,7 +30,7 @@ namespace NCL {
 				Window::GetWindow()->ShowOSPointer(isPaused);
 			}
 			void UpdatePauseMenu();
-			void UpdateVariables(float dt);
+			void UpdateAI();
 
 			/*
 			These are some of the world/object creation functions I created when testing the functionality
@@ -61,6 +59,8 @@ namespace NCL {
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
+			GameObject* AddChaseAIToWorld(const Vector3& position);
+			GameObject* AddPatrolAIToWorld(const Vector3& position);
 
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
@@ -75,9 +75,6 @@ namespace NCL {
 
 			GameObject* selectionObject = nullptr;
 			GameObject* player = nullptr;
-			GameObject* enemyChase = nullptr;
-			GameObject* enemyPatrol = nullptr;
-
 
 			OGLMesh* cubeMesh = nullptr;
 			OGLMesh* sphereMesh = nullptr;
@@ -105,19 +102,12 @@ namespace NCL {
 			bool isPaused;
 
 			LoadingScreen* loadingScreen;
-			StateMachine* stateMachineChase;
-			StateMachine* stateMachinePatrol;
 
+			EnemyAI* chaseAI;
+			EnemyAI* patrolAI;
 
-			//@TODO create AI class for these
-			void EnemyAIChase();
-			void EnemyAIPatrol();
-
-			float enemyPlayerDist = 0;
-			float patrolIdleTime;
-			Vector3 enemyPatrolPos = Vector3();
-			Vector3 patrolSrc = Vector3();
-			Vector3 patrolDst = Vector3(1000,0,1000);
+			Vector3 patrolA = Vector3(0, 0, 0);
+			Vector3 patrolB = Vector3(60, 0, 60);
 		};
 	}
 }

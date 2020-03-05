@@ -17,7 +17,7 @@ namespace NCL {
 		class GameObject	{
 		public:
 			GameObject(string name = "");
-			~GameObject();
+			virtual ~GameObject();
 
 			void SetBoundingVolume(CollisionVolume* vol) {
 				boundingVolume = vol;
@@ -83,13 +83,6 @@ namespace NCL {
 
 			void UpdateBroadphaseAABB();
 
-			// @TODO make AI class
-			void SetStateDescription(const string description) { stateDescription = description; }
-			string GetStateDescription() const { return stateDescription; }
-
-			void UpdateIdleTime(float dt) { idleTime += dt; }
-			void ResetIdleTime() { idleTime = 0.0f; }
-			float GetIdleTime() const { return idleTime; }
 		protected:
 			Transform			transform;
 
@@ -103,10 +96,6 @@ namespace NCL {
 			string	name;
 
 			Vector3 broadphaseAABB;
-
-			// put this in AI object class
-			string stateDescription = "N/A";
-			float idleTime = 0.0f;
 		};
 	}
 }
