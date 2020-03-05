@@ -61,6 +61,8 @@ namespace NCL {
 			bool greyPost = false;
 			bool invPost = false;
 
+			void SelectPostType();
+
 			//shadow mapping things
 			OGLShader*	shadowShader;
 			GLuint		shadowTex;
