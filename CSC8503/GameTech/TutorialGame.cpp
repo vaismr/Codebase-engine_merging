@@ -576,8 +576,9 @@ void TutorialGame::InitWorld() {
 	//AddCharacterToWorld(Vector3(45, 2, 0));
 
 	AddFloorToWorld(Vector3(0, -2, 0));
-	AddWaterToWorld(Vector3(60, 0.1f, 60));
-	AddIceToWorld(Vector3(40, 1.0f, 40), Vector3(1.0f, 1.0f, 1.0f));
+	AddWaterToWorld(Vector3(70, 0.1f, 70));
+	AddIceToWorld(Vector3(40, 6.0f, 40), Vector3(5.0f, 6.0f, 1.0f));
+	AddFireUPToWorld(Vector3(50, 0.1f, 50));
 
 	Ball* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 1);
 	ball = (Ball*)tempball;
@@ -635,7 +636,7 @@ physics worlds. You'll probably need another function for the creation of OBB cu
 
 */
 Ball* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
-	Ball* sphere = new Ball("FIRE");
+	Ball* sphere = new Ball("BALL");
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
@@ -697,6 +698,30 @@ GameObject* TutorialGame::AddWaterToWorld(const Vector3& position)
 	world->AddGameObject(water);
 
 	return water;
+}
+
+GameObject* TutorialGame::AddFireUPToWorld(const Vector3& position)
+{
+
+	GameObject* FirePowerUp = new GameObject("FIREPOWERUP");
+	Vector3 dimensions = Vector3(1.0f, 0.1f, 1.0f);
+	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
+
+	FirePowerUp->SetBoundingVolume((CollisionVolume*)volume);
+
+	FirePowerUp->GetTransform().SetWorldPosition(position);
+	FirePowerUp->GetTransform().SetWorldScale(dimensions);
+
+	FirePowerUp->SetRenderObject(new RenderObject(&FirePowerUp->GetTransform(), cubeMesh, 0, basicShader));
+	FirePowerUp->SetPhysicsObject(new PhysicsObject(&FirePowerUp->GetTransform(), FirePowerUp->GetBoundingVolume()));
+	FirePowerUp->GetRenderObject()->SetColour(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	FirePowerUp->GetPhysicsObject()->SetInverseMass(0);
+	FirePowerUp->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(FirePowerUp);
+
+	return FirePowerUp;
 }
 
 GameObject* TutorialGame::AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {

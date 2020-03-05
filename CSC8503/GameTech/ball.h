@@ -29,7 +29,11 @@ namespace NCL {
 					this->isOnFloor = false;
 					this->isOnWater = true;
 				}
-				else if (otherObject->GetName() == "ICE") {
+				else if (otherObject->GetName() == "FIREPOWERUP") {
+					this->SetName("FIRE");
+					this->GetRenderObject()->SetColour(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+				}
+				else if (this->GetName() == "FIRE" && otherObject->GetName() == "ICE") {
 					this->hitIce = true;
 					otherObject->SetActive(false);
 				}
