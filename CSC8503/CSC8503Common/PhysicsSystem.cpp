@@ -176,6 +176,9 @@ void PhysicsSystem::BasicCollisionDetection() {
 			if ((*i)->IsStatic() && (*j)->IsStatic()) {
 				continue;
 			}
+			if ((*i)->IsActive() == false || (*j)->IsActive() == false) {
+				continue;
+			}
 			CollisionDetection::CollisionInfo info;
 			if (CollisionDetection::ObjectIntersection(*i, *j, info)) {
 				//std::cout << "Collision between" << (*i)->GetName()

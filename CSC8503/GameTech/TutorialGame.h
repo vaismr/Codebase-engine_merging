@@ -65,7 +65,8 @@ namespace NCL {
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddWaterToWorld(const Vector3& position);
-			GameObject* AddFireUPToWorld(const Vector3& position);
+			GameObject* AddFirePowerUpToWorld(const Vector3& position);
+			GameObject* AddIcePowerUpToWorld(const Vector3& position);
 			//IT'S HAPPENING
 			GameObject* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);

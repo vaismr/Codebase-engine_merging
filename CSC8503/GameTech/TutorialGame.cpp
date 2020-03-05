@@ -578,8 +578,8 @@ void TutorialGame::InitWorld() {
 	AddFloorToWorld(Vector3(0, -2, 0));
 	AddWaterToWorld(Vector3(70, 0.1f, 70));
 	AddIceToWorld(Vector3(40, 6.0f, 40), Vector3(5.0f, 6.0f, 1.0f));
-	AddFireUPToWorld(Vector3(50, 0.1f, 50));
-
+	AddFirePowerUpToWorld(Vector3(50, 0.1f, 50));
+	AddIcePowerUpToWorld(Vector3(55, 0.1f, 55));
 	Ball* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 1);
 	ball = (Ball*)tempball;
 
@@ -700,11 +700,11 @@ GameObject* TutorialGame::AddWaterToWorld(const Vector3& position)
 	return water;
 }
 
-GameObject* TutorialGame::AddFireUPToWorld(const Vector3& position)
+GameObject* TutorialGame::AddFirePowerUpToWorld(const Vector3& position)
 {
 
 	GameObject* FirePowerUp = new GameObject("FIREPOWERUP");
-	Vector3 dimensions = Vector3(1.0f, 0.1f, 1.0f);
+	Vector3 dimensions = Vector3(1.0f, 0.5f, 1.0f);
 	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
 
 	FirePowerUp->SetBoundingVolume((CollisionVolume*)volume);
@@ -714,7 +714,7 @@ GameObject* TutorialGame::AddFireUPToWorld(const Vector3& position)
 
 	FirePowerUp->SetRenderObject(new RenderObject(&FirePowerUp->GetTransform(), cubeMesh, 0, basicShader));
 	FirePowerUp->SetPhysicsObject(new PhysicsObject(&FirePowerUp->GetTransform(), FirePowerUp->GetBoundingVolume()));
-	FirePowerUp->GetRenderObject()->SetColour(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+	FirePowerUp->GetRenderObject()->SetColour(Vector4(0.5f, 0.1f, 0.1f, 1.0f));
 
 	FirePowerUp->GetPhysicsObject()->SetInverseMass(0);
 	FirePowerUp->GetPhysicsObject()->InitCubeInertia();
@@ -722,6 +722,30 @@ GameObject* TutorialGame::AddFireUPToWorld(const Vector3& position)
 	world->AddGameObject(FirePowerUp);
 
 	return FirePowerUp;
+}
+
+GameObject* TutorialGame::AddIcePowerUpToWorld(const Vector3& position)
+{
+
+	GameObject* IcePowerUp = new GameObject("ICEPOWERUP");
+	Vector3 dimensions = Vector3(1.0f, 0.5f, 1.0f);
+	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
+
+	IcePowerUp->SetBoundingVolume((CollisionVolume*)volume);
+
+	IcePowerUp->GetTransform().SetWorldPosition(position);
+	IcePowerUp->GetTransform().SetWorldScale(dimensions);
+
+	IcePowerUp->SetRenderObject(new RenderObject(&IcePowerUp->GetTransform(), cubeMesh, 0, basicShader));
+	IcePowerUp->SetPhysicsObject(new PhysicsObject(&IcePowerUp->GetTransform(), IcePowerUp->GetBoundingVolume()));
+	IcePowerUp->GetRenderObject()->SetColour(Vector4(0.0f, 0.8f, 0.8f, 1.0f));
+
+	IcePowerUp->GetPhysicsObject()->SetInverseMass(0);
+	IcePowerUp->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(IcePowerUp);
+
+	return IcePowerUp;
 }
 
 GameObject* TutorialGame::AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
