@@ -86,7 +86,7 @@ TutorialGame::~TutorialGame()	{
 	delete basicTex;
 	delete basicShader;
 
-	delete player;
+	delete ball;
 	delete chaseAI;
 	delete patrolAI;
 
@@ -182,8 +182,10 @@ void TutorialGame::UpdatePauseMenu() {
 }
 
 void TutorialGame::UpdateAI() {
-	chaseAI->Update();
-	patrolAI->Update();
+	if(chaseAI)
+		chaseAI->Update();
+	if(patrolAI)
+		patrolAI->Update();
 }
 
 void NCL::CSC8503::TutorialGame::renderHUD(float dt)
@@ -499,7 +501,7 @@ void TutorialGame::InitWorld() {
 	physics->Clear();
 
 	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	player = AddGooseToWorld(Vector3(30, 2, 0));
+	ball = AddGooseToWorld(Vector3(30, 2, 0));
 	AddAppleToWorld(Vector3(35, 2, 0));
 
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
@@ -508,8 +510,8 @@ void TutorialGame::InitWorld() {
 
 	AddFloorToWorld(Vector3(0, -2, 0));
 
-	selectionObject = player;
-	lockedObject = player;
+	selectionObject = ball;
+	lockedObject = ball;
 }
 
 //From here on it's functions to add in objects to the world!
@@ -672,6 +674,7 @@ GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 	return character;
 }
 
+// @TODO uses placeholder character mesh for now
 GameObject* TutorialGame::AddChaseAIToWorld(const Vector3& position) {
 	float meshSize = 4.0f;
 	float inverseMass = 0.5f;
@@ -686,7 +689,7 @@ GameObject* TutorialGame::AddChaseAIToWorld(const Vector3& position) {
 		minVal.y = min(minVal.y, i.y);
 	}
 
-	EnemyAI* character = new EnemyAIChase(player);
+	EnemyAI* character = new EnemyAIChase(ball);
 
 	float r = rand() / (float)RAND_MAX;
 
@@ -708,6 +711,7 @@ GameObject* TutorialGame::AddChaseAIToWorld(const Vector3& position) {
 	return character;
 }
 
+// @TODO uses placeholder character mesh for now
 GameObject* TutorialGame::AddPatrolAIToWorld(const Vector3& position) {
 	float meshSize = 4.0f;
 	float inverseMass = 0.5f;

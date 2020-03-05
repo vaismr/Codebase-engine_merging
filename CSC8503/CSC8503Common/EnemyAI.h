@@ -8,12 +8,14 @@ namespace NCL {
 
 		class EnemyAI : public GameObject {
 		public:
-			EnemyAI(string name = "") : GameObject(name) {
-				sM = new StateMachine();
-			}
+			EnemyAI(string name = "") : GameObject(name), sM(new StateMachine()) {}
+
 			virtual ~EnemyAI() { delete sM; }
 
 			virtual void Update() {}
+
+			void SetSpeedMultiplier(const float multiplier) { speedMultiplier = multiplier; }
+			float GetSpeedMultiplier() const { return speedMultiplier; }
 
 			void SetStateDescription(const string description) { stateDescription = description; }
 			string GetStateDescription() const { return stateDescription; }
@@ -21,6 +23,7 @@ namespace NCL {
 		protected:
 			StateMachine* sM;
 			string stateDescription = "";
+			float speedMultiplier = 100.0f;
 			
 			virtual void SetupStateMachine() {}
 		};

@@ -74,7 +74,7 @@ namespace NCL {
 			ImFont* fontMainDlg = nullptr;
 
 			GameObject* selectionObject = nullptr;
-			GameObject* player = nullptr;
+			GameObject* ball = nullptr;
 
 			OGLMesh* cubeMesh = nullptr;
 			OGLMesh* sphereMesh = nullptr;
@@ -103,8 +103,8 @@ namespace NCL {
 
 			LoadingScreen* loadingScreen;
 
-			EnemyAI* chaseAI;
-			EnemyAI* patrolAI;
+			EnemyAIChase* chaseAI;
+			EnemyAIPatrol* patrolAI;
 
 			Vector3 patrolA = Vector3(0, 0, 0);
 			Vector3 patrolB = Vector3(60, 0, 60);

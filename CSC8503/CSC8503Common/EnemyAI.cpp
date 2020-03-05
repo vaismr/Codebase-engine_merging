@@ -23,6 +23,7 @@ void EnemyAIChase::SetupStateMachine() {
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
 	};
 
+	// @TODO stop pushing player once collided
 	EnemyFunc chaseFunc = [](void* enemy, void* player) {
 		EnemyAIChase* enemyObject = (EnemyAIChase*)enemy;
 		GameObject* playerObject = (GameObject*)player;
@@ -33,7 +34,7 @@ void EnemyAIChase::SetupStateMachine() {
 		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
 		// @TODO pathfind?
-		enemyObject->GetPhysicsObject()->AddForce(dir * 100.0f);
+		enemyObject->GetPhysicsObject()->AddForce(dir * enemyObject->GetSpeedMultiplier());
 	};
 
 	EnemyState* idleState = new EnemyState(idleFunc, this);
@@ -64,7 +65,7 @@ void EnemyAIChase::SetupStateMachine() {
 }
 
 void EnemyAIPatrol::SetupStateMachine() {
-	// @TODO idlefunc for this, i.e. when reach point, stop for 1 sec before moving to other point
+	// @TODO idle state for this, i.e. when reach point, stop for x secs before moving to other point
 	
 	EnemyFunc patrolToA = [](void* enemy, void* A) {
 		EnemyAIPatrol* enemyObject = (EnemyAIPatrol*)enemy;
@@ -77,7 +78,7 @@ void EnemyAIPatrol::SetupStateMachine() {
 		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
 		// @TODO pathfind?
-		enemyObject->GetPhysicsObject()->AddForce(dir * 100.0);
+		enemyObject->GetPhysicsObject()->AddForce(dir * enemyObject->GetSpeedMultiplier());
 	};
 
 	EnemyFunc patrolToB = [](void* enemy, void* B) {
@@ -91,7 +92,7 @@ void EnemyAIPatrol::SetupStateMachine() {
 		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
 		// @TODO pathfind?
-		enemyObject->GetPhysicsObject()->AddForce(dir * 100.0);
+		enemyObject->GetPhysicsObject()->AddForce(dir * enemyObject->GetSpeedMultiplier());
 	};
 
 	EnemyState* patrolToAState = new EnemyState(patrolToA, this, (void*)&A);
