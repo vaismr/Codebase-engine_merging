@@ -19,6 +19,7 @@ namespace NCL {
 
 		protected:
 			void RenderFrame()	override;
+			void RenderLoadingFrame() override;
 
 			OGLShader*		defaultShader;
 
@@ -37,9 +38,17 @@ namespace NCL {
 			void RenderSkybox();
 			void GenerateSkybox();
 			unsigned int skyboxVAO, skyboxVBO;
-			
+
+			//icecube
+			OGLShader* iceshader;
+			void GenerateIce();
 
 			void SetupDebugMatrix(OGLShader*s) override;
+
+			void UpdateParticleTime(float dt)
+			{
+
+			}
 
 			vector<const RenderObject*> activeObjects;
 
