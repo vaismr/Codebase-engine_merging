@@ -48,9 +48,14 @@
     <ClCompile Include="ball.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    <ClCompile Include="Post Processing\Mesh.cpp" >
-       <Filter>Source Files</Filter>
+    <ClCompile Include="Post Processing\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Particles\ParticleEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Particles\SphereEmitter.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,10 +107,17 @@
     <ClInclude Include="ball.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    <ClInclude Include="Post Processing\Mesh.h" >
-    <Filter>Header Files</Filter>
+    <ClInclude Include="Post Processing\Mesh.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-
+    <ClInclude Include="Particles\ParticleEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles\Particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles\ParticleEmitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
