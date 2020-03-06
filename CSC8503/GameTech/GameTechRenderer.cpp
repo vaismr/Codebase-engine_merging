@@ -214,7 +214,6 @@ void GameTechRenderer::RenderShadowMap() {
 
 void GameTechRenderer::RenderCamera() 
 {
-	
 	glClear((GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
 	float screenAspect = (float)currentWidth / (float)currentHeight;
@@ -243,6 +242,7 @@ void GameTechRenderer::RenderCamera()
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 
 	for (const auto&i : activeObjects) {
+
 		OGLShader* shader = (OGLShader*)(*i).GetShader();
 		BindShader(shader);
 
