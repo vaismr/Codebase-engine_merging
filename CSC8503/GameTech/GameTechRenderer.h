@@ -9,6 +9,8 @@
 
 #include "Post Processing/Mesh.h"
 
+#include <queue>
+
 #define POST_PASSES 10
 
 
@@ -65,6 +67,9 @@ namespace NCL {
 			OGLShader* processInvShader;
 			OGLShader* sceneShader;
 			Mesh* quad;
+
+			std::queue<GLuint> screenTextures;
+			bool firstRender = true;
 
 			GLuint processFBO;
 			GLuint processTexture;
