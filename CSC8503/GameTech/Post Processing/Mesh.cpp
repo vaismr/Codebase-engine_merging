@@ -94,5 +94,5 @@ void Mesh::Draw()
 
 	glBindVertexArray(arrayObject);
 	glDrawArrays(type, 0, numVertices);
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
 }

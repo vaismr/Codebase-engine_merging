@@ -178,29 +178,29 @@ GameTechRenderer::~GameTechRenderer()	{
 void GameTechRenderer::RenderFrame() {
 	glEnable(GL_CULL_FACE);
 	glClearColor(1, 1, 1, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
   
-  glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
-  
-	RenderSkybox();
+
+	
+	
 	BuildObjectList();
 	SortObjectList();	
 	RenderShadowMap();
-  
+
 	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
 	RenderCamera();
+	RenderSkybox();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
+	
+	
+	glDisable(GL_DEPTH_TEST);
 	SelectPostType();
 	quad->SetTexture(processTexture);
 	quad->Draw();
-	glUseProgram(0);
-
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -245,8 +245,6 @@ char* texData = nullptr;
 	}
 
 	
-	
-
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -255,6 +253,7 @@ char* texData = nullptr;
 	return skytextureID;
 
 }
+
 void GameTechRenderer::RenderSkybox() {
 	
 
