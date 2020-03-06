@@ -1,6 +1,7 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
+#include "../CSC8503Common/EnemyAI.h"
 
 #include <iostream>
 #include "../GameTech/Sound/AudioEngine.h"
@@ -75,6 +76,7 @@ namespace NCL {
 
 			void InitCamera();
 			void UpdateKeys();
+			void UpdateAI(float dt);
 
 			void InitWorld();
 			void Initball();
@@ -211,6 +213,10 @@ namespace NCL {
       
 			LoadingScreen* loadingScreen;
 
+			EnemyAIChase* chaseAI;
+			EnemyAIPatrol* patrolAI;
+
+			std::vector<Vector3> points = { Vector3(0,0,0), Vector3(10,0,10), Vector3(10, 0, 40), Vector3(40, 0, 40) };
 		};
 	}
 }

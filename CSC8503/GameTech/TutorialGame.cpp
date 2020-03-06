@@ -8,8 +8,8 @@
 #include "../../Common/Assets.h"
 
 #include "../CSC8503Common/PositionConstraint.h"
-#include <iostream>
 
+#include <iostream>
 
 
 #include <imgui/imgui.h>
@@ -115,7 +115,8 @@ TutorialGame::~TutorialGame()	{
 	delete gooseMesh;
 	delete basicTex;
 	delete basicShader;
-
+	delete chaseAI;
+	delete patrolAI;
 	delete physics;
 	delete renderer;
 	delete world;
@@ -190,6 +191,7 @@ void TutorialGame::UpdateGame(float dt) {
 				renderer->Update(dt);
 				physics->Update(dt);
 
+				UpdateAI(dt);
 
 				Debug::FlushRenderables();
 				UpdateListener(dt);
@@ -365,6 +367,13 @@ void TutorialGame::UpdatePauseMenu() {
 void TutorialGame::UpdateEndgameMenu() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))
 		ToggleEndgameMenu();
+}
+
+void TutorialGame::UpdateAI(float dt) {
+	if (chaseAI)
+		chaseAI->Update(dt);
+	if (patrolAI)
+		patrolAI->Update(dt);
 }
 
 void TutorialGame::RenderMainGameMenu(float dt) {
@@ -1010,6 +1019,9 @@ void TutorialGame::InitWorld() {
 	icecube = (Icecube*)tempball;
 	icecube->GetTransform().SetWorldScale(Vector3(3, 3, 3));
 
+	chaseAI = (EnemyAIChase*)AddChaseAIToWorld(Vector3(45, 2, 0));
+	patrolAI = (EnemyAIPatrol*)AddPatrolAIToWorld(Vector3(-10, 2, -10));
+
 	if (level) {
 		level->init(this);
 	}
@@ -1330,6 +1342,80 @@ GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 	}
 
 	GameObject* character = new GameObject();
+
+	float r = rand() / (float)RAND_MAX;
+
+
+	AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
+	character->SetBoundingVolume((CollisionVolume*)volume);
+
+	character->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
+	character->GetTransform().SetWorldPosition(position);
+
+	character->SetRenderObject(new RenderObject(&character->GetTransform(), r > 0.5f ? charA : charB, nullptr, basicShader));
+	character->SetPhysicsObject(new PhysicsObject(&character->GetTransform(), character->GetBoundingVolume()));
+
+	character->GetPhysicsObject()->SetInverseMass(inverseMass);
+	character->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(character);
+
+	return character;
+}
+
+// @TODO uses placeholder character mesh for now
+GameObject* TutorialGame::AddChaseAIToWorld(const Vector3& position) {
+	float meshSize = 4.0f;
+	float inverseMass = 0.5f;
+
+	auto pos = keeperMesh->GetPositionData();
+
+	Vector3 minVal = pos[0];
+	Vector3 maxVal = pos[0];
+
+	for (auto& i : pos) {
+		maxVal.y = max(maxVal.y, i.y);
+		minVal.y = min(minVal.y, i.y);
+	}
+
+	EnemyAI* character = new EnemyAIChase(ball);
+
+	float r = rand() / (float)RAND_MAX;
+
+
+	AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
+	character->SetBoundingVolume((CollisionVolume*)volume);
+
+	character->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
+	character->GetTransform().SetWorldPosition(position);
+
+	character->SetRenderObject(new RenderObject(&character->GetTransform(), r > 0.5f ? charA : charB, nullptr, basicShader));
+	character->SetPhysicsObject(new PhysicsObject(&character->GetTransform(), character->GetBoundingVolume()));
+
+	character->GetPhysicsObject()->SetInverseMass(inverseMass);
+	character->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(character);
+
+	return character;
+}
+
+// @TODO uses placeholder character mesh for now
+GameObject* TutorialGame::AddPatrolAIToWorld(const Vector3& position) {
+	float meshSize = 4.0f;
+	float inverseMass = 0.5f;
+
+	auto pos = keeperMesh->GetPositionData();
+
+	Vector3 minVal = pos[0];
+	Vector3 maxVal = pos[0];
+
+	for (auto& i : pos) {
+		maxVal.y = max(maxVal.y, i.y);
+		minVal.y = min(minVal.y, i.y);
+	}
+
+	EnemyAI* character = new EnemyAIPatrol(points, ball);
 
 	float r = rand() / (float)RAND_MAX;
 

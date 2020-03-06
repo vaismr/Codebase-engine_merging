@@ -132,6 +132,9 @@
     <ClInclude Include="Buoyancy.h">
       <Filter>Physics</Filter>
     </ClInclude>
+    <ClInclude Include="EnemyAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp">
@@ -214,6 +217,9 @@
     </ClCompile>
     <ClCompile Include="Buoyancy.cpp">
       <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyAI.cpp">
+      <Filter>AI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
