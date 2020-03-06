@@ -66,7 +66,7 @@ void EnemyAIChase::SetupStateMachine() {
 	GenericTransition<float&, float>* chaseToSpotted = new GenericTransition<float&, float>(
 		GenericTransition<float&, float>::GreaterThanTransition, distToObject, 45.0f, chaseState, spottedState);
 
-	/***********@TODO Placeholder - AI simply stops once close to player/ball, need to decide on most appropriate response**************/
+	/***********@TODO Placeholder - AI simply stops once close to player/ball, need to decide on most appropriate response*********************/
 	GenericTransition<float&, float>* chaseToStopped = new GenericTransition<float&, float>(
 		GenericTransition<float&, float>::LessThanTransition, distToObject, 5.0f, chaseState, stoppedState);
 
@@ -89,7 +89,7 @@ void EnemyAIPatrol::SetupStateMachine() {
 		enemyObject->SetStateDescription("waiting");
 		if (!enemyObject->GetIsWaiting()) {
 			enemyObject->SetIsWaiting(true);
-			enemyObject->SwitchDestinations();
+			enemyObject->NextDestination();
 		}
 	};
 
@@ -106,21 +106,64 @@ void EnemyAIPatrol::SetupStateMachine() {
 		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
 		enemyObject->GetTransform().SetLocalOrientation(orientation);
 		// @TODO pathfind?
-		enemyObject->GetPhysicsObject()->AddForce(dir * enemyObject->GetSpeedMultiplier());
+		enemyObject->GetPhysicsObject()->AddForce((dir * enemyObject->GetSpeedMultiplier()) * Vector3(1.0, 0.0, 1.0));
+	};
+
+	EnemyFunc chaseFunc = [](void* enemy, void* player) {
+		EnemyAIChase* enemyObject = (EnemyAIChase*)enemy;
+		GameObject* playerObject = (GameObject*)player;
+		enemyObject->SetStateDescription("chasing");
+		Vector3 dir = playerObject->GetTransform().GetWorldPosition() - enemyObject->GetTransform().GetWorldPosition();
+		dir.Normalise();
+		float dirAngle = atan2(dir.x, dir.z);
+		Quaternion orientation = Quaternion(0.0f, sin(dirAngle * 0.5f), 0.0f, cos(dirAngle * 0.5f));
+		enemyObject->GetTransform().SetLocalOrientation(orientation);
+		// @TODO pathfind?
+		enemyObject->GetPhysicsObject()->AddForce((dir * enemyObject->GetSpeedMultiplier()) * Vector3(1.0, 0.0, 1.0));
+	};
+
+	EnemyFunc stop = [](void* enemy, void* data) {
+		EnemyAIChase* enemyObject = (EnemyAIChase*)enemy;
+		enemyObject->SetStateDescription("stopped");
+		enemyObject->GetPhysicsObject()->ClearForces();
 	};
 
 	EnemyState* waitState = new EnemyState(waitFunc, this);
 	EnemyState* patrolToPointState = new EnemyState(patrolToPoint, this);
+	EnemyState* chaseState = new EnemyState(chaseFunc, this, chaseObject);
+	EnemyState* stoppedState = new EnemyState(stop, this);
 
 	sM->AddState(waitState);
 	sM->AddState(patrolToPointState);
+	sM->AddState(chaseState);
+	sM->AddState(stoppedState);
 
 	GenericTransition<float&, float>* patrolToWait = new GenericTransition<float&, float>(
-		GenericTransition<float&, float>::LessThanTransition, distToCurrentDest, 5.0, patrolToPointState, waitState);
+		GenericTransition<float&, float>::LessThanTransition, distToCurrentDest, 6.0, patrolToPointState, waitState);
 
 	GenericTransition<float&, float>* waitToPatrol = new GenericTransition<float&, float>(
 		GenericTransition<float&, float>::GreaterThanTransition, waitTime, 1.0, waitState, patrolToPointState);
 
+
+	GenericTransition<float&, float>* patrolToChase = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::LessThanTransition, distToObject, 25.0f, patrolToPointState, chaseState);
+
+	GenericTransition<float&, float>* chaseToPatrol = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::GreaterThanTransition, distToObject, 35.0f, chaseState, patrolToPointState);
+
+
+	/***********@TODO Placeholder - AI simply stops once close to player/ball, need to decide on most appropriate response*********************/
+	GenericTransition<float&, float>* chaseToStopped = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::LessThanTransition, distToObject, 5.0f, chaseState, stoppedState);
+
+	GenericTransition<float&, float>* stoppedToChase = new GenericTransition<float&, float>(
+		GenericTransition<float&, float>::GreaterThanTransition, distToObject, 15.0f, stoppedState, chaseState);
+	/******************************************************************************************************************************************/
+
 	sM->AddTransition(waitToPatrol);
 	sM->AddTransition(patrolToWait);
+	sM->AddTransition(patrolToChase);
+	sM->AddTransition(chaseToPatrol);
+	sM->AddTransition(chaseToStopped);
+	sM->AddTransition(stoppedToChase);
 }

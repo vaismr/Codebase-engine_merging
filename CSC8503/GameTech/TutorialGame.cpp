@@ -723,7 +723,7 @@ GameObject* TutorialGame::AddPatrolAIToWorld(const Vector3& position) {
 		minVal.y = min(minVal.y, i.y);
 	}
 
-	EnemyAI* character = new EnemyAIPatrol(patrolA, patrolB);
+	EnemyAI* character = new EnemyAIPatrol(points, ball);
 
 	float r = rand() / (float)RAND_MAX;
 

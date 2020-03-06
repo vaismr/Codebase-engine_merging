@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "../CSC8503Common/StateMachine.h"
+#include <vector>
 
 namespace NCL {
 	namespace CSC8503 {
@@ -54,9 +55,14 @@ namespace NCL {
 
 		class EnemyAIPatrol : public EnemyAI {
 		public:
-			EnemyAIPatrol(Vector3& pointA, Vector3& pointB, string name = "") : EnemyAI(name), A(pointA), B(pointB), isWaiting(true), waitTime(0.0f) {
-				(A - GetTransform().GetWorldPosition()).Length() < 
-					(B - GetTransform().GetWorldPosition()).Length() ? currentDest = A : currentDest = B;
+			EnemyAIPatrol(std::vector<Vector3> points, GameObject* chaseObject = nullptr, string name = "") : EnemyAI(name), chaseObject(chaseObject), points(points) {
+				isWaiting = true;
+				hasReachedEnd = false;
+				waitTime = 0.0f;
+				index = 0;
+				currentDest = points[index];
+				distToCurrentDest = (currentDest - GetTransform().GetWorldPosition()).Length();
+				distToObject = 30.0f;
 				SetupStateMachine();
 			}
 
@@ -66,16 +72,26 @@ namespace NCL {
 				if (isWaiting)
 					waitTime += dt;
 				distToCurrentDest = (currentDest - GetTransform().GetWorldPosition()).Length();
+				distToObject = (chaseObject->GetTransform().GetWorldPosition() - GetTransform().GetWorldPosition()).Length();
 				sM->Update();
 			}
 
-			void SetPointA(const Vector3& pointA) { A = pointA; }
-			void SetPointB(const Vector3& pointB) { B = pointB; }
+			void SetPoints(const std::vector<Vector3>& points) { this->points = points; }
 
 		protected:
 			Vector3 GetCurrentDestination() const { return currentDest; }
-			// could expand to move through array of destinations
-			void SwitchDestinations() { currentDest == A ? currentDest = B : currentDest = A; }
+
+			void NextDestination() {
+				if (index == 0)
+					hasReachedEnd = false;
+				if (index < (points.size() - 1) && !hasReachedEnd) {
+					currentDest = points[index++];
+				}
+				else if (index > 0) {
+					hasReachedEnd = true;
+					currentDest = points[index--];
+				}
+			}
 
 			bool GetIsWaiting() const { return isWaiting; }
 			void SetIsWaiting(const bool isWaiting) { 
@@ -86,10 +102,14 @@ namespace NCL {
 
 		private:
 			Vector3 currentDest;
-			Vector3 A;
-			Vector3 B;
+			GameObject* chaseObject;
+
+			std::vector<Vector3> points;
+			int index;
+			bool hasReachedEnd;
 
 			float distToCurrentDest;
+			float distToObject;
 
 			bool isWaiting;
 			float waitTime;
