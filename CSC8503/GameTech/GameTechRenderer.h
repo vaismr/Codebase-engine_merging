@@ -5,7 +5,15 @@
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 
 #include "../CSC8503Common/GameWorld.h"
+
+
+#include "Post Processing/Mesh.h"
+
+#define POST_PASSES 10
+
+
 #include "../../Common/TextureLoader.h"
+
 namespace NCL {
 	class Maths::Vector3;
 	class Maths::Vector4;
@@ -45,12 +53,27 @@ namespace NCL {
 
 			void SetupDebugMatrix(OGLShader* s) override;
 
-			void UpdateParticleTime(float dt)
-			{
-
-			}
+			void DrawWithShader(OGLShader* shader);
 
 			vector<const RenderObject*> activeObjects;
+
+
+
+			//post process things
+			OGLShader* processDefaultShader;
+			OGLShader* processGreyShader;
+			OGLShader* processInvShader;
+			OGLShader* sceneShader;
+			Mesh* quad;
+
+			GLuint processFBO;
+			GLuint processTexture;
+			GLuint rbo;
+
+			bool greyPost = false;
+			bool invPost = false;
+
+			void SelectPostType();
 
 			//shadow mapping things
 			OGLShader* shadowShader;

@@ -48,6 +48,10 @@
     <ClCompile Include="ball.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    
+    <ClCompile Include="Post Processing\Mesh.cpp" >
+       <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameTechRenderer.h">
@@ -98,5 +102,10 @@
     <ClInclude Include="ball.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    
+    <ClInclude Include="Post Processing\Mesh.h" >
+    <Filter>Header Files</Filter>
+    </ClInclude>
+
   </ItemGroup>
 </Project>

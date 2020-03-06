@@ -215,7 +215,13 @@
     </ClCompile>
     <ClCompile Include="NetworkedGame.cpp" />
     <ClCompile Include="NetworkPlayer.cpp" />
-    <ClCompile Include="Sound\AudioEngine.cpp" />
+
+    <ClCompile Include="Particles\ParticleEffect.cpp" />
+    <ClCompile Include="Post Processing\Mesh.cpp" />
+    <ClCompile Include="Sound\AudioEngine.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\Admin\Desktop\Codebase\CSC8503\GameTech;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="Particles\SphereEmitter.cpp" />
     <ClCompile Include="TutorialGame.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -233,6 +239,12 @@
     <ClInclude Include="imgui_progressbar.h" />
     <ClInclude Include="NetworkedGame.h" />
     <ClInclude Include="NetworkPlayer.h" />
+
+    <ClInclude Include="Particles\ParticleEffect.h" />
+    <ClInclude Include="Particles\Particle.h" />
+    <ClInclude Include="Particles\ParticleEmitter.h" />
+    <ClInclude Include="Post Processing\Mesh.h" />
+
     <ClInclude Include="Sound\AudioEngine.h" />
     <ClInclude Include="TutorialGame.h" />
   </ItemGroup>

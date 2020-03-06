@@ -45,16 +45,48 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	glDrawBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glClearColor(1, 1, 1, 1);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	//Set up the light properties
 	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 	lightRadius = 1000.0f;
 	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
+  
+//post processing additions
+	quad = Mesh::GenerateQuad();
+	processDefaultShader = new OGLShader("PostVertex.glsl", "PostFrag.glsl");
+	processGreyShader = new OGLShader("PostVertex.glsl", "PostFragGrey.glsl");
+	processInvShader = new OGLShader("PostVertex.glsl", "PostFragInv.glsl");
+	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
+
+	glGenTextures(1, &processTexture);
+	glBindTexture(GL_TEXTURE_2D, processTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, currentWidth, currentHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glGenFramebuffers(1, &processFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, processTexture, 0);
+
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, currentWidth, currentHeight);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	GenerateSkybox();
 	GenerateIce();
 	
 }
+
 void GameTechRenderer::GenerateSkybox() {
 	skyshader = new OGLShader("skyvertex.glsl", "skyfrag.glsl");
 	float skyboxVertices[] = {
@@ -131,24 +163,47 @@ void GameTechRenderer::GenerateIce() {
 GameTechRenderer::~GameTechRenderer()	{
 	glDeleteTextures(1, &shadowTex);
 	glDeleteFramebuffers(1, &shadowFBO);
+
+	delete processDefaultShader;
+	delete processGreyShader;
+	delete processInvShader;
+	delete sceneShader;
+	delete quad;
+
+	glDeleteTextures(1, &processTexture);
+	glDeleteFramebuffers(1, &processFBO);
+	glDeleteRenderbuffers(1, &rbo);
 }
 
 void GameTechRenderer::RenderFrame() {
 	glEnable(GL_CULL_FACE);
 	glClearColor(1, 1, 1, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+  
+  glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+  
 	RenderSkybox();
 	BuildObjectList();
-	SortObjectList();
+	SortObjectList();	
 	RenderShadowMap();
+  
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
 	RenderCamera();
-	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
-	
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+
+	SelectPostType();
+	quad->SetTexture(processTexture);
+	quad->Draw();
+	glUseProgram(0);
+
+	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 unsigned int GameTechRenderer::loadCubemap(vector<std::string> faces) {
 
@@ -258,7 +313,9 @@ void GameTechRenderer::SortObjectList() {
 
 void GameTechRenderer::RenderShadowMap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
-	glClear(GL_DEPTH_BUFFER_BIT);	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);	glViewport(0, 0, SHADOWSIZE, SHADOWSIZE);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glViewport(0, 0, SHADOWSIZE, SHADOWSIZE);
 
 	glCullFace(GL_FRONT);
 
@@ -287,7 +344,10 @@ void GameTechRenderer::RenderShadowMap() {
 	glCullFace(GL_BACK);
 }
 
-void GameTechRenderer::RenderCamera() {
+void GameTechRenderer::RenderCamera() 
+{
+	glClear((GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
 	float screenAspect = (float)currentWidth / (float)currentHeight;
 	Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
 	Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
@@ -312,6 +372,7 @@ void GameTechRenderer::RenderCamera() {
 	//TODO - PUT IN FUNCTION
 	glActiveTexture(GL_TEXTURE0 + 1);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
+
 
 	for (const auto& i : activeObjects) {
 		if (i->GetRenderName() != "icecube") {
@@ -395,7 +456,6 @@ void GameTechRenderer::RenderCamera() {
 
 	};
 
-
 }
 
 
@@ -409,4 +469,47 @@ void GameTechRenderer::SetupDebugMatrix(OGLShader*s) {
 	int matLocation = glGetUniformLocation(s->GetProgramID(), "viewProjMatrix");
 
 	glUniformMatrix4fv(matLocation, 1, false, (float*)&vp);
+}
+
+void GameTechRenderer::DrawWithShader(OGLShader* shader)
+{
+	glDisable(GL_DEPTH_TEST);
+	BindShader(shader);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture1"), 0);
+	Matrix4 modelMatrix = Matrix4::Rotation(180.0f, Vector3(0, 0, 1)) * Matrix4::Rotation(180.0f, Vector3(0, 1, 0));
+	glUniformMatrix4fv(glGetUniformLocation(shader->GetProgramID(), "model"), 1, false, (float*)&modelMatrix);
+}
+
+void GameTechRenderer::SelectPostType()
+{
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD1))
+	{
+		greyPost = true;
+		invPost = false;
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD2))
+	{
+		greyPost = false;
+		invPost = true;
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD0))
+	{
+		greyPost = false;
+		invPost = false;
+	}
+
+	if (greyPost)
+	{
+		DrawWithShader(processGreyShader);
+	}
+	else if (invPost)
+	{
+		DrawWithShader(processInvShader);
+	}
+	else
+	{
+		DrawWithShader(processDefaultShader);
+	}
 }
