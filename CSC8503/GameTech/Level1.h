@@ -3,10 +3,9 @@
 class Level1 : public LevelBase {
 public:
 	virtual void init(TutorialGame* game) {
-		auto world = new GameWorld();
-		game->SetWorld(world);
+		
 
 		game->AddCharacterToWorld(Vector3(45, 2, 0));
-		game->AddFloorToWorld(Vector3(0, -2, 0));
+		game->AddFloorToWorld(Vector3(100, -2, 0));
 	}
 };
