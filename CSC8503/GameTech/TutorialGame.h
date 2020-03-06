@@ -21,7 +21,6 @@ namespace NCL {
 			LOADING,
 			IN_GAME,
 			PAUSED,
-			END_GAME_WIN,
 			END_GAME,
 		};
 
@@ -37,6 +36,11 @@ namespace NCL {
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddWaterToWorld(const Vector3& position);
+			GameObject* AddFirePowerUpToWorld(const Vector3& position);
+			GameObject* AddIcePowerUpToWorld(const Vector3& position);
+			GameObject* AddPortalToWorld(const Vector3& position);
 			//IT'S HAPPENING
 			GameObject* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
@@ -132,18 +136,26 @@ namespace NCL {
 			void TutorialGame::RenderEndgameMenu(float dt);
 			void RenderDebugUi(float dt);
 
+#pragma region Bridge
+			Vector3 velocity1 = Vector3(300, 0, 0);
+			Vector3 MoveBridgePosition;
+			Transform MoveBridgeTransform;
 
+#pragma endregion
 			int backgroundMusic = -1;
 
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
 			GameWorld* world;
+
 			//ball
 			Ball* ball;
             //icecube
 			Icecube* icecube;
 			GameObject* AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
+			//void Updateballco();
+
 			bool useGravity;
 			bool inSelectionMode;
 			bool inDebugMode;

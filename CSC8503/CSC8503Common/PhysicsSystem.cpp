@@ -122,7 +122,9 @@ OnCollisionBegin / OnCollisionEnd functions (removing health when hit by a
 rocket launcher, gaining a point when the player hits the gold coin, and so on).
 */
 void PhysicsSystem::UpdateCollisionList() {
+
 	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); ) {
+		
 		if ((*i).framesLeft == numCollisionFrames) {
 			i->a->OnCollisionBegin(i->b);
 			i->b->OnCollisionBegin(i->a);
@@ -172,6 +174,9 @@ void PhysicsSystem::BasicCollisionDetection() {
 				continue;
 			}
 			if ((*i)->IsStatic() && (*j)->IsStatic()) {
+				continue;
+			}
+			if ((*i)->IsActive() == false || (*j)->IsActive() == false) {
 				continue;
 			}
 			CollisionDetection::CollisionInfo info;
@@ -312,6 +317,10 @@ void PhysicsSystem::NarrowPhase() {
 		i != broadphaseCollisions.end(); ++i) {
 		CollisionDetection::CollisionInfo info = *i;
 		if (info.a->IsStatic() && info.b->IsStatic()) {
+			continue;
+
+		}
+		if (info.a->IsActive() == false || info.b->IsActive() == false) {
 			continue;
 		}
 		if (CollisionDetection::ObjectIntersection(info.a, info.b, info)) {

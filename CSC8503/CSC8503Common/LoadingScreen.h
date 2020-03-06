@@ -35,7 +35,7 @@ namespace NCL {
 			void Loading() {
 				std::lock_guard<std::mutex> guard(mMutex);
 				// since it's a new thread, we need a new renderer
-				world = new GameWorld();
+				world = new GameWorld(); 
 				renderer = new GameTechRenderer(*world);
 				world->GetMainCamera()->SetCameraType(CameraType::Orthographic);
 				glClearColor(0, 0, 0, 0);
@@ -62,8 +62,8 @@ namespace NCL {
 					renderer->DrawString(loadingText, textPos);
 					loadCount = 0;
 				}
-
-				renderer->RenderLoading();
+				
+				renderer->Render();
 			}
 
 		private:

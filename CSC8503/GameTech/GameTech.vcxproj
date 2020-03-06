@@ -129,7 +129,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link />
     <Link>
@@ -184,8 +183,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -212,21 +209,14 @@
     <ClCompile Include="arrow.cpp" />
     <ClCompile Include="ball.cpp" />
     <ClCompile Include="GameTechRenderer.cpp" />
-    <ClCompile Include="icecube.cpp" />
     <ClCompile Include="imgui_progressbar.cpp" />
     <ClCompile Include="Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug BoostTests|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="NetworkedGame.cpp" />
     <ClCompile Include="NetworkPlayer.cpp" />
-    <ClCompile Include="Particles\ParticleEffect.cpp" />
-    <ClCompile Include="Sound\AudioEngine.cpp">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\Admin\Desktop\Codebase\CSC8503\GameTech;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="Particles\SphereEmitter.cpp" />
+    <ClCompile Include="Sound\AudioEngine.cpp" />
     <ClCompile Include="TutorialGame.cpp" />
-    <ClCompile Include="LevelBase.h" />
-    <ClCompile Include="LevelTest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Library\imgui\imconfig.h" />
@@ -240,17 +230,11 @@
     <ClInclude Include="arrow.h" />
     <ClInclude Include="ball.h" />
     <ClInclude Include="GameTechRenderer.h" />
-    <ClInclude Include="icecube.h" />
     <ClInclude Include="imgui_progressbar.h" />
     <ClInclude Include="NetworkedGame.h" />
     <ClInclude Include="NetworkPlayer.h" />
-    <ClInclude Include="Particles\ParticleEffect.h" />
-    <ClInclude Include="Particles\Particle.h" />
-    <ClInclude Include="Particles\ParticleEmitter.h" />
     <ClInclude Include="Sound\AudioEngine.h" />
-    <ClInclude Include="Particles\SphereEmitter.h" />
     <ClInclude Include="TutorialGame.h" />
-    <ClInclude Include="Level1.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.vcxproj">
