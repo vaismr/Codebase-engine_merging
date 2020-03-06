@@ -347,10 +347,10 @@ void TutorialGame::UpdateListener(float dt)
 	audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, cameraUp);
 	//audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, Vec3{0,1,0});
 
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
-	{
-		cout << lastCamPos.x << endl;
-	}		
+	//if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
+	//{
+		//cout << lastCamPos.x << endl;
+	//}		
 }
 
 
@@ -368,6 +368,9 @@ void TutorialGame::UpdateEndgameMenu() {
 }
 
 void TutorialGame::RenderMainGameMenu(float dt) {
+
+	Window::GetWindow()->ShowOSPointer(true);
+	Window::GetWindow()->LockMouseToWindow(false);
 
 	ImGuiWindowFlags Miainflags =
 		ImGuiWindowFlags_NoTitleBar
@@ -997,8 +1000,8 @@ void TutorialGame::InitWorld() {
 	AddPortalToWorld(Portal1)->SetName("PORTAL1");
 	AddPortalToWorld(Portal2)->SetName("PORTAL2");
 
-	Ball* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 1);
-	ball = (Ball*)tempball;
+	Ball* tempball = AddPlayerToWorld(Vector3(80, 6, 80), 3, 1);
+	ball = tempball;
 	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
 
 	//AddFloorToWorld(Vector3(0, -2, 0));
@@ -1063,7 +1066,27 @@ rigid body representation. This and the cube function will let you build a lot o
 physics worlds. You'll probably need another function for the creation of OBB cubes too.
 
 */
-Ball* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
+GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
+	GameObject* sphere = new GameObject();
+
+	Vector3 sphereSize = Vector3(radius, radius, radius);
+	SphereVolume* volume = new SphereVolume(radius);
+	sphere->SetBoundingVolume((CollisionVolume*)volume);
+	sphere->GetTransform().SetWorldScale(sphereSize);
+	sphere->GetTransform().SetWorldPosition(position);
+
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, 0, basicShader));
+	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+
+	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
+	sphere->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(sphere);
+
+	return sphere;
+}
+
+Ball* TutorialGame::AddPlayerToWorld(const Vector3& position, float radius, float inverseMass) {
 	Ball* sphere = new Ball("BALL");
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);

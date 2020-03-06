@@ -16,6 +16,7 @@ namespace NCL {
 		{
 		public:
 			RenderObject(Transform* parentTransform, MeshGeometry* mesh, TextureBase* tex, ShaderBase* shader);
+			RenderObject(Transform* parentTransform, MeshGeometry* mesh, TextureBase* tex, ShaderBase* shader, std::string name);
 			~RenderObject();
 
 			void SetDefaultTexture(TextureBase* t) {
@@ -51,12 +52,23 @@ namespace NCL {
 				return colour;
 			}
 
+			void SetrenderName(const string name) {
+				rendername = name;
+
+			}
+
+			string GetRenderName() const {
+
+				return this->rendername;
+			}
+
 		protected:
 			MeshGeometry*	mesh;
 			TextureBase*	texture;
 			ShaderBase*		shader;
 			Transform*		transform;
 			Vector4			colour;
+			string rendername;
 		};
 	}
 }

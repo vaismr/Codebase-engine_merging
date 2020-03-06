@@ -29,7 +29,15 @@ namespace NCL {
 
 			virtual bool HasInitialised() const {return true;}
 
-			virtual void Update(float dt) {}
+			virtual void Update(float dt) {
+			
+				particleTime += dt;
+
+				if (particleTime > 3.0f)
+				{
+					particleTime = 1.0f;
+				}
+			}
 
 			void Render() {
 				BeginFrame();
@@ -37,9 +45,17 @@ namespace NCL {
 				EndFrame();
 			}
 
+			void RenderLoading() {
+				BeginFrame();
+				RenderLoadingFrame();
+				EndFrame();
+			}
+
 			virtual bool SetVerticalSync(VerticalSyncState s) {
 				return false;
 			}
+
+			float particleTime;
 
 		protected:
 			virtual void OnWindowResize(int w, int h) = 0;
@@ -48,6 +64,8 @@ namespace NCL {
 			virtual void BeginFrame()	= 0;
 			virtual void RenderFrame()	= 0;
 			virtual void EndFrame()		= 0;
+
+			virtual void RenderLoadingFrame() = 0;
 			
 			Window& hostWindow;
 

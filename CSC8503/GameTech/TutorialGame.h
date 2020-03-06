@@ -21,6 +21,7 @@ namespace NCL {
 			LOADING,
 			IN_GAME,
 			PAUSED,
+			END_GAME_WIN,
 			END_GAME,
 		};
 
@@ -35,6 +36,7 @@ namespace NCL {
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
+			Ball* AddPlayerToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			GameObject* AddWaterToWorld(const Vector3& position);
@@ -121,7 +123,6 @@ namespace NCL {
 			void LockedCameraMovement();
 			
 			float timeLeft = 0;
-			void renderHUD(float dt);
 			//arrow
 			float dir;
 			void UpdateArrow();

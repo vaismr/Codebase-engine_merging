@@ -12,22 +12,23 @@ namespace NCL {
 	namespace CSC8503 {
 		class RenderObject;
 
-		class GameTechRenderer : public OGLRenderer	{
+		class GameTechRenderer : public OGLRenderer {
 		public:
 			GameTechRenderer(GameWorld& world);
 			~GameTechRenderer();
 
 		protected:
 			void RenderFrame()	override;
+			void RenderLoadingFrame() override;
 
-			OGLShader*		defaultShader;
+			OGLShader* defaultShader;
 
-			GameWorld&	gameWorld;
+			GameWorld& gameWorld;
 
 			void BuildObjectList();
 			void SortObjectList();
 			void RenderShadowMap();
-			void RenderCamera(); 
+			void RenderCamera();
 
 			//skybox
 			unsigned int skytextureID;
@@ -37,14 +38,22 @@ namespace NCL {
 			void RenderSkybox();
 			void GenerateSkybox();
 			unsigned int skyboxVAO, skyboxVBO;
-			
 
-			void SetupDebugMatrix(OGLShader*s) override;
+			//icecube
+			OGLShader* iceshader;
+			void GenerateIce();
+
+			void SetupDebugMatrix(OGLShader* s) override;
+
+			void UpdateParticleTime(float dt)
+			{
+
+			}
 
 			vector<const RenderObject*> activeObjects;
 
 			//shadow mapping things
-			OGLShader*	shadowShader;
+			OGLShader* shadowShader;
 			GLuint		shadowTex;
 			GLuint		shadowFBO;
 			Matrix4     shadowMatrix;
