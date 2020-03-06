@@ -54,6 +54,13 @@ void TextureLoader::RegisterTextureLoadFunction(TextureLoadFunction f, const std
 	fileHandlers.insert(std::make_pair(fileExtension, f));
 }
 
+/*unsigned char* readskytex(const char* c) {
+	int width, height, nrChannels;
+	std::string realPath = Assets::TEXTUREDIR + c;
+	unsigned char* data = stbi_load(realPath.c_str(), &width, &height, &nrChannels, 0);
+	return data;
+};*/
+
 std::string TextureLoader::GetFileExtension(const std::string& fileExtension) {
 #ifdef WIN32
 	path p = path(fileExtension);

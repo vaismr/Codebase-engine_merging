@@ -66,7 +66,9 @@ public:
 	int PlaySounds(const string& soundName, const Vec3& pos = Vec3{ 0,0,0 }, float volumedB = 0.0f);
 
 	void Set3DListenerAndOrientation(const Vec3& pos, const Vec3& vel, const Vec3& forward, const Vec3& up, float volumedB = 0.0f);
-		
+
+	bool IsPaused(int channelID);
+	void PlayChannel(int channelID, bool pause = false);
 	void StopChannel(int channelID);
 	void StopAllChannels();
 	void TogglePauseAllChannels();

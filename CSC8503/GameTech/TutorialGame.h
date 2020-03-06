@@ -7,6 +7,9 @@
 #include <imgui/imgui.h>
 #include "../CSC8503Common/LoadingScreen.h"
 #include "ball.h"
+#include <ctime>
+#include "psapi.h"
+#include "icecube.h"
 
 class LevelBase;
 
@@ -18,6 +21,7 @@ namespace NCL {
 			LOADING,
 			IN_GAME,
 			PAUSED,
+			END_GAME_WIN,
 			END_GAME,
 		};
 
@@ -32,7 +36,13 @@ namespace NCL {
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
+			Ball* AddPlayerToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddWaterToWorld(const Vector3& position);
+			GameObject* AddFirePowerUpToWorld(const Vector3& position);
+			GameObject* AddIcePowerUpToWorld(const Vector3& position);
+			GameObject* AddPortalToWorld(const Vector3& position);
 			//IT'S HAPPENING
 			GameObject* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
@@ -86,9 +96,13 @@ namespace NCL {
 			void ToggleEndgameMenu() {
 				if (state == GameState::END_GAME) {
 					state = GameState::IN_GAME;
+					Window::GetWindow()->ShowOSPointer(false);
+					Window::GetWindow()->LockMouseToWindow(true);
 				}
 				else if (state == GameState::IN_GAME) {
 					state = GameState::END_GAME;
+					Window::GetWindow()->ShowOSPointer(true);
+					Window::GetWindow()->LockMouseToWindow(false);
 				}
 				Window::GetWindow()->ShowOSPointer(state == GameState::END_GAME);
 			}
@@ -108,43 +122,60 @@ namespace NCL {
 			void LockedObjectMovement();
 			void LockedCameraMovement();
 			
-			void renderHUD(float dt);
+			float timeLeft = 0;
 			//arrow
 			float dir;
 			void UpdateArrow();
-			float Impulsesize=0;
+			float Impulsesize = 0;
 			Vector3 Impulsedir;
 			Vector3 totalImpulse;
 			Vector3 Arrowlength;
-
-
 
 			void RenderInGameHud(float dt);
 			void RenderMainGameMenu(float dt);
 			void RenderPauseMenu(float dt);
 			void TutorialGame::RenderEndgameMenu(float dt);
+			void RenderDebugUi(float dt);
 
+#pragma region Bridge
+			Vector3 velocity1 = Vector3(300, 0, 0);
+			Vector3 MoveBridgePosition;
+			Transform MoveBridgeTransform;
 
+#pragma endregion
+			int backgroundMusic = -1;
 
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
 			GameWorld* world;
-			Ball* ball;
 
+			//ball
+			Ball* ball;
+            //icecube
+			Icecube* icecube;
+			GameObject* AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			
+			//void Updateballco();
 
 			bool useGravity;
 			bool inSelectionMode;
+			bool inDebugMode;
 
 			float		forceMagnitude;
+			float temppitch;
 
 			ImFont* fontMainDlg = nullptr;
-			ImFont* fontPauseHeader = nullptr;
+			ImFont* fontbutton = nullptr;
+			ImFont* fontHeader = nullptr;
 
 			GameObject* selectionObject = nullptr;
 
 			OGLMesh* cubeMesh = nullptr;
 			OGLMesh* sphereMesh = nullptr;
 			OGLTexture* basicTex = nullptr;
+			OGLTexture* backgroundTex = nullptr;
+			OGLTexture* Itemicon = nullptr;
+
 			OGLShader* basicShader = nullptr;
 			OGLShader* particleShader = nullptr;
 

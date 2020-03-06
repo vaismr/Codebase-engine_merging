@@ -6,9 +6,13 @@
 
 #include "../CSC8503Common/GameWorld.h"
 
+
 #include "Post Processing/Mesh.h"
 
 #define POST_PASSES 10
+
+
+#include "../../Common/TextureLoader.h"
 
 namespace NCL {
 	class Maths::Vector3;
@@ -16,7 +20,7 @@ namespace NCL {
 	namespace CSC8503 {
 		class RenderObject;
 
-		class GameTechRenderer : public OGLRenderer	{
+		class GameTechRenderer : public OGLRenderer {
 		public:
 			GameTechRenderer(GameWorld& world);
 			~GameTechRenderer();
@@ -25,21 +29,29 @@ namespace NCL {
 			void RenderFrame()	override;
 			void RenderLoadingFrame() override;
 
-			OGLShader*		defaultShader;
+			OGLShader* defaultShader;
 
-			GameWorld&	gameWorld;
+			GameWorld& gameWorld;
 
 			void BuildObjectList();
 			void SortObjectList();
 			void RenderShadowMap();
-			void RenderCamera(); 
+			void RenderCamera();
 
 			//skybox
+			unsigned int skytextureID;
+			unsigned int cubemapTexture;
 			OGLShader* skyshader;
 			unsigned int loadCubemap(vector<std::string> faces);
 			void RenderSkybox();
+			void GenerateSkybox();
+			unsigned int skyboxVAO, skyboxVBO;
 
-			void SetupDebugMatrix(OGLShader*s) override;
+			//icecube
+			OGLShader* iceshader;
+			void GenerateIce();
+
+			void SetupDebugMatrix(OGLShader* s) override;
 
 			void DrawWithShader(OGLShader* shader);
 
@@ -64,7 +76,7 @@ namespace NCL {
 			void SelectPostType();
 
 			//shadow mapping things
-			OGLShader*	shadowShader;
+			OGLShader* shadowShader;
 			GLuint		shadowTex;
 			GLuint		shadowFBO;
 			Matrix4     shadowMatrix;

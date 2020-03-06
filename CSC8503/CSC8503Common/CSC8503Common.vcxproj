@@ -126,7 +126,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Admin\Downloads\boost_1_72_0\boost;</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug BoostTests|Win32'">
@@ -135,7 +134,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Admin\Downloads\boost_1_72_0\boost;</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -162,7 +160,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Admin\Downloads\boost_1_72_0\boost;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;C:\Program Files %28x86%29\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -189,6 +187,7 @@
     <ClInclude Include="BoundingOOBB.h" />
     <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="BoundingVolume.h" />
+    <ClInclude Include="Buoyancy.h" />
     <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="NavigationGrid.h" />
     <ClInclude Include="NavigationMap.h" />
@@ -225,6 +224,7 @@
     <ClCompile Include="BoundingOOBB.cpp" />
     <ClCompile Include="BoundingSphere.cpp" />
     <ClCompile Include="BoundingVolume.cpp" />
+    <ClCompile Include="Buoyancy.cpp" />
     <ClCompile Include="CollisionDetection.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="GameClient.cpp" />
@@ -246,11 +246,6 @@
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="StateTransition.cpp" />
     <ClCompile Include="Test.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug BoostTests|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Test1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug BoostTests|Win32'">false</ExcludedFromBuild>

@@ -135,6 +135,26 @@ void AudioEngine::StopChannel(int channelID)
 	AudioEngine::ErrorCheck(foundIt->second->stop());
 }
 
+bool AudioEngine::IsPaused(int channelID)
+{
+	auto foundIt = imp->channels.find(channelID);
+	if (foundIt == imp->channels.end())
+		return true;
+
+	bool isPaused;
+	AudioEngine::ErrorCheck(foundIt->second->getPaused(&isPaused));
+	return isPaused;
+}
+
+void AudioEngine::PlayChannel(int channelID, bool pause)
+{
+	auto foundIt = imp->channels.find(channelID);
+	if (foundIt == imp->channels.end())
+		return;
+
+	AudioEngine::ErrorCheck(foundIt->second->setPaused(pause));
+}
+
 void AudioEngine::StopAllChannels()
 {
 	for (auto const& x : imp->channels)
