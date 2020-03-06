@@ -68,7 +68,17 @@ namespace NCL {
 			OGLShader* sceneShader;
 			Mesh* quad;
 
-			std::queue<GLuint> screenTextures;
+			std::queue<GLuint> screenFBOs;
+			GLuint screenFBO0;
+			GLuint screenFBO1;
+			GLuint screenFBO2;
+			GLuint screenFBO3;
+			GLuint screenFBO4;
+			GLuint screentex0;
+			GLuint screentex1;
+			GLuint screentex2;
+			GLuint screentex3;
+			GLuint screentex4;
 			bool firstRender = true;
 
 			GLuint processFBO;
