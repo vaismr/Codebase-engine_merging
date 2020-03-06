@@ -150,7 +150,7 @@ void TutorialGame::UpdateGame(float dt) {
 			loadingScreen = new LoadingScreen();
 
 			level = levels[level_number];
-			InitWorld();
+		/*	InitWorld();*/
 			//Sleep(200);
 			state = GameState::IN_GAME;
 			Window::GetWindow()->ShowOSPointer(false);
@@ -389,8 +389,8 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	auto dl = ImGui::GetBackgroundDrawList();
 	dl->AddImage(backgroundTex->GetImGuiID(), ImVec2(0, 0), ImVec2(1920, 1200));
 
-	ImGui::SetNextWindowPos(ImVec2(663, 266), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(523, 235), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(663, 266), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(523, 235), ImGuiCond_Always);
 
 	ImGui::Begin("Main Menu Title", nullptr, Title_flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
