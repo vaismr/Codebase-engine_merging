@@ -50,6 +50,8 @@ namespace NCL {
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 			GameObject* AddParticleToWorld(const Vector3& position, OGLTexture* texture, const float alpha);
+			GameObject* AddChaseAIToWorld(const Vector3& position);
+			GameObject* AddPatrolAIToWorld(const Vector3& position);
 
 
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
@@ -216,7 +218,7 @@ namespace NCL {
 			EnemyAIChase* chaseAI;
 			EnemyAIPatrol* patrolAI;
 
-			std::vector<Vector3> points = { Vector3(0,0,0), Vector3(10,0,10), Vector3(10, 0, 40), Vector3(40, 0, 40) };
+			std::vector<Vector3> points = { Vector3(0,0,0), Vector3(-10,0,10), Vector3(-10, 0, 40), Vector3(-40, 0, 40) };
 		};
 	}
 }
