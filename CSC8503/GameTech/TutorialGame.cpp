@@ -96,9 +96,9 @@ void TutorialGame::InitialiseAssets() {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
 	std::string pathMainDlgFont = Assets::FONTSSDIR + "/FiraSans-Regular.otf";
-	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 50);
-	fontbutton = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 36);
-	fontHeader = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), 100);
+	fontMainDlg = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), ScaleY(50));
+	fontbutton = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), ScaleY(36));
+	fontHeader = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), ScaleY(100));
 
 
 	ImVec4* colors = ImGui::GetStyle().Colors;
@@ -150,11 +150,12 @@ void TutorialGame::UpdateGame(float dt) {
 			loadingScreen = new LoadingScreen();
 
 			level = levels[level_number];
-		/*	InitWorld();*/
 			//Sleep(200);
 			state = GameState::IN_GAME;
 			Window::GetWindow()->ShowOSPointer(false);
 			Window::GetWindow()->LockMouseToWindow(true);
+
+			InitWorld();
 
 			delete loadingScreen;
 			loadingScreen = nullptr;
@@ -241,8 +242,8 @@ void TutorialGame::RenderDebugUi(float dt) {
 		| ImGuiWindowFlags_NoNav
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(340, 300), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ScaledPos(0, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ScaledPos(340, 300), ImGuiCond_Always);
 
 	ImGui::Begin("Debug", nullptr, debugflags);
 	ImGui::SetWindowFontScale(1.0f);
@@ -308,6 +309,21 @@ void TutorialGame::RenderDebugUi(float dt) {
 	UpdateArrow();
 	RenderInGameHud(dt);
 }
+
+double NCL::CSC8503::TutorialGame::ScaleY(double y)
+{
+	const Vector2& size = Window::GetWindow()->GetScreenSize();
+	return y / 1200 * size.y;
+}
+
+ImVec2 NCL::CSC8503::TutorialGame::ScaledPos(double x, double y)
+{
+	const Vector2& size = Window::GetWindow()->GetScreenSize();
+
+	// 1920x1200
+	return ImVec2(x / 1920 * size.x, y / 1200 * size.y);
+}
+
 void TutorialGame::UpdateListener(float dt)
 {
 	//update audio
@@ -387,10 +403,10 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 	auto dl = ImGui::GetBackgroundDrawList();
-	dl->AddImage(backgroundTex->GetImGuiID(), ImVec2(0, 0), ImVec2(1920, 1200));
+	dl->AddImage(backgroundTex->GetImGuiID(), ScaledPos(0, 0), ScaledPos(1920, 1200));
 
-	ImGui::SetNextWindowPos(ImVec2(663, 266), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(523, 235), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ScaledPos(663, 266), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ScaledPos(523, 235), ImGuiCond_Always);
 
 	ImGui::Begin("Main Menu Title", nullptr, Title_flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
@@ -401,13 +417,13 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	ImGui::End();
 
 
-	ImGui::SetNextWindowPos(ImVec2(740, 510), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(336, 371), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(740, 510), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(336, 371), ImGuiCond_Once);
 
 	ImGui::Begin("Main Menu",nullptr,Miainflags );
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
 	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(25));
 	ImGui::PushFont(fontbutton);
 	if (ImGui::Button("START GAME", ImVec2(-1.0f, 0.0f))) {
 		state = GameState::LOADING;
@@ -415,7 +431,7 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	}
 
 
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(25));
 	if (ImGui::Button("CHOICE LEVEL", ImVec2(-1.0f, 0.0f))) {
 		// LOAD_LEVEL
 		state = GameState::LOADING;
@@ -423,12 +439,12 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	}
 	ImGui::SliderInt("level", &level_number, 1, levels.size());
 
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(25));
 	if (ImGui::Button("OPTIONS", ImVec2(-1.0f, 0.0f))) {
 		
 	}
 
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25);
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(25));
 	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
 		closed = true;
 	}
@@ -457,8 +473,8 @@ void TutorialGame::RenderPauseMenu(float dt) {
 		| ImGuiWindowFlags_NoBackground
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-	ImGui::SetNextWindowPos(ImVec2(708, 317), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(458, 167), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(708, 317), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(458, 167), ImGuiCond_Once);
 
 	ImGui::Begin("Paused Title", nullptr, Title_flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
@@ -468,14 +484,14 @@ void TutorialGame::RenderPauseMenu(float dt) {
 	ImGui::PopStyleColor();
 	ImGui::End();
 
-	ImGui::SetNextWindowPos(ImVec2(769, 507), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(278, 257), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(769, 507), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(278, 257), ImGuiCond_Once);
 
 
 	ImGui::Begin("Pause menu",nullptr, pausedflags);
-	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
+	// ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
 	// RGBA
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 232));
 	ImGui::PushFont(fontMainDlg);
 	if (ImGui::Button("MAIN MENU", ImVec2(-1.0f, 0.0f))) {
 		 state = GameState::MAIN_MENU;
@@ -513,8 +529,8 @@ void TutorialGame::RenderEndgameMenu(float dt) {
 		| ImGuiWindowFlags_NoBackground
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 	
-	ImGui::SetNextWindowPos(ImVec2(652, 290), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(608, 229), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(652, 290), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(608, 229), ImGuiCond_Once);
 
 	//Display final socre
 
@@ -526,8 +542,8 @@ void TutorialGame::RenderEndgameMenu(float dt) {
 	ImGui::PopStyleColor();
 	ImGui::End();
 
-	ImGui::SetNextWindowPos(ImVec2(815, 534), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(230, 199), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(815, 534), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(230, 199), ImGuiCond_Once);
 
 	ImGui::Begin("Endgame", nullptr, endflags);
 	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
@@ -572,8 +588,8 @@ void TutorialGame::RenderInGameHud(float dt) {
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
 	
 	//Level window
-	ImGui::SetNextWindowPos(ImVec2(696, 34), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(523, 180), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(696, 34), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(523, 180), ImGuiCond_Once);
 	ImGui::Begin("Level Window", nullptr, flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
 	ImGui::PushFont(fontHeader);
@@ -587,8 +603,8 @@ void TutorialGame::RenderInGameHud(float dt) {
 
 
 	//Time window
-	ImGui::SetNextWindowPos(ImVec2(1675, 13), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(437, 291), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(1675, 13), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(437, 291), ImGuiCond_Once);
 	ImGui::Begin("Time Window", nullptr, flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
 	ImGui::PushFont(fontHeader);
@@ -601,10 +617,10 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGui::End();
 
 	auto Banana = ImGui::GetBackgroundDrawList();
-	Banana->AddImage(Itemicon->GetImGuiID(), ImVec2(0, 0), ImVec2(100, 100));
+	Banana->AddImage(Itemicon->GetImGuiID(), ScaledPos(0, 0), ScaledPos(100, 100));
 	// Item count
-	ImGui::SetNextWindowPos(ImVec2(77, 17), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(207, 127), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(77, 17), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(207, 127), ImGuiCond_Once);
 	ImGui::Begin("Item Window", nullptr, flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
 	ImGui::PushFont(fontHeader);
@@ -618,22 +634,22 @@ void TutorialGame::RenderInGameHud(float dt) {
 	// Stroke count
 
 	//power window
-	ImGui::SetNextWindowPos(ImVec2(15, 1044), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(403, 150), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ScaledPos(15, 1044), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(403, 150), ImGuiCond_Once);
 
 	ImGui::Begin("Power window", nullptr, flags); 
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
 	ImGui::PushFont(fontMainDlg);
 	ImGui::Text("Power Bar");               // Display some text (you can use a format strings too)
 	ImGui::PopFont();
-	ImGui::ProgressBar("##progress_bar1", Impulsesize / MAX_POWER_VALUE, ImVec2(500, 25), red, col);
+	ImGui::ProgressBar("##progress_bar1", Impulsesize / MAX_POWER_VALUE, ScaledPos(500, 25), red, col);
 	ImGui::PopStyleColor();
 
 	ImGui::End();
 
 	//Name window
-	//ImGui::SetNextWindowPos(ImVec2(966,593), ImGuiCond_Always);
-	//ImGui::SetNextWindowSize(ImVec2(276,71), ImGuiCond_Always);
+	//ImGui::SetNextWindowPos(ScaledPos(966,593), ImGuiCond_Always);
+	//ImGui::SetNextWindowSize(ScaledPos(276,71), ImGuiCond_Always);
 
 	//ImGui::Begin("Name window", nullptr, flags); 
 	//ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 500));
@@ -788,7 +804,9 @@ void TutorialGame::UpdateArrow() {
 	if (Impulsesize == 0) { totalImpulse = Vector3(0, 0, 0); }
 	else{totalImpulse = Impulsedir *20 + Vector3(0,1,0) *Impulsesize ;}
 	
-	renderer->DrawLine(ball->GetTransform().GetWorldPosition(), (ball->GetTransform().GetWorldPosition()) + Arrowlength, Vector4(1, 0, 0, 1));
+	if (ball) {
+		renderer->DrawLine(ball->GetTransform().GetWorldPosition(), (ball->GetTransform().GetWorldPosition()) + Arrowlength, Vector4(1, 0, 0, 1));
+	}
 }
 
 void  TutorialGame::LockedCameraMovement() {
@@ -967,24 +985,8 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-
-	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	AddGooseToWorld(Vector3(30, 2, 0));
-	AddAppleToWorld(Vector3(35, 2, 0));
-
-	//AddParkKeeperToWorld(Vector3(40, 2, 0));
-	//AddCharacterToWorld(Vector3(45, 2, 0));
-
-	AddFloorToWorld(Vector3(0, -2, 0));
-	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80),2,1);
+	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 1);
 	ball = (Ball*)tempball;
-	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
-
-	//AddFloorToWorld(Vector3(0, -2, 0));
-
-	GameObject* tempice = AddIcecubeToWorld(Vector3(70, 6, 70), Vector3(2, 2, 2));
-	icecube = (Icecube*)tempball;
-	icecube->GetTransform().SetWorldScale(Vector3(3, 3, 3));
 
 	if (level) {
 		level->init(this);
@@ -1019,6 +1021,7 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 
 	return floor;
 }
+
 
 /*
 

@@ -43,6 +43,7 @@ namespace NCL {
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 			GameObject* AddParticleToWorld(const Vector3& position, OGLTexture* texture, const float alpha);
+			GameObject* AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 
 
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
@@ -62,6 +63,10 @@ namespace NCL {
 				}
 
 				world = a;
+			}
+
+			OGLTexture* GetBasicTex() {
+				return basicTex;
 			}
 
 		protected:
@@ -117,7 +122,7 @@ namespace NCL {
 			void LockedCameraMovement();
 			
 			float timeLeft = 0;
-			void renderHUD(float dt);
+
 			//arrow
 			float dir;
 			void UpdateArrow();
@@ -132,6 +137,9 @@ namespace NCL {
 			void TutorialGame::RenderEndgameMenu(float dt);
 			void RenderDebugUi(float dt);
 
+			static double ScaleY(double y);
+			static ImVec2 ScaledPos(double x, double y);
+
 
 			int backgroundMusic = -1;
 
@@ -142,7 +150,6 @@ namespace NCL {
 			Ball* ball;
             //icecube
 			Icecube* icecube;
-			GameObject* AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			
 			bool useGravity;
 			bool inSelectionMode;

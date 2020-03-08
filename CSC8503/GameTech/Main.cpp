@@ -85,7 +85,7 @@ hide or show the
 
 */
 int main() {
-	Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1920, 1200);
+	Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1080, 720);
 
 	if (!w->HasInitialised()) {
 		return -1;
