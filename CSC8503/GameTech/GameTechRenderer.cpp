@@ -235,51 +235,8 @@ void GameTechRenderer::RenderFrame() {
 	DrawWithShader(motionBlurShader);
 	//DrawWithShader(processDefaultShader);
 
-	if (currentFBO == screenFBO0)
-	{
-		quad->SetTexture0(screenTex0);
-		quad->SetTexture1(screenTex4);
-		quad->SetTexture2(screenTex3);
-		quad->SetTexture3(screenTex2);
-		quad->SetTexture4(screenTex1);	
-	}
-
-	else if (currentFBO == screenFBO1)
-	{
-		quad->SetTexture0(screenTex1);
-		quad->SetTexture1(screenTex0);
-		quad->SetTexture2(screenTex4);
-		quad->SetTexture3(screenTex3);
-		quad->SetTexture4(screenTex2);
-	}
-
-	else if (currentFBO == screenFBO2)
-	{
-		quad->SetTexture0(screenTex2);
-		quad->SetTexture1(screenTex1);
-		quad->SetTexture2(screenTex0);
-		quad->SetTexture3(screenTex4);
-		quad->SetTexture4(screenTex3);
-	}
-
-	else if (currentFBO == screenFBO3)
-	{
-		quad->SetTexture0(screenTex3);
-		quad->SetTexture1(screenTex2);
-		quad->SetTexture2(screenTex1);
-		quad->SetTexture3(screenTex0);
-		quad->SetTexture4(screenTex4);
-	}
-
-	else
-	{
-		quad->SetTexture0(screenTex4);
-		quad->SetTexture1(screenTex3);
-		quad->SetTexture2(screenTex2);
-		quad->SetTexture3(screenTex1);
-		quad->SetTexture4(screenTex0);
-	}
-
+	
+	SetTextureOrder();
 	quad->Draw();
 	
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
@@ -619,4 +576,52 @@ void GameTechRenderer::SetupFBO(GLuint* FBO, GLuint* RBO, GLuint* tex)
 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *RBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GameTechRenderer::SetTextureOrder()
+{
+	if (currentFBO == screenFBO0)
+	{
+		quad->SetTexture0(screenTex0);
+		quad->SetTexture1(screenTex4);
+		quad->SetTexture2(screenTex3);
+		quad->SetTexture3(screenTex2);
+		quad->SetTexture4(screenTex1);
+	}
+
+	else if (currentFBO == screenFBO1)
+	{
+		quad->SetTexture0(screenTex1);
+		quad->SetTexture1(screenTex0);
+		quad->SetTexture2(screenTex4);
+		quad->SetTexture3(screenTex3);
+		quad->SetTexture4(screenTex2);
+	}
+
+	else if (currentFBO == screenFBO2)
+	{
+		quad->SetTexture0(screenTex2);
+		quad->SetTexture1(screenTex1);
+		quad->SetTexture2(screenTex0);
+		quad->SetTexture3(screenTex4);
+		quad->SetTexture4(screenTex3);
+	}
+
+	else if (currentFBO == screenFBO3)
+	{
+		quad->SetTexture0(screenTex3);
+		quad->SetTexture1(screenTex2);
+		quad->SetTexture2(screenTex1);
+		quad->SetTexture3(screenTex0);
+		quad->SetTexture4(screenTex4);
+	}
+
+	else
+	{
+		quad->SetTexture0(screenTex4);
+		quad->SetTexture1(screenTex3);
+		quad->SetTexture2(screenTex2);
+		quad->SetTexture3(screenTex1);
+		quad->SetTexture4(screenTex0);
+	}
 }

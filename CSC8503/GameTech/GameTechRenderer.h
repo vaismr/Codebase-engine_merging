@@ -61,6 +61,8 @@ namespace NCL {
 
 			void SetupFBO(GLuint* FBO, GLuint* RBO, GLuint* tex);
 
+			void SetTextureOrder();
+
 			//post process things
 			OGLShader* processDefaultShader;
 			OGLShader* processGreyShader;

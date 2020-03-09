@@ -11,11 +11,6 @@ uniform sampler2D texture4;
 
 void main()
 {    
-	/*float red = (texture(texture0, TexCoords).r + texture(texture1, TexCoords).r + texture(texture2, TexCoords).r + texture(texture3, TexCoords).r + texture(texture4, TexCoords).r) / 5.0f;
-	float blue = (texture(texture0, TexCoords).g + texture(texture1, TexCoords).g + texture(texture2, TexCoords).g + texture(texture3, TexCoords).g + texture(texture4, TexCoords).g) / 5.0f;
-	float green = (texture(texture0, TexCoords).b + texture(texture1, TexCoords).b + texture(texture2, TexCoords).b + texture(texture3, TexCoords).b + texture(texture4, TexCoords).b) / 5.0f;
-	float alpha = (texture(texture0, TexCoords).a + texture(texture1, TexCoords).a + texture(texture2, TexCoords).a + texture(texture3, TexCoords).a + texture(texture4, TexCoords).a) / 5.0f;*/
-
 	float weight0 = 0.5f;
 	float weight1 = 0.25f;
 	float weight2 = 0.125f;
@@ -27,7 +22,5 @@ void main()
 	float green = texture(texture0, TexCoords).b * weight0 + texture(texture1, TexCoords).b * weight1 + texture(texture2, TexCoords).b * weight2 + texture(texture3, TexCoords).b * weight3 + texture(texture4, TexCoords).b * weight4;
 	float alpha = texture(texture0, TexCoords).a * weight0 + texture(texture1, TexCoords).a * weight1 + texture(texture2, TexCoords).a * weight2 + texture(texture3, TexCoords).a * weight3 + texture(texture4, TexCoords).a * weight4;
     
-
-	//FragColor = texture(texture1, TexCoords);
 	FragColor = vec4(red, blue, green, alpha);
 }
