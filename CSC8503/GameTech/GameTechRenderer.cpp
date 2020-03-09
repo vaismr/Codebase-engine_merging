@@ -59,32 +59,15 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	processInvShader = new OGLShader("PostVertex.glsl", "PostFragInv.glsl");
 	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
-	/*glGenFramebuffers(1, &processFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
-
-	glGenTextures(1, &processTexture);
-	glBindTexture(GL_TEXTURE_2D, processTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, currentWidth, currentHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, processTexture, 0);
-
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, currentWidth, currentHeight);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
-
 	SetupFBO(&processFBO, &rbo, &processTexture);
 
 //motion blur stuff
+
+	SetupFBO(&screenFBO0, &screenRBO0, &screenTex0);
+	SetupFBO(&screenFBO1, &screenRBO1, &screenTex1);
+	SetupFBO(&screenFBO2, &screenRBO2, &screenTex2);
+	SetupFBO(&screenFBO3, &screenRBO3, &screenTex3);
+	SetupFBO(&screenFBO4, &screenRBO4, &screenTex4);
 
 	GenerateSkybox();
 	GenerateIce();
