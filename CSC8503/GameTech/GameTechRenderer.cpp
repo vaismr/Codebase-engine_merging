@@ -69,6 +69,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	SetupFBO(&screenFBO3, &screenRBO3, &screenTex3);
 	SetupFBO(&screenFBO4, &screenRBO4, &screenTex4);
 
+	motionBlurShader = new OGLShader("PostVertex.glsl", "PostFragBlur.glsl");
+
 	GenerateSkybox();
 	GenerateIce();
 	
@@ -229,7 +231,9 @@ void GameTechRenderer::RenderFrame() {
 	
 	
 	glDisable(GL_DEPTH_TEST);
-	SelectPostType();
+	//SelectPostType();
+	DrawWithShader(motionBlurShader);
+	//DrawWithShader(processDefaultShader);
 	quad->SetTexture0(screenTex0);
 	quad->SetTexture1(screenTex1);
 	quad->SetTexture2(screenTex2);

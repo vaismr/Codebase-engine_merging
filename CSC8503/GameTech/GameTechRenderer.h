@@ -66,6 +66,7 @@ namespace NCL {
 			OGLShader* processGreyShader;
 			OGLShader* processInvShader;
 			OGLShader* sceneShader;
+			OGLShader* motionBlurShader;
 			Mesh* quad;
 
 			std::queue<GLuint> screenFBOs;
