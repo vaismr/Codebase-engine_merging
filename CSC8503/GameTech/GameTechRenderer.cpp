@@ -161,6 +161,8 @@ GameTechRenderer::~GameTechRenderer()	{
 	glDeleteTextures(1, &processTexture);
 	glDeleteFramebuffers(1, &processFBO);
 	glDeleteRenderbuffers(1, &rbo);
+
+	//TODO: delete fbo, rbo, tex for motion blur
 }
 
 void GameTechRenderer::RenderFrame() {
@@ -179,7 +181,44 @@ void GameTechRenderer::RenderFrame() {
 	SortObjectList();	
 	RenderShadowMap();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+	if (firstRender)
+	{
+		firstRender = false;
+
+		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO0);
+		RenderCamera();
+		RenderSkybox();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO1);
+		RenderCamera();
+		RenderSkybox();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO2);
+		RenderCamera();
+		RenderSkybox();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO3);
+		RenderCamera();
+		RenderSkybox();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO4);
+		RenderCamera();
+		RenderSkybox();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		screenFBOs.push(screenFBO0);
+		screenFBOs.push(screenFBO1);
+		screenFBOs.push(screenFBO2);
+		screenFBOs.push(screenFBO3);
+		screenFBOs.push(screenFBO4);
+
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO0);
 	RenderCamera();
 	RenderSkybox();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -187,7 +226,7 @@ void GameTechRenderer::RenderFrame() {
 	
 	glDisable(GL_DEPTH_TEST);
 	SelectPostType();
-	quad->SetTexture(processTexture);
+	quad->SetTexture(screenTex0);
 	quad->Draw();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 
