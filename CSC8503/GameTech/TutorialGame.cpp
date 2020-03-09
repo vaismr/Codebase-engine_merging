@@ -456,7 +456,7 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 		
 	}
 
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(25));
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(20));
 	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
 		closed = true;
 	}
