@@ -84,6 +84,8 @@ namespace NCL {
 			GLuint screenTex2;
 			GLuint screenTex3;
 			GLuint screenTex4;
+
+			GLuint currentFBO;
 			bool firstRender = true;
 
 			GLuint processFBO;
