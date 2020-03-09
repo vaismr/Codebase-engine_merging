@@ -59,7 +59,7 @@ namespace NCL {
 
 			vector<const RenderObject*> activeObjects;
 
-			void SetupFBO(GLuint FBO, GLuint RBO, GLuint tex);
+			void SetupFBO(GLuint* FBO, GLuint* RBO, GLuint* tex);
 
 			//post process things
 			OGLShader* processDefaultShader;
