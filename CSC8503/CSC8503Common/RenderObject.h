@@ -52,17 +52,15 @@ namespace NCL {
 				return colour;
 			}
 
-			//Add name
 			void SetrenderName(const string name) {
 				rendername = name;
 
 			}
 
-			string GetRenderName() const{
+			string GetRenderName() const {
 
 				return this->rendername;
 			}
-
 
 		protected:
 			MeshGeometry*	mesh;

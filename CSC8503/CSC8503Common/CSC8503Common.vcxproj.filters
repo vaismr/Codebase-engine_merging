@@ -129,6 +129,12 @@
     <ClInclude Include="LoadingScreen.h">
       <Filter>Other</Filter>
     </ClInclude>
+    <ClInclude Include="Buoyancy.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp">
@@ -209,8 +215,11 @@
     <ClCompile Include="Test.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>
-    <ClCompile Include="Test1.cpp">
-      <Filter>UnitTests</Filter>
+    <ClCompile Include="Buoyancy.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyAI.cpp">
+      <Filter>AI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

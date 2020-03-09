@@ -45,7 +45,6 @@ TutorialGame::TutorialGame()	{
 
 	Debug::SetRenderer(renderer);
 
-
 	InitialiseAssets();
 
 	audioEngine.Init();
@@ -100,13 +99,11 @@ void TutorialGame::InitialiseAssets() {
 	fontbutton = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), ScaleY(36));
 	fontHeader = io.Fonts->AddFontFromFileTTF(pathMainDlgFont.c_str(), ScaleY(100));
 
-
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
 
 	InitCamera();
 	InitWorld();
-
 }
 
 TutorialGame::~TutorialGame()	{
@@ -115,7 +112,8 @@ TutorialGame::~TutorialGame()	{
 	delete gooseMesh;
 	delete basicTex;
 	delete basicShader;
-
+	delete chaseAI;
+	delete patrolAI;
 	delete physics;
 	delete renderer;
 	delete world;
@@ -191,6 +189,7 @@ void TutorialGame::UpdateGame(float dt) {
 				renderer->Update(dt);
 				physics->Update(dt);
 
+				UpdateAI(dt);
 
 				Debug::FlushRenderables();
 				UpdateListener(dt);
@@ -310,6 +309,7 @@ void TutorialGame::RenderDebugUi(float dt) {
 	RenderInGameHud(dt);
 }
 
+
 double NCL::CSC8503::TutorialGame::ScaleY(double y)
 {
 	const Vector2& size = Window::GetWindow()->GetScreenSize();
@@ -324,6 +324,11 @@ ImVec2 NCL::CSC8503::TutorialGame::ScaledPos(double x, double y)
 	return ImVec2(x / 1920 * size.x, y / 1200 * size.y);
 }
 
+
+//void TutorialGame::Updateballco() {
+//	isOnWater = ball->onWater;
+//}
+
 void TutorialGame::UpdateListener(float dt)
 {
 	//update audio
@@ -332,8 +337,6 @@ void TutorialGame::UpdateListener(float dt)
 
 	//calculate distance between camera in this frame and last frame, using dt to get velocity - used for doppler effect
 	Vec3 cameraVelocity = Vec3{ (world->GetMainCamera()->GetPosition().x - lastCamPos.x) / dt, (world->GetMainCamera()->GetPosition().y - lastCamPos.y) / dt, (world->GetMainCamera()->GetPosition().z - lastCamPos.z) / dt };
-
-	
 
 	float cosPitch = cos(world->GetMainCamera()->GetPitch());
 	float cosYaw = cos(world->GetMainCamera()->GetYaw());
@@ -361,10 +364,10 @@ void TutorialGame::UpdateListener(float dt)
 	audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, cameraUp);
 	//audioEngine.Set3DListenerAndOrientation(cameraPos, cameraVelocity, cameraForward, Vec3{0,1,0});
 
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
-	{
-		cout << lastCamPos.x << endl;
-	}		
+	//if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N))
+	//{
+		//cout << lastCamPos.x << endl;
+	//}		
 }
 
 
@@ -374,7 +377,6 @@ void TutorialGame::UpdatePauseMenu() {
 		TogglePauseMenu();
 		audioEngine.TogglePauseAllChannels();
 	}		
-
 }
 
 void TutorialGame::UpdateEndgameMenu() {
@@ -382,7 +384,17 @@ void TutorialGame::UpdateEndgameMenu() {
 		ToggleEndgameMenu();
 }
 
+void TutorialGame::UpdateAI(float dt) {
+	if (chaseAI)
+		chaseAI->Update(dt);
+	if (patrolAI)
+		patrolAI->Update(dt);
+}
+
 void TutorialGame::RenderMainGameMenu(float dt) {
+
+	Window::GetWindow()->ShowOSPointer(true);
+	Window::GetWindow()->LockMouseToWindow(false);
 
 	ImGuiWindowFlags Miainflags =
 		ImGuiWindowFlags_NoTitleBar
@@ -677,7 +689,6 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGui::End();*/
 }
 
-
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
 		InitWorld(); //We can reset the simulation at any time with F1
@@ -749,13 +760,16 @@ void TutorialGame::UpdateKeys() {
 	else {
 		DebugObjectMovement();
 	}
-
-	
 }
 
 void TutorialGame::LockedObjectMovement() {
 	Matrix4 view		= world->GetMainCamera()->BuildViewMatrix();
 	Matrix4 camWorld	= view.Inverse();
+	Vector3 floatingforce(0, 0, 40.0f);
+	float force = 30.0f;
+	//if (selectionObject->GetIsOnBridge() == true) {
+	//	selectionObject->GetPhysicsObject()->ApplyLinearImpulse(floatingforce);
+	//}
 
 	Vector3 rightAxis = Vector3(camWorld.GetColumn(0)); //view is inverse of model!
 
@@ -764,33 +778,42 @@ void TutorialGame::LockedObjectMovement() {
 	//the right axis, to hopefully get a vector that's good enough!
 
 	Vector3 fwdAxis = Vector3::Cross(Vector3(0, 1, 0), rightAxis);
+
+
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
 		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
 		selectionObject->GetPhysicsObject()->AddForce(dir * 30.0f);
 		cout << dir << endl;
 	}
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
 
-		selectionObject->GetPhysicsObject()->AddForce(-rightAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, 1);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
+
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::RIGHT)) {
-		selectionObject->GetPhysicsObject()->AddForce(rightAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(-1, 0, 0);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::UP)) {
-		selectionObject->GetPhysicsObject()->AddForce(fwdAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(1, 0, 0);
+		selectionObject->GetPhysicsObject()->AddForce(dir * force);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
-		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis);
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
+		Vector3 dir = Matrix4::Rotation(world->GetMainCamera()->GetYaw(), Vector3(0, 1, 0)) * Vector3(0, 0, -1);
+		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(dir * force);
+		ball->isSlowDown = false;
+		ball->isSpeedUp = false;
+		ball->isTelePorted = false;
 	}
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::I)) {
 		selectionObject->GetPhysicsObject()->ApplyLinearImpulse(totalImpulse);
 	}
-
-	
 }
+
 
 void TutorialGame::UpdateArrow() {
 
@@ -985,8 +1008,39 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
+
 	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 1);
 	ball = (Ball*)tempball;
+
+	Vector3 Portal1 = Vector3(30, 0.1f, 30);
+	Vector3 Portal2 = Vector3(10, 0.1f, 10);
+
+	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	AddGooseToWorld(Vector3(30, 2, 0));
+	AddAppleToWorld(Vector3(35, 2, 0));
+
+	//AddParkKeeperToWorld(Vector3(40, 2, 0));
+	//AddCharacterToWorld(Vector3(45, 2, 0));
+
+	AddFloorToWorld(Vector3(0, -2, 0));
+	AddWaterToWorld(Vector3(70, 0.1f, 70));
+	AddIceToWorld(Vector3(40, 6.0f, 40), Vector3(5.0f, 6.0f, 1.0f));
+	AddFirePowerUpToWorld(Vector3(50, 0.1f, 50));
+	AddIcePowerUpToWorld(Vector3(55, 0.1f, 55));
+	AddPortalToWorld(Portal1)->SetName("PORTAL1");
+	AddPortalToWorld(Portal2)->SetName("PORTAL2");
+
+	
+	AddParticleToWorld(Vector3(40, 20, 0), basicTex, 0.5);
+
+	//AddFloorToWorld(Vector3(0, -2, 0));
+
+	GameObject* tempice = AddIcecubeToWorld(Vector3(70, 6, 70), Vector3(2, 2, 2));
+	icecube = (Icecube*)tempball;
+	icecube->GetTransform().SetWorldScale(Vector3(3, 3, 3));
+
+	chaseAI = (EnemyAIChase*)AddChaseAIToWorld(Vector3(45, 2, 0));
+	patrolAI = (EnemyAIPatrol*)AddPatrolAIToWorld(Vector3(-10, 2, -10));
 
 	if (level) {
 		level->init(this);
@@ -1003,7 +1057,7 @@ A single function to add a large immoveable cube to the bottom of our world
 
 */
 GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
-	GameObject* floor = new GameObject();
+	GameObject* floor = new GameObject("FLOOR");
 
 	Vector3 floorSize = Vector3(100, 2, 100);
 	AABBVolume* volume = new AABBVolume(floorSize);
@@ -1021,7 +1075,21 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 
 	return floor;
 }
+/*
+GameObject* TutorialGame::AddBridgeToWorld(const Vector3& position) {
+	GameObject* Bridge = new GameObject();
+	Vector3 bridgeSize = Vector3(40, 10, 10);
+	AABBVolume* volume = new AABBVolume(bridgeSize);
+	Bridge->SetBoundingVolume((CollisionVolume*)volume);
+	Bridge->GetTransform().SetWorldScale(bridgeSize);
 
+
+	Vector3 velocity= Vector3(300, 0, 0);
+	Bridge->GetPhysicsObject()->SetLinearVelocity(velocity);
+	Bridge->
+
+
+}*/
 
 /*
 
@@ -1030,8 +1098,29 @@ rigid body representation. This and the cube function will let you build a lot o
 physics worlds. You'll probably need another function for the creation of OBB cubes too.
 
 */
+
 GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
 	GameObject* sphere = new GameObject();
+
+	Vector3 sphereSize = Vector3(radius, radius, radius);
+	SphereVolume* volume = new SphereVolume(radius);
+	sphere->SetBoundingVolume((CollisionVolume*)volume);
+	sphere->GetTransform().SetWorldScale(sphereSize);
+	sphere->GetTransform().SetWorldPosition(position);
+
+	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, 0, basicShader));
+	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+
+	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
+	sphere->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(sphere);
+
+	return sphere;
+}
+
+Ball* TutorialGame::AddPlayerToWorld(const Vector3& position, float radius, float inverseMass) {
+	Ball* sphere = new Ball("BALL");
 
 	Vector3 sphereSize = Vector3(radius, radius, radius);
 	SphereVolume* volume = new SphereVolume(radius);
@@ -1070,8 +1159,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 
 	return cube;
 }
-
-GameObject* TutorialGame::AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass ) 
+GameObject* TutorialGame::AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass)
 {
 	GameObject* icecube = new GameObject("icecube");
 	AABBVolume* volume = new AABBVolume(dimensions);
@@ -1080,10 +1168,10 @@ GameObject* TutorialGame::AddIcecubeToWorld(const Vector3& position, Vector3 dim
 	icecube->GetTransform().SetWorldPosition(position);
 	icecube->GetTransform().SetWorldScale(dimensions);
 
-	icecube->SetRenderObject(new RenderObject(&icecube->GetTransform(), cubeMesh, nullptr, nullptr,"icecube"));
+	icecube->SetRenderObject(new RenderObject(&icecube->GetTransform(), cubeMesh, nullptr, nullptr, "icecube"));
 	icecube->SetPhysicsObject(new PhysicsObject(&icecube->GetTransform(), icecube->GetBoundingVolume()));
 
-    icecube->GetPhysicsObject()->SetInverseMass(inverseMass);
+	icecube->GetPhysicsObject()->SetInverseMass(inverseMass);
 	icecube->GetPhysicsObject()->InitCubeInertia();
 
 	world->AddGameObject(icecube);
@@ -1091,6 +1179,125 @@ GameObject* TutorialGame::AddIcecubeToWorld(const Vector3& position, Vector3 dim
 	return icecube;
 
 }
+
+GameObject* TutorialGame::AddWaterToWorld(const Vector3& position)
+{
+
+	GameObject* water = new GameObject("WATER");
+	Vector3 dimensions = Vector3(10.0f, 0.1f, 10.0f);
+	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
+
+	water->SetBoundingVolume((CollisionVolume*)volume);
+
+	water->GetTransform().SetWorldPosition(position);
+	water->GetTransform().SetWorldScale(dimensions);
+
+	water->SetRenderObject(new RenderObject(&water->GetTransform(), cubeMesh, 0, basicShader));
+	water->SetPhysicsObject(new PhysicsObject(&water->GetTransform(), water->GetBoundingVolume()));
+	water->GetRenderObject()->SetColour(Vector4(0.2f, 0.2f, 1.0f, 1.0f));
+
+	water->GetPhysicsObject()->SetInverseMass(0);
+	water->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(water);
+
+	return water;
+}
+
+GameObject* TutorialGame::AddFirePowerUpToWorld(const Vector3& position)
+{
+
+	GameObject* FirePowerUp = new GameObject("FIREPOWERUP");
+	Vector3 dimensions = Vector3(1.0f, 0.5f, 1.0f);
+	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
+
+	FirePowerUp->SetBoundingVolume((CollisionVolume*)volume);
+
+	FirePowerUp->GetTransform().SetWorldPosition(position);
+	FirePowerUp->GetTransform().SetWorldScale(dimensions);
+
+	FirePowerUp->SetRenderObject(new RenderObject(&FirePowerUp->GetTransform(), cubeMesh, 0, basicShader));
+	FirePowerUp->SetPhysicsObject(new PhysicsObject(&FirePowerUp->GetTransform(), FirePowerUp->GetBoundingVolume()));
+	FirePowerUp->GetRenderObject()->SetColour(Vector4(0.5f, 0.1f, 0.1f, 1.0f));
+
+	FirePowerUp->GetPhysicsObject()->SetInverseMass(0);
+	FirePowerUp->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(FirePowerUp);
+
+	return FirePowerUp;
+}
+
+GameObject* TutorialGame::AddIcePowerUpToWorld(const Vector3& position)
+{
+
+	GameObject* IcePowerUp = new GameObject("ICEPOWERUP");
+	Vector3 dimensions = Vector3(1.0f, 0.5f, 1.0f);
+	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
+
+	IcePowerUp->SetBoundingVolume((CollisionVolume*)volume);
+
+	IcePowerUp->GetTransform().SetWorldPosition(position);
+	IcePowerUp->GetTransform().SetWorldScale(dimensions);
+
+	IcePowerUp->SetRenderObject(new RenderObject(&IcePowerUp->GetTransform(), cubeMesh, 0, basicShader));
+	IcePowerUp->SetPhysicsObject(new PhysicsObject(&IcePowerUp->GetTransform(), IcePowerUp->GetBoundingVolume()));
+	IcePowerUp->GetRenderObject()->SetColour(Vector4(0.0f, 0.8f, 0.8f, 1.0f));
+
+	IcePowerUp->GetPhysicsObject()->SetInverseMass(0);
+	IcePowerUp->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(IcePowerUp);
+
+	return IcePowerUp;
+}
+
+GameObject* TutorialGame::AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
+	GameObject* ice = new GameObject("ICE");
+
+	AABBVolume* volume = new AABBVolume(dimensions);
+
+	ice->SetBoundingVolume((CollisionVolume*)volume);
+
+	ice->GetTransform().SetWorldPosition(position);
+	ice->GetTransform().SetWorldScale(dimensions);
+
+	ice->SetRenderObject(new RenderObject(&ice->GetTransform(), cubeMesh, 0, basicShader));
+	ice->SetPhysicsObject(new PhysicsObject(&ice->GetTransform(), ice->GetBoundingVolume()));
+	ice->GetRenderObject()->SetColour(Vector4(0.8f, 1.0f, 1.0f, 1.0f));
+
+	ice->GetPhysicsObject()->SetInverseMass(0);
+	ice->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(ice);
+
+	return ice;
+}
+
+GameObject* TutorialGame::AddPortalToWorld(const Vector3& position)
+{
+
+	GameObject* portal = new GameObject();
+	Vector3 dimensions = Vector3(1.0f, 0.1f, 1.0f);
+	AABBVolume* volume = new AABBVolume(Vector3(dimensions));
+
+	portal->SetBoundingVolume((CollisionVolume*)volume);
+
+	portal->GetTransform().SetWorldPosition(position);
+	portal->GetTransform().SetWorldScale(dimensions);
+
+	portal->SetRenderObject(new RenderObject(&portal->GetTransform(), cubeMesh, 0, basicShader));
+	portal->SetPhysicsObject(new PhysicsObject(&portal->GetTransform(), portal->GetBoundingVolume()));
+	portal->GetRenderObject()->SetColour(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+	portal->GetPhysicsObject()->SetInverseMass(0);
+	portal->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(portal);
+
+	return portal;
+}
+
 
 GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
 {
@@ -1156,6 +1363,80 @@ GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 	}
 
 	GameObject* character = new GameObject();
+
+	float r = rand() / (float)RAND_MAX;
+
+
+	AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
+	character->SetBoundingVolume((CollisionVolume*)volume);
+
+	character->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
+	character->GetTransform().SetWorldPosition(position);
+
+	character->SetRenderObject(new RenderObject(&character->GetTransform(), r > 0.5f ? charA : charB, nullptr, basicShader));
+	character->SetPhysicsObject(new PhysicsObject(&character->GetTransform(), character->GetBoundingVolume()));
+
+	character->GetPhysicsObject()->SetInverseMass(inverseMass);
+	character->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(character);
+
+	return character;
+}
+
+// @TODO uses placeholder character mesh for now
+GameObject* TutorialGame::AddChaseAIToWorld(const Vector3& position) {
+	float meshSize = 4.0f;
+	float inverseMass = 0.5f;
+
+	auto pos = keeperMesh->GetPositionData();
+
+	Vector3 minVal = pos[0];
+	Vector3 maxVal = pos[0];
+
+	for (auto& i : pos) {
+		maxVal.y = max(maxVal.y, i.y);
+		minVal.y = min(minVal.y, i.y);
+	}
+
+	EnemyAI* character = new EnemyAIChase(ball);
+
+	float r = rand() / (float)RAND_MAX;
+
+
+	AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
+	character->SetBoundingVolume((CollisionVolume*)volume);
+
+	character->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
+	character->GetTransform().SetWorldPosition(position);
+
+	character->SetRenderObject(new RenderObject(&character->GetTransform(), r > 0.5f ? charA : charB, nullptr, basicShader));
+	character->SetPhysicsObject(new PhysicsObject(&character->GetTransform(), character->GetBoundingVolume()));
+
+	character->GetPhysicsObject()->SetInverseMass(inverseMass);
+	character->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(character);
+
+	return character;
+}
+
+// @TODO uses placeholder character mesh for now
+GameObject* TutorialGame::AddPatrolAIToWorld(const Vector3& position) {
+	float meshSize = 4.0f;
+	float inverseMass = 0.5f;
+
+	auto pos = keeperMesh->GetPositionData();
+
+	Vector3 minVal = pos[0];
+	Vector3 maxVal = pos[0];
+
+	for (auto& i : pos) {
+		maxVal.y = max(maxVal.y, i.y);
+		minVal.y = min(minVal.y, i.y);
+	}
+
+	EnemyAI* character = new EnemyAIPatrol(points, ball);
 
 	float r = rand() / (float)RAND_MAX;
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
+#include "../CSC8503Common/EnemyAI.h"
 
 #include <iostream>
 #include "../GameTech/Sound/AudioEngine.h"
@@ -36,14 +37,25 @@ namespace NCL {
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
+			Ball* AddPlayerToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddIceToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+			GameObject* AddWaterToWorld(const Vector3& position);
+			GameObject* AddFirePowerUpToWorld(const Vector3& position);
+			GameObject* AddIcePowerUpToWorld(const Vector3& position);
+			GameObject* AddPortalToWorld(const Vector3& position);
 			//IT'S HAPPENING
 			GameObject* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 			GameObject* AddParticleToWorld(const Vector3& position, OGLTexture* texture, const float alpha);
+
 			GameObject* AddIcecubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
+
+			GameObject* AddChaseAIToWorld(const Vector3& position);
+			GameObject* AddPatrolAIToWorld(const Vector3& position);
+
 
 
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
@@ -74,6 +86,7 @@ namespace NCL {
 
 			void InitCamera();
 			void UpdateKeys();
+			void UpdateAI(float dt);
 
 			void InitWorld();
 			void Initball();
@@ -137,20 +150,31 @@ namespace NCL {
 			void TutorialGame::RenderEndgameMenu(float dt);
 			void RenderDebugUi(float dt);
 
+
 			static double ScaleY(double y);
 			static ImVec2 ScaledPos(double x, double y);
 
 
+#pragma region Bridge
+			Vector3 velocity1 = Vector3(300, 0, 0);
+			Vector3 MoveBridgePosition;
+			Transform MoveBridgeTransform;
+
+
+#pragma endregion
 			int backgroundMusic = -1;
 
 			GameTechRenderer* renderer;
 			PhysicsSystem* physics;
 			GameWorld* world;
+
 			//ball
 			Ball* ball;
             //icecube
 			Icecube* icecube;
 			
+			//void Updateballco();
+
 			bool useGravity;
 			bool inSelectionMode;
 			bool inDebugMode;
@@ -205,6 +229,10 @@ namespace NCL {
       
 			LoadingScreen* loadingScreen;
 
+			EnemyAIChase* chaseAI;
+			EnemyAIPatrol* patrolAI;
+
+			std::vector<Vector3> points = { Vector3(0,0,0), Vector3(-10,0,10), Vector3(-10, 0, 40), Vector3(-40, 0, 40) };
 		};
 	}
 }

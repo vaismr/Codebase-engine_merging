@@ -6,6 +6,6 @@ public:
 	
 		
 		game->AddCharacterToWorld(Vector3(45, 2, 0));
-		game->AddFloorToWorld(Vector3(100, -2, 0));
+		game->AddFloorToWorld(Vector3(300, -2, 0));
 	}
 };
