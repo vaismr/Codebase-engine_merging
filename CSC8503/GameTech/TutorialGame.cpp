@@ -409,7 +409,7 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	ImGui::SetNextWindowSize(ScaledPos(523, 235), ImGuiCond_Always);
 
 	ImGui::Begin("Main Menu Title", nullptr, Title_flags);
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 	ImGui::PushFont(fontHeader);
 	ImGui::Text(" MINI GOLF ! ");
 	ImGui::PopFont();
@@ -418,12 +418,12 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 
 
 	ImGui::SetNextWindowPos(ScaledPos(740, 510), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ScaledPos(336, 371), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(336, 400), ImGuiCond_Once);
 
 	ImGui::Begin("Main Menu",nullptr,Miainflags );
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 1000));
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
 	ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(25));
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(20));
 	ImGui::PushFont(fontbutton);
 	if (ImGui::Button("START GAME", ImVec2(-1.0f, 0.0f))) {
 		state = GameState::LOADING;
@@ -431,7 +431,7 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	}
 
 
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(25));
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(20));
 	if (ImGui::Button("CHOICE LEVEL", ImVec2(-1.0f, 0.0f))) {
 		// LOAD_LEVEL
 		state = GameState::LOADING;
@@ -439,7 +439,7 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	}
 	ImGui::SliderInt("level", &level_number, 1, levels.size());
 
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(25));
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(20));
 	if (ImGui::Button("OPTIONS", ImVec2(-1.0f, 0.0f))) {
 		
 	}
@@ -477,7 +477,7 @@ void TutorialGame::RenderPauseMenu(float dt) {
 	ImGui::SetNextWindowSize(ScaledPos(458, 167), ImGuiCond_Once);
 
 	ImGui::Begin("Paused Title", nullptr, Title_flags);
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 	ImGui::PushFont(fontHeader);
 	ImGui::Text(" PAUSED ! ");
 	ImGui::PopFont();
@@ -485,22 +485,22 @@ void TutorialGame::RenderPauseMenu(float dt) {
 	ImGui::End();
 
 	ImGui::SetNextWindowPos(ScaledPos(769, 507), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ScaledPos(278, 257), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ScaledPos(278, 300), ImGuiCond_Once);
 
 
 	ImGui::Begin("Pause menu",nullptr, pausedflags);
 	// ImGui::PushItemWidth(ImGui::GetWindowSize().x * 1.0f);
 	// RGBA
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 232));
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
 	ImGui::PushFont(fontMainDlg);
 	if (ImGui::Button("MAIN MENU", ImVec2(-1.0f, 0.0f))) {
 		 state = GameState::MAIN_MENU;
 	}
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(20));
 	if (ImGui::Button("CONTINUE", ImVec2(-1.0f, 0.0f))) {
 		TogglePauseMenu();
 	}
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20);
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ScaleY(20));
 	if (ImGui::Button("QUIT GAME", ImVec2(-1.0f, 0.0f))) {
 		closed = true;
 	}
@@ -581,8 +581,8 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGuiWindowFlags flags =
 		ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoScrollbar
-	/*	| ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoResize*/
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoResize
 		| ImGuiWindowFlags_NoNav
 		| ImGuiWindowFlags_NoBackground
 		| ImGuiWindowFlags_NoBringToFrontOnFocus;
