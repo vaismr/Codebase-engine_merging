@@ -59,7 +59,7 @@ namespace NCL {
 
 			vector<const RenderObject*> activeObjects;
 
-
+			void SetupFBO(GLuint FBO, GLuint RBO, GLuint tex);
 
 			//post process things
 			OGLShader* processDefaultShader;
@@ -74,11 +74,16 @@ namespace NCL {
 			GLuint screenFBO2;
 			GLuint screenFBO3;
 			GLuint screenFBO4;
-			GLuint screentex0;
-			GLuint screentex1;
-			GLuint screentex2;
-			GLuint screentex3;
-			GLuint screentex4;
+			GLuint screenRBO0;
+			GLuint screenRBO1;
+			GLuint screenRBO2;
+			GLuint screenRBO3;
+			GLuint screenRBO4;
+			GLuint screenTex0;
+			GLuint screenTex1;
+			GLuint screenTex2;
+			GLuint screenTex3;
+			GLuint screenTex4;
 			bool firstRender = true;
 
 			GLuint processFBO;
