@@ -63,6 +63,8 @@ namespace NCL {
 
 			void SetTextureOrder();
 
+			void FirstRender();
+
 			//post process things
 			OGLShader* processDefaultShader;
 			OGLShader* processGreyShader;

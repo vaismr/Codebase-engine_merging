@@ -185,38 +185,7 @@ void GameTechRenderer::RenderFrame() {
 
 	if (firstRender)
 	{
-		firstRender = false;
-
-		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO0);
-		RenderCamera();
-		RenderSkybox();
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO1);
-		RenderCamera();
-		RenderSkybox();
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO2);
-		RenderCamera();
-		RenderSkybox();
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO3);
-		RenderCamera();
-		RenderSkybox();
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, screenFBO4);
-		RenderCamera();
-		RenderSkybox();
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		screenFBOs.push(screenFBO0);
-		screenFBOs.push(screenFBO1);
-		screenFBOs.push(screenFBO2);
-		screenFBOs.push(screenFBO3);
-		screenFBOs.push(screenFBO4);
+		FirstRender();
 	}
 
 	currentFBO = screenFBOs.front();
@@ -231,12 +200,15 @@ void GameTechRenderer::RenderFrame() {
 	
 	
 	glDisable(GL_DEPTH_TEST);
-	//SelectPostType();
 	DrawWithShader(motionBlurShader);
-	//DrawWithShader(processDefaultShader);
-
-	
 	SetTextureOrder();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+	quad->Draw();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	SelectPostType();
+	quad->SetTexture0(processTexture);
 	quad->Draw();
 	
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
@@ -624,4 +596,40 @@ void GameTechRenderer::SetTextureOrder()
 		quad->SetTexture3(screenTex1);
 		quad->SetTexture4(screenTex0);
 	}
+}
+
+void GameTechRenderer::FirstRender()
+{
+	firstRender = false;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO0);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO1);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO2);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO3);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO4);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	screenFBOs.push(screenFBO0);
+	screenFBOs.push(screenFBO1);
+	screenFBOs.push(screenFBO2);
+	screenFBOs.push(screenFBO3);
+	screenFBOs.push(screenFBO4);
 }
