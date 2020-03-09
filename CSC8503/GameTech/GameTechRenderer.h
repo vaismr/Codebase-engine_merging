@@ -9,6 +9,8 @@
 
 #include "Post Processing/Mesh.h"
 
+#include <queue>
+
 #define POST_PASSES 10
 
 
@@ -57,14 +59,39 @@ namespace NCL {
 
 			vector<const RenderObject*> activeObjects;
 
+			void SetupFBO(GLuint* FBO, GLuint* RBO, GLuint* tex);
 
+			void SetTextureOrder();
+
+			void FirstRender();
 
 			//post process things
 			OGLShader* processDefaultShader;
 			OGLShader* processGreyShader;
 			OGLShader* processInvShader;
 			OGLShader* sceneShader;
+			OGLShader* motionBlurShader;
 			Mesh* quad;
+
+			std::queue<GLuint> screenFBOs;
+			GLuint screenFBO0;
+			GLuint screenFBO1;
+			GLuint screenFBO2;
+			GLuint screenFBO3;
+			GLuint screenFBO4;
+			GLuint screenRBO0;
+			GLuint screenRBO1;
+			GLuint screenRBO2;
+			GLuint screenRBO3;
+			GLuint screenRBO4;
+			GLuint screenTex0;
+			GLuint screenTex1;
+			GLuint screenTex2;
+			GLuint screenTex3;
+			GLuint screenTex4;
+
+			GLuint currentFBO;
+			bool firstRender = true;
 
 			GLuint processFBO;
 			GLuint processTexture;

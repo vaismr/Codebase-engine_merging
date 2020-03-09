@@ -13,7 +13,11 @@ Mesh::Mesh()
 
 	vertices = NULL;
 	colours = NULL;
-	texture = 0;
+	texture0 = 0;
+	texture1 = 0;
+	texture2 = 0;
+	texture3 = 0;
+	texture4 = 0;
 	numVertices = 0;
 	type = GL_TRIANGLE_STRIP;
 	texCoords = NULL;
@@ -26,7 +30,11 @@ Mesh::~Mesh()
 	delete[] colours;
 	delete[] vertices;
 	delete[] texCoords;
-	glDeleteTextures(1, &texture);
+	glDeleteTextures(1, &texture0);
+	glDeleteTextures(1, &texture1);
+	glDeleteTextures(1, &texture2);
+	glDeleteTextures(1, &texture3);
+	glDeleteTextures(1, &texture4);
 }
 
 Mesh* Mesh::GenerateQuad()
@@ -89,8 +97,19 @@ void Mesh::BufferData()
 void Mesh::Draw()
 {
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, texture0);
 
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture1);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, texture3);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, texture4);
 
 	glBindVertexArray(arrayObject);
 	glDrawArrays(type, 0, numVertices);

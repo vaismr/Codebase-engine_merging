@@ -59,28 +59,17 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	processInvShader = new OGLShader("PostVertex.glsl", "PostFragInv.glsl");
 	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
-	glGenTextures(1, &processTexture);
-	glBindTexture(GL_TEXTURE_2D, processTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, currentWidth, currentHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	SetupFBO(&processFBO, &rbo, &processTexture);
 
-	glGenFramebuffers(1, &processFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+//motion blur stuff
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, processTexture, 0);
+	SetupFBO(&screenFBO0, &screenRBO0, &screenTex0);
+	SetupFBO(&screenFBO1, &screenRBO1, &screenTex1);
+	SetupFBO(&screenFBO2, &screenRBO2, &screenTex2);
+	SetupFBO(&screenFBO3, &screenRBO3, &screenTex3);
+	SetupFBO(&screenFBO4, &screenRBO4, &screenTex4);
 
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, currentWidth, currentHeight);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	motionBlurShader = new OGLShader("PostVertex.glsl", "PostFragBlur.glsl");
 
 	GenerateSkybox();
 	GenerateIce();
@@ -156,6 +145,7 @@ void GameTechRenderer::GenerateSkybox() {
 
 
 }
+
 void GameTechRenderer::GenerateIce() {
 	iceshader = new OGLShader("icecubev.glsl","reflect.glsl");
 }
@@ -173,6 +163,8 @@ GameTechRenderer::~GameTechRenderer()	{
 	glDeleteTextures(1, &processTexture);
 	glDeleteFramebuffers(1, &processFBO);
 	glDeleteRenderbuffers(1, &rbo);
+
+	//TODO: delete fbo, rbo, tex for motion blur
 }
 
 void GameTechRenderer::RenderFrame() {
@@ -191,16 +183,34 @@ void GameTechRenderer::RenderFrame() {
 	SortObjectList();	
 	RenderShadowMap();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+	if (firstRender)
+	{
+		FirstRender();
+	}
+
+	currentFBO = screenFBOs.front();
+	screenFBOs.pop();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
 	RenderCamera();
 	RenderSkybox();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	screenFBOs.push(currentFBO);
 	
 	
 	glDisable(GL_DEPTH_TEST);
-	SelectPostType();
-	quad->SetTexture(processTexture);
+	DrawWithShader(motionBlurShader);
+	SetTextureOrder();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
 	quad->Draw();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	SelectPostType();
+	quad->SetTexture0(processTexture);
+	quad->Draw();
+	
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -474,7 +484,11 @@ void GameTechRenderer::DrawWithShader(OGLShader* shader)
 {
 	glDisable(GL_DEPTH_TEST);
 	BindShader(shader);
-	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture1"), 0);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture0"), 0);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture1"), 1);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture2"), 2);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture3"), 3);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture4"), 4);
 	Matrix4 modelMatrix = Matrix4::Rotation(180.0f, Vector3(0, 0, 1)) * Matrix4::Rotation(180.0f, Vector3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(shader->GetProgramID(), "model"), 1, false, (float*)&modelMatrix);
 }
@@ -511,4 +525,111 @@ void GameTechRenderer::SelectPostType()
 	{
 		DrawWithShader(processDefaultShader);
 	}
+}
+
+void GameTechRenderer::SetupFBO(GLuint* FBO, GLuint* RBO, GLuint* tex)
+{
+	glGenFramebuffers(1, FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, *FBO);
+
+	glGenTextures(1, tex);
+	glBindTexture(GL_TEXTURE_2D, *tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, currentWidth, currentHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *tex, 0);
+
+	glGenRenderbuffers(1, RBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, *RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, currentWidth, currentHeight);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *RBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GameTechRenderer::SetTextureOrder()
+{
+	if (currentFBO == screenFBO0)
+	{
+		quad->SetTexture0(screenTex0);
+		quad->SetTexture1(screenTex4);
+		quad->SetTexture2(screenTex3);
+		quad->SetTexture3(screenTex2);
+		quad->SetTexture4(screenTex1);
+	}
+
+	else if (currentFBO == screenFBO1)
+	{
+		quad->SetTexture0(screenTex1);
+		quad->SetTexture1(screenTex0);
+		quad->SetTexture2(screenTex4);
+		quad->SetTexture3(screenTex3);
+		quad->SetTexture4(screenTex2);
+	}
+
+	else if (currentFBO == screenFBO2)
+	{
+		quad->SetTexture0(screenTex2);
+		quad->SetTexture1(screenTex1);
+		quad->SetTexture2(screenTex0);
+		quad->SetTexture3(screenTex4);
+		quad->SetTexture4(screenTex3);
+	}
+
+	else if (currentFBO == screenFBO3)
+	{
+		quad->SetTexture0(screenTex3);
+		quad->SetTexture1(screenTex2);
+		quad->SetTexture2(screenTex1);
+		quad->SetTexture3(screenTex0);
+		quad->SetTexture4(screenTex4);
+	}
+
+	else
+	{
+		quad->SetTexture0(screenTex4);
+		quad->SetTexture1(screenTex3);
+		quad->SetTexture2(screenTex2);
+		quad->SetTexture3(screenTex1);
+		quad->SetTexture4(screenTex0);
+	}
+}
+
+void GameTechRenderer::FirstRender()
+{
+	firstRender = false;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO0);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO1);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO2);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO3);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, screenFBO4);
+	RenderCamera();
+	RenderSkybox();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	screenFBOs.push(screenFBO0);
+	screenFBOs.push(screenFBO1);
+	screenFBOs.push(screenFBO2);
+	screenFBOs.push(screenFBO3);
+	screenFBOs.push(screenFBO4);
 }
