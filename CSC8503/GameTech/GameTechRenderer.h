@@ -79,8 +79,6 @@ namespace NCL {
 
 			void FirstRender();
 
-			void LoadTexture(const std::string& name);
-
 			//post process things
 			OGLShader* processDefaultShader;
 			OGLShader* processGreyShader;

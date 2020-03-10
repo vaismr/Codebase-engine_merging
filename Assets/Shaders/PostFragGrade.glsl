@@ -33,5 +33,5 @@ void main()
 	vec4 gradedColour = mix(gradedColourDown, gradedColourUp, fract(cell));
 
     FragColor = gradedColour;
-    FragColor = texture2D(texture0, TexCoords);
+    //FragColor = texture2D(texture0, TexCoords);
 }

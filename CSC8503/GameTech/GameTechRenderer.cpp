@@ -695,8 +695,3 @@ void GameTechRenderer::FirstRender()
 	screenFBOs.push(screenFBO3);
 	screenFBOs.push(screenFBO4);
 }
-
-void GameTechRenderer::LoadTexture(const std::string& name)
-{
-
-}
