@@ -19,6 +19,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{ade7defe-8eba-4592-bc3f-7b6b83839e31}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Level">
+      <UniqueIdentifier>{e6a65472-446f-46fd-96c6-e337362cec0a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -119,14 +122,17 @@
     <ClInclude Include="Particles\ParticleEmitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Level1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LevelBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LevelTest.h">
+    <ClInclude Include="limits.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelTest.h">
+      <Filter>Level</Filter>
+    </ClInclude>
+    <ClInclude Include="Level1.h">
+      <Filter>Level</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

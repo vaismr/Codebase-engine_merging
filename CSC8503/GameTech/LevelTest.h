@@ -1,5 +1,6 @@
 #include "LevelBase.h"
-
+#include  "GameTechRenderer.h"
+#include  "TutorialGame.h"
 class LevelTest: public LevelBase {
 private:
 
@@ -18,4 +19,9 @@ public:
 
 		// game->AddFloorToWorld(Vector3(0, -2, 0));
 	}
+
+	char* getName() const override
+	{
+		return "test_level";
+	};
 };

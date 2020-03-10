@@ -13,6 +13,7 @@
 
 
 #include "../../Common/TextureLoader.h"
+#include <string>
 
 namespace NCL {
 	class Maths::Vector3;
@@ -25,7 +26,20 @@ namespace NCL {
 			GameTechRenderer(GameWorld& world);
 			~GameTechRenderer();
 
+			void DoSaveMap() {
+				_save = true;
+			}
+			void DoLoadMap() {
+				_load = true;
+			}
+			void setLevelName(const char* name) {
+				this->name = name;
+			}
+
 		protected:
+			std::string name;
+			bool _save = false;
+			bool _load = false;
 			void RenderFrame()	override;
 			void RenderLoadingFrame() override;
 

@@ -43,6 +43,8 @@ namespace NCL {
 
 		void UpdateCamera(float dt);
 
+		void UpdateLevelEdtiorCamera(float dt);
+
 		float GetFieldOfVision() const {
 			return fov;
 		}

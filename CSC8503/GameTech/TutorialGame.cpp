@@ -1,3 +1,5 @@
+#include "limits.h"
+
 #include "TutorialGame.h"
 #include "../CSC8503Common/GameWorld.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
@@ -10,7 +12,6 @@
 #include "../CSC8503Common/PositionConstraint.h"
 
 #include <iostream>
-
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -147,7 +148,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 			loadingScreen = new LoadingScreen();
 
-			level = levels[level_number];
+			level = levels[level_number - 1];
 			//Sleep(200);
 			state = GameState::IN_GAME;
 			Window::GetWindow()->ShowOSPointer(false);
@@ -223,6 +224,20 @@ void TutorialGame::UpdateGame(float dt) {
 
 		
 			break;
+		
+		case GameState::Level_Editor:
+
+		
+			world->GetMainCamera()->UpdateLevelEdtiorCamera(dt);
+			
+			UpdateLevelEdtior();
+			renderer->Update(dt);
+			physics->Update(dt);
+			//SelectObject();
+			RenderLevelEditor(dt);
+		
+			break;
+
 		}
 	}
 	ImGui::Render();
@@ -391,6 +406,14 @@ void TutorialGame::UpdateAI(float dt) {
 		patrolAI->Update(dt);
 }
 
+void TutorialGame::UpdateLevelEdtior() {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::M))
+	{
+		ToggleLevelEditor();
+	}
+
+}
+
 void TutorialGame::RenderMainGameMenu(float dt) {
 
 	Window::GetWindow()->ShowOSPointer(true);
@@ -439,7 +462,6 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	ImGui::PushFont(fontbutton);
 	if (ImGui::Button("START GAME", ImVec2(-1.0f, 0.0f))) {
 		state = GameState::LOADING;
-		level_number = 0;
 	}
 
 
@@ -447,7 +469,6 @@ void TutorialGame::RenderMainGameMenu(float dt) {
 	if (ImGui::Button("CHOICE LEVEL", ImVec2(-1.0f, 0.0f))) {
 		// LOAD_LEVEL
 		state = GameState::LOADING;
-		level_number = level_number - 1;
 	}
 	ImGui::SliderInt("level", &level_number, 1, levels.size());
 
@@ -689,6 +710,46 @@ void TutorialGame::RenderInGameHud(float dt) {
 	ImGui::End();*/
 }
 
+void TutorialGame::RenderLevelEditor(float dt) {
+	ImGui::Begin("Leveleditor");
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 1000));
+	ImGui::PushFont(fontbutton);
+
+	if (ImGui::Button("Save Map")) {
+		renderer->DoSaveMap();
+	}
+
+	if (ImGui::Button("Load Map")) {
+		renderer->DoLoadMap();
+	}
+
+	if (selectionObject) {
+		auto& t = selectionObject->GetTransform();
+		auto p = t.GetWorldPosition();
+
+		float x = p.x;
+		float y = p.y;
+		float z = p.z;
+
+		ImGui::SliderFloat("object.x", &x, FLOAT_MIN, FLOAT_MAX);
+		ImGui::SliderFloat("object.y", &y, FLOAT_MIN, FLOAT_MAX);
+		ImGui::SliderFloat("object.z", &z, FLOAT_MIN, FLOAT_MAX);
+
+		if (x != p.x || y != p.y || z != p.z) {
+			p.x = x;
+			p.y = y;
+			p.z = z;
+			t.SetWorldPosition(p);
+		}
+	}
+	else {
+		ImGui::Text("Select an object first");
+	}
+
+	ImGui::PopFont();
+	ImGui::PopStyleColor();
+	ImGui::End();
+}
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
 		InitWorld(); //We can reset the simulation at any time with F1
@@ -704,9 +765,11 @@ void TutorialGame::UpdateKeys() {
 		TogglePauseMenu();
 		audioEngine.TogglePauseAllChannels();
 	}
-		
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::M))
+	{
+		ToggleLevelEditor();
+	}
 
-	
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E))		// Endgame test
 		ToggleEndgameMenu();
 
@@ -1008,7 +1071,6 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-
 	GameObject* tempball = AddSphereToWorld(Vector3(80, 6, 80), 2, 1);
 	ball = (Ball*)tempball;
 
@@ -1044,8 +1106,10 @@ void TutorialGame::InitWorld() {
 
 	if (level) {
 		level->init(this);
+		renderer->setLevelName(level->getName());
 	}
 
+	renderer->DoLoadMap();
 	timeLeft = LEVEL_TIME;
 }
 

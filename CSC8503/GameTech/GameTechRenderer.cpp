@@ -4,6 +4,12 @@
 #include "../../Common/Vector2.h"
 #include "../../Common/Vector3.h"
 
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
 //#define STB_IMAGE_IMPLEMENTATION
 //#include "../../Common/stb/stb_image.h"
 //#include "../../Common/Assets.h"
@@ -296,6 +302,14 @@ void GameTechRenderer::BuildObjectList() {
 
 	activeObjects.clear();
 
+	const std::string filename = "map/" + name + "_map.txt";
+	std::fstream fs;
+	if (_save) {
+		fs.open(filename, std::fstream::out);
+	}
+	if (_load) {
+		fs.open(filename, std::fstream::in);
+	}
 	for (std::vector<GameObject*>::const_iterator i = first; i != last; ++i) {
 		if ((*i)->IsActive()) {
 			const RenderObject*g = (*i)->GetRenderObject();
@@ -303,7 +317,27 @@ void GameTechRenderer::BuildObjectList() {
 				activeObjects.emplace_back(g);
 			}
 		}
+		if (fs.is_open()) {
+			auto& pos = (*i)->GetTransform().GetWorldPosition();
+			if (_save) {
+				fs << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+			}
+			else if (_load) {
+				char buffer[4096];
+				Vector3 pos;
+				fs.getline(buffer, _countof(buffer));
+				sscanf_s(buffer, "%f, %f, %f", &pos.x, &pos.y, &pos.z);
+				(*i)->GetTransform().SetWorldPosition(pos);
+			}
+		}
 	}
+
+	if (fs.is_open()) {
+		fs.close();
+	}
+
+	_save = false;
+	_load = false;
 }
 
 void GameTechRenderer::SortObjectList() {

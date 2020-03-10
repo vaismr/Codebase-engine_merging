@@ -24,6 +24,7 @@ namespace NCL {
 			PAUSED,
 			END_GAME_WIN,
 			END_GAME,
+			Level_Editor,
 		};
 
 		class TutorialGame {
@@ -85,6 +86,7 @@ namespace NCL {
 			void InitialiseAssets();
 
 			void InitCamera();
+			void RenderLevelEditor(float dt);
 			void UpdateKeys();
 			void UpdateAI(float dt);
 
@@ -119,7 +121,21 @@ namespace NCL {
 				Window::GetWindow()->ShowOSPointer(state == GameState::END_GAME);
 			}
 			void UpdateEndgameMenu();
-
+		
+			void ToggleLevelEditor() {
+				if (state == GameState::Level_Editor) {
+					state = GameState::IN_GAME;
+					Window::GetWindow()->ShowOSPointer(false);
+					Window::GetWindow()->LockMouseToWindow(true);
+				}
+				else if (state == GameState::IN_GAME) {
+					state = GameState::Level_Editor;
+					Window::GetWindow()->ShowOSPointer(true);
+					Window::GetWindow()->LockMouseToWindow(false);
+	
+				}
+			}
+			void UpdateLevelEdtior();
 			/*
 			These are some of the world/object creation functions I created when testing the functionality
 			in the module. Feel free to mess around with them to see different objects being created in different

@@ -49,6 +49,10 @@ namespace NCL {
 				return localPosition;
 			}
 
+			Vector3* GetModifiableLocalPosition() {
+				return &localPosition;
+			}
+
 			Vector3 GetLocalScale() const {
 				return localScale;
 			}
