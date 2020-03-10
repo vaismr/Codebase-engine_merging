@@ -239,7 +239,7 @@ void GameTechRenderer::RenderFrame() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//SelectPostType();
-	DrawWithShader(gradingShader);
+	SelectColourGrade();
 	quad->SetTexture0(processTexture);
 	quad->SetLut(lut->GetObjectID());
 	quad->Draw();
@@ -694,4 +694,29 @@ void GameTechRenderer::FirstRender()
 	screenFBOs.push(screenFBO2);
 	screenFBOs.push(screenFBO3);
 	screenFBOs.push(screenFBO4);
+}
+
+void GameTechRenderer::SelectColourGrade()
+{
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD0))
+	{
+		lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1.png");
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD1))
+	{
+		lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1Underwater.png");
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD2))
+	{
+		lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1Night.png");
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD3))
+	{
+		lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1Taffy.png");
+	}
+
+	DrawWithShader(gradingShader);
 }

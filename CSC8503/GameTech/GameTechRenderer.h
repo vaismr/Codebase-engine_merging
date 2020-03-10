@@ -79,6 +79,8 @@ namespace NCL {
 
 			void FirstRender();
 
+			void SelectColourGrade();
+
 			//post process things
 			OGLShader* processDefaultShader;
 			OGLShader* processGreyShader;
