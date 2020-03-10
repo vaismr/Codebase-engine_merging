@@ -36,6 +36,9 @@ namespace NCL {
 
 		void SetTexture4(GLuint tex) { texture4 = tex; }
 		GLuint GetTexture4() { return texture4; }
+		
+		void SetLut(GLuint tex) { lut = tex; }
+		GLuint GetLut() { return lut; }
 
 	protected:
 		GLuint texture0;
@@ -43,6 +46,7 @@ namespace NCL {
 		GLuint texture2;
 		GLuint texture3;
 		GLuint texture4;
+		GLuint lut;
 		GLuint arrayObject;
 		GLuint bufferObject[MAX_BUFFER];
 		GLuint numVertices;
