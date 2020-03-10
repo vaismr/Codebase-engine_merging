@@ -64,8 +64,11 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	processGreyShader = new OGLShader("PostVertex.glsl", "PostFragGrey.glsl");
 	processInvShader = new OGLShader("PostVertex.glsl", "PostFragInv.glsl");
 	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
+	gradingShader = new OGLShader("PostVertex.glsl", "PostFragGrade.glsl");
 
 	SetupFBO(&processFBO, &rbo, &processTexture);
+
+	lut = (OGLTexture*)TextureLoader::LoadAPITexture("lut16.png");
 
 //motion blur stuff
 
