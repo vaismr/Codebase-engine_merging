@@ -64,8 +64,11 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	processGreyShader = new OGLShader("PostVertex.glsl", "PostFragGrey.glsl");
 	processInvShader = new OGLShader("PostVertex.glsl", "PostFragInv.glsl");
 	sceneShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
+	gradingShader = new OGLShader("PostVertex.glsl", "PostFragGrade.glsl");
 
 	SetupFBO(&processFBO, &rbo, &processTexture);
+
+	lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1.png");
 
 //motion blur stuff
 
@@ -165,12 +168,34 @@ GameTechRenderer::~GameTechRenderer()	{
 	delete processInvShader;
 	delete sceneShader;
 	delete quad;
+	delete motionBlurShader;
+	delete gradingShader;
 
 	glDeleteTextures(1, &processTexture);
 	glDeleteFramebuffers(1, &processFBO);
 	glDeleteRenderbuffers(1, &rbo);
 
 	//TODO: delete fbo, rbo, tex for motion blur
+
+	glDeleteTextures(1, &screenTex0);
+	glDeleteFramebuffers(1, &screenFBO0);
+	glDeleteRenderbuffers(1, &screenRBO0);
+
+	glDeleteTextures(1, &screenTex1);
+	glDeleteFramebuffers(1, &screenFBO1);
+	glDeleteRenderbuffers(1, &screenRBO1);
+
+	glDeleteTextures(1, &screenTex2);
+	glDeleteFramebuffers(1, &screenFBO2);
+	glDeleteRenderbuffers(1, &screenRBO2);
+
+	glDeleteTextures(1, &screenTex3);
+	glDeleteFramebuffers(1, &screenFBO3);
+	glDeleteRenderbuffers(1, &screenRBO3);
+
+	glDeleteTextures(1, &screenTex4);
+	glDeleteFramebuffers(1, &screenFBO4);
+	glDeleteRenderbuffers(1, &screenRBO4);
 }
 
 void GameTechRenderer::RenderFrame() {
@@ -213,8 +238,10 @@ void GameTechRenderer::RenderFrame() {
 	quad->Draw();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	SelectPostType();
+	//SelectPostType();
+	SelectColourGrade();
 	quad->SetTexture0(processTexture);
+	quad->SetLut(lut->GetObjectID());
 	quad->Draw();
 	
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
@@ -523,6 +550,7 @@ void GameTechRenderer::DrawWithShader(OGLShader* shader)
 	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture2"), 2);
 	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture3"), 3);
 	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture4"), 4);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "lut"), 5);
 	Matrix4 modelMatrix = Matrix4::Rotation(180.0f, Vector3(0, 0, 1)) * Matrix4::Rotation(180.0f, Vector3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(shader->GetProgramID(), "model"), 1, false, (float*)&modelMatrix);
 }
@@ -666,4 +694,29 @@ void GameTechRenderer::FirstRender()
 	screenFBOs.push(screenFBO2);
 	screenFBOs.push(screenFBO3);
 	screenFBOs.push(screenFBO4);
+}
+
+void GameTechRenderer::SelectColourGrade()
+{
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD0))
+	{
+		lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1.png");
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD1))
+	{
+		lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1Underwater.png");
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD2))
+	{
+		lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1Night.png");
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUMPAD3))
+	{
+		lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1Taffy.png");
+	}
+
+	DrawWithShader(gradingShader);
 }

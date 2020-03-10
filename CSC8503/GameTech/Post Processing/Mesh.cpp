@@ -35,6 +35,7 @@ Mesh::~Mesh()
 	glDeleteTextures(1, &texture2);
 	glDeleteTextures(1, &texture3);
 	glDeleteTextures(1, &texture4);
+	glDeleteTextures(1, &lut);
 }
 
 Mesh* Mesh::GenerateQuad()
@@ -110,6 +111,9 @@ void Mesh::Draw()
 
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, texture4);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, lut);
 
 	glBindVertexArray(arrayObject);
 	glDrawArrays(type, 0, numVertices);

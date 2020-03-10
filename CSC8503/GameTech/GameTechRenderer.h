@@ -79,13 +79,19 @@ namespace NCL {
 
 			void FirstRender();
 
+			void SelectColourGrade();
+
 			//post process things
 			OGLShader* processDefaultShader;
 			OGLShader* processGreyShader;
 			OGLShader* processInvShader;
 			OGLShader* sceneShader;
 			OGLShader* motionBlurShader;
+			OGLShader* gradingShader;
+
 			Mesh* quad;
+
+			OGLTexture* lut = nullptr;
 
 			std::queue<GLuint> screenFBOs;
 			GLuint screenFBO0;
