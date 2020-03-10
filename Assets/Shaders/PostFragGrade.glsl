@@ -15,17 +15,23 @@ void main()
 {    
 	vec4 colour = texture2D(texture0, TexCoords); //get colour of pixel from texture
 
-	float cell = floor(colour.b * MAXCOLOUR); //calculate which slice of cube to use from the blue
+	float cell = colour.b * MAXCOLOUR;
+	float cellUp = ceil(cell);
+	float cellDown = floor(cell);
 
-	float halfPxOffsetX = 0.5 / WIDTH;
-	float halfPxOffsetY = 0.5 / HEIGHT;
+	float halfPxX= 0.5 / WIDTH;
+	float halfPxY = 0.5 / HEIGHT;
+	float rOffset = halfPxX + colour.r / COLOURS * (MAXCOLOUR / COLOURS);
+	float gOffset = halfPxY + colour.g * (MAXCOLOUR / COLOURS);
 
-	halfPxOffsetX = halfPxOffsetX + colour.r / COLOURS * (MAXCOLOUR / COLOURS);
-	halfPxOffsetY = halfPxOffsetY + colour.g * (MAXCOLOUR / COLOURS);
+	vec2 lutPosDown = vec2(cellDown / COLOURS + rOffset, gOffset);
+	vec2 lutPosUp = vec2(cellUp / COLOURS + rOffset, gOffset);
 
-	vec2 lutPos = vec2(cell / COLOURS + halfPXOffsetX, halfPxOffsetY);
+	vec4 gradedColourDown = texture2D(lut, lutPosDown);
+	vec4 gradedColourUp = texture2D(lut, lutPosUp);
 
-	vec4 gradedColour = texture2D(lut, lutPos);
+	vec4 gradedColour = mix(gradedColourDown, gradedColourUp, fract(cell));
 
     FragColor = gradedColour;
+    FragColor = texture2D(texture0, TexCoords);
 }

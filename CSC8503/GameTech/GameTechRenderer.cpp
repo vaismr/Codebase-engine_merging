@@ -68,7 +68,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 
 	SetupFBO(&processFBO, &rbo, &processTexture);
 
-	lut = (OGLTexture*)TextureLoader::LoadAPITexture("lut16.png");
+	lut = (OGLTexture*)TextureLoader::LoadAPITexture("RGBTable16x1.png");
 
 //motion blur stuff
 
@@ -238,8 +238,10 @@ void GameTechRenderer::RenderFrame() {
 	quad->Draw();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	SelectPostType();
+	//SelectPostType();
+	DrawWithShader(gradingShader);
 	quad->SetTexture0(processTexture);
+	quad->SetLut(lut->GetObjectID());
 	quad->Draw();
 	
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
@@ -548,6 +550,7 @@ void GameTechRenderer::DrawWithShader(OGLShader* shader)
 	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture2"), 2);
 	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture3"), 3);
 	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "texture4"), 4);
+	glUniform1i(glGetUniformLocation(shader->GetProgramID(), "lut"), 5);
 	Matrix4 modelMatrix = Matrix4::Rotation(180.0f, Vector3(0, 0, 1)) * Matrix4::Rotation(180.0f, Vector3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(shader->GetProgramID(), "model"), 1, false, (float*)&modelMatrix);
 }
@@ -691,4 +694,9 @@ void GameTechRenderer::FirstRender()
 	screenFBOs.push(screenFBO2);
 	screenFBOs.push(screenFBO3);
 	screenFBOs.push(screenFBO4);
+}
+
+void GameTechRenderer::LoadTexture(const std::string& name)
+{
+
 }
