@@ -165,12 +165,34 @@ GameTechRenderer::~GameTechRenderer()	{
 	delete processInvShader;
 	delete sceneShader;
 	delete quad;
+	delete motionBlurShader;
+	delete gradingShader;
 
 	glDeleteTextures(1, &processTexture);
 	glDeleteFramebuffers(1, &processFBO);
 	glDeleteRenderbuffers(1, &rbo);
 
 	//TODO: delete fbo, rbo, tex for motion blur
+
+	glDeleteTextures(1, &screenTex0);
+	glDeleteFramebuffers(1, &screenFBO0);
+	glDeleteRenderbuffers(1, &screenRBO0);
+
+	glDeleteTextures(1, &screenTex1);
+	glDeleteFramebuffers(1, &screenFBO1);
+	glDeleteRenderbuffers(1, &screenRBO1);
+
+	glDeleteTextures(1, &screenTex2);
+	glDeleteFramebuffers(1, &screenFBO2);
+	glDeleteRenderbuffers(1, &screenRBO2);
+
+	glDeleteTextures(1, &screenTex3);
+	glDeleteFramebuffers(1, &screenFBO3);
+	glDeleteRenderbuffers(1, &screenRBO3);
+
+	glDeleteTextures(1, &screenTex4);
+	glDeleteFramebuffers(1, &screenFBO4);
+	glDeleteRenderbuffers(1, &screenRBO4);
 }
 
 void GameTechRenderer::RenderFrame() {
