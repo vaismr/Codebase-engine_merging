@@ -46,8 +46,16 @@ void GameWorld::AddGameObject(GameObject* o) {
 	gameObjects.emplace_back(o);
 }
 
+void GameWorld::AddRigidBody(RigidBody* o) {
+	rigidbodies.emplace_back(o);
+}
+
 void GameWorld::RemoveGameObject(GameObject* o) {
 	gameObjects.erase(std::remove(gameObjects.begin(), gameObjects.end(), o), gameObjects.end());
+}
+
+void GameWorld::RemoveRigidBody(RigidBody* o) {
+	rigidbodies.erase(std::remove(rigidbodies.begin(), rigidbodies.end(), o), rigidbodies.end());
 }
 
 void GameWorld::GetObjectIterators(

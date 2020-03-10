@@ -101,7 +101,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)\Plugins\Networking-ENet\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\pxshared\include;$(SolutionDir)\physx\include;$(SolutionDir)\Plugins\Networking-ENet\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug BoostTests|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
@@ -189,6 +189,7 @@
     <ClInclude Include="BoundingVolume.h" />
     <ClInclude Include="Buoyancy.h" />
     <ClInclude Include="EnemyAI.h" />
+    <ClInclude Include="Lineup_Constraint.h" />
     <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="NavigationGrid.h" />
     <ClInclude Include="NavigationMap.h" />
@@ -197,6 +198,7 @@
     <ClInclude Include="NetworkObject.h" />
     <ClInclude Include="NetworkState.h" />
     <ClInclude Include="OBBVolume.h" />
+    <ClInclude Include="RigidBody.h" />
     <ClInclude Include="SphereVolume.h" />
     <ClInclude Include="CollisionVolume.h" />
     <ClInclude Include="CollisionDetection.h" />
@@ -233,6 +235,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="GameWorld.cpp" />
+    <ClCompile Include="Lineup_Constraint.cpp" />
     <ClCompile Include="NavigationGrid.cpp" />
     <ClCompile Include="NavigationMesh.cpp" />
     <ClCompile Include="NetworkBase.cpp" />
@@ -245,6 +248,7 @@
     <ClCompile Include="PushdownState.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="RenderObject.cpp" />
+    <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="StateTransition.cpp" />
     <ClCompile Include="Test.cpp">

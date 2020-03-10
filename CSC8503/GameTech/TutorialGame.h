@@ -11,6 +11,7 @@
 #include <ctime>
 #include "psapi.h"
 #include "icecube.h"
+#include "../CSC8503Common/RigidBody.h"
 
 class LevelBase;
 
@@ -56,7 +57,7 @@ namespace NCL {
 
 			GameObject* AddChaseAIToWorld(const Vector3& position);
 			GameObject* AddPatrolAIToWorld(const Vector3& position);
-
+			//RigidBody* AddTestRigidBodyToWorld(const Vector3& position);
 
 
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);

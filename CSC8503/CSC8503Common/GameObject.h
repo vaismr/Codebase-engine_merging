@@ -5,6 +5,7 @@
 #include "PhysicsObject.h"
 #include "RenderObject.h"
 #include "NetworkObject.h"
+#include "../CSC8503Common/RigidBody.h"
 
 #include <vector>
 
@@ -83,6 +84,10 @@ namespace NCL {
 				return networkObject;
 			}
 
+			RigidBody* GetBoundingDynamicObject() const{
+				return dynamicObject;
+			}
+
 			void SetRenderObject(RenderObject* newObject) {
 				renderObject = newObject;
 			}
@@ -91,12 +96,24 @@ namespace NCL {
 				physicsObject = newObject;
 			}
 
+			void setBoundingDynamicObject(RigidBody* newObject) {
+				dynamicObject = newObject;
+			}
+
 			const string& GetName() const {
 				return name;
 			}
 
 			void SetName(string newname) {
 				name = newname;
+			}
+
+			void SetID(int id) {
+				ID = id;
+			}
+
+			int GetID() {
+				return ID;
 			}
 
 			virtual void OnCollisionBegin(GameObject* otherObject) {
@@ -110,6 +127,10 @@ namespace NCL {
 			bool GetBroadphaseAABB(Vector3&outsize) const;
 
 			void UpdateBroadphaseAABB();
+
+			bool operator==(const GameObject& obj)const {
+				return ID == obj.ID;
+			}
 #pragma region 04/03 collisionType
 
 			//void SetCollisionType(CollisionType);
@@ -136,10 +157,12 @@ namespace NCL {
 			PhysicsObject*		physicsObject;
 			RenderObject*		renderObject;
 			NetworkObject*		networkObject;
+			RigidBody*          dynamicObject;
 
 			bool	isActive;
 			bool	isStatic;
 			string	name;
+			int ID;
 
 			Vector3 broadphaseAABB;
 		};
