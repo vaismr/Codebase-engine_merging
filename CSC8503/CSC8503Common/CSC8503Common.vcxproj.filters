@@ -135,12 +135,6 @@
     <ClInclude Include="EnemyAI.h">
       <Filter>AI</Filter>
     </ClInclude>
-    <ClInclude Include="RigidBody.h">
-      <Filter>Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Lineup_Constraint.h">
-      <Filter>Other</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp">
@@ -226,12 +220,6 @@
     </ClCompile>
     <ClCompile Include="EnemyAI.cpp">
       <Filter>AI</Filter>
-    </ClCompile>
-    <ClCompile Include="RigidBody.cpp">
-      <Filter>Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Lineup_Constraint.cpp">
-      <Filter>Other</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -3,8 +3,6 @@
 #include "Ray.h"
 #include "CollisionDetection.h"
 #include "QuadTree.h"
-#include "RigidBody.h"
-using namespace physx;
 namespace NCL {
 		class Camera;
 		using Maths::Ray;
@@ -24,9 +22,7 @@ namespace NCL {
 			void ClearAndErase();
 
 			void AddGameObject(GameObject* o);
-			void AddRigidBody(RigidBody* o);
 			void RemoveGameObject(GameObject* o);
-			void RemoveRigidBody(RigidBody* o);
 
 			void AddConstraint(Constraint* c);
 			void RemoveConstraint(Constraint* c);
@@ -71,7 +67,6 @@ namespace NCL {
 
 
 			std::vector<GameObject*> gameObjects;
-			std::vector<RigidBody*>rigidbodies;
 
 			std::vector<Constraint*> constraints;
 			std::vector<Constraint*> buoyancies;
